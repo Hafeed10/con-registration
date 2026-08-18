@@ -18,7 +18,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     status: 'Student',
     campus: '',
     position: '',
-    studiedAlfiyyaAndFathulMueen: true
+    studiedAlfiyyaAndFathulMueen: false
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -378,22 +378,16 @@ export default function RegistrationModal({ isOpen, onClose }) {
                 )}
               </div>
 
-              {/* 6. Eligibility Check Toggle Box */}
+              {/* 6. Eligibility Note Box (Checkbox removed) */}
               <div className="pt-1 sm:pt-2">
-                <label className="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 bg-[#EBF5DA] rounded-xl sm:rounded-2xl border border-[#B3D98E] cursor-pointer hover:bg-[#E2F0CB] transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={formData.studiedAlfiyyaAndFathulMueen}
-                    onChange={(e) => setFormData({ ...formData, studiedAlfiyyaAndFathulMueen: e.target.checked })}
-                    className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 rounded border-gray-300 text-[#17472B] focus:ring-[#17472B] cursor-pointer accent-[#17472B] shrink-0"
-                  />
+                <div className="p-3 sm:p-3.5 bg-[#EBF5DA] rounded-xl sm:rounded-2xl border border-[#B3D98E]">
                   <div className="text-[11px] sm:text-xs text-[#1F281B]">
-                    <span className="font-extrabold text-[#17472B] block text-xs sm:text-sm">
-                      Eligibility Check *
+                    <span className="font-extrabold text-[#17472B] block text-xs sm:text-sm mb-0.5">
+                      Eligibility Requirement *
                     </span>
-                    I have studied / am studying <strong>Alfiyya ibn Malik</strong> and <strong>Fathul Mueen (Baabul Ibaadaath)</strong>.
+                    Registration is intended for delegates studying <strong>Alfiyya ibn Malik</strong> and <strong>Fathul Mueen (Baabul Ibaadaath)</strong>.
                   </div>
-                </label>
+                </div>
               </div>
 
               {/* Submit Button */}

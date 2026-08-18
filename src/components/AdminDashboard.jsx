@@ -324,7 +324,6 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
                     <th className="py-3.5 px-4">Study Range</th>
                     <th className="py-3.5 px-4">Birudam</th>
                     <th className="py-3.5 px-4">Status & Campus / Job</th>
-                    <th className="py-3.5 px-4">Alfiyya & Fathul Mueen</th>
                     <th className="py-3.5 px-4 text-right">Action</th>
                   </tr>
                 </thead>
@@ -355,11 +354,6 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
                         <div className="text-[11px] text-gray-600 truncate max-w-[140px]">
                           {d.status === 'Student' ? d.campus : d.position}
                         </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded bg-green-100 text-green-800 font-bold text-[10px]">
-                          ✓ Studied
-                        </span>
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <button
