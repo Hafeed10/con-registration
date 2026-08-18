@@ -137,15 +137,6 @@ export default function RegistrationModal({ isOpen, onClose }) {
       console.error('Supabase connection exception:', err.message);
     }
 
-    // Secondary backup cache in LocalStorage
-    try {
-      const saved = localStorage.getItem('confiqh_delegates');
-      const existing = saved ? JSON.parse(saved) : [];
-      localStorage.setItem('confiqh_delegates', JSON.stringify([newDelegate, ...existing]));
-    } catch (e) {
-      console.warn('LocalStorage backup failed:', e);
-    }
-
     // Trigger celebration confetti
     try {
       confetti({

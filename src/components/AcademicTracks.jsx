@@ -1,13 +1,12 @@
 import React from 'react';
-import { ShieldCheck, Cpu, Dna, BookMarked, ArrowUpRight } from 'lucide-react';
+import { ShieldCheck, Cpu, Dna, BookMarked, ArrowUpRight, Award, Sparkles, Compass } from 'lucide-react';
 
-export default function AcademicTracks({ onOpenRegister }) {
-  const tracks = [
+export default function AcademicTracks({ onOpenRegister, tracksData }) {
+  const defaultTracks = [
     {
       id: 'track-1',
       title: 'Decentralized Crypto Finance & Smart Contracts',
       code: 'TRACK 01',
-      icon: ShieldCheck,
       description: 'Examining tokenomics, decentralized liquidity pools, automated market makers (AMMs), and staking rewards under Islamic jurisprudence and Usul al-Fiqh.',
       topics: ['DeFi Yield Farming', 'Algorithmic Stablecoins', 'Smart Contract Gharar'],
       speakersCount: '4 Keynotes'
@@ -16,7 +15,6 @@ export default function AcademicTracks({ onOpenRegister }) {
       id: 'track-2',
       title: 'Artificial Intelligence & Algorithmic Fatwa Limits',
       code: 'TRACK 02',
-      icon: Cpu,
       description: 'Delineating ethical boundary conditions, LLM hallucination risks, and legal accountability when AI agents generate legal opinions or fatwas.',
       topics: ['LLM Jurisprudential Limits', 'Autonomous Ijtihad Risks', 'Algorithmic Bias'],
       speakersCount: '5 Sessions'
@@ -25,7 +23,6 @@ export default function AcademicTracks({ onOpenRegister }) {
       id: 'track-3',
       title: 'CRISPR Gene Editing & Bioethical Jurisprudence',
       code: 'TRACK 03',
-      icon: Dna,
       description: 'Scholarly evaluation of somatic vs. germline modification, human enhancement boundaries, synthetic biology, and genetic patenting in Fiqh.',
       topics: ['Germline Editing Limits', 'Gene Therapy Fiqh', 'Genomic Privacy'],
       speakersCount: '3 Panels'
@@ -34,12 +31,18 @@ export default function AcademicTracks({ onOpenRegister }) {
       id: 'track-4',
       title: 'Makhdoomi Shafi\'i Heritage & Applied Jurisprudence',
       code: 'TRACK 04',
-      icon: BookMarked,
       description: 'Tracing the Indian Ocean jurisprudence tradition from Ponnani Makhdooms to contemporary Malabar Coast legal applications.',
       topics: ['Makhdoomi Manuscripts', 'Maritime Jurisprudence', 'Contemporary Nawazil'],
       speakersCount: '6 Lectures'
     }
   ];
+
+  const tracksToRender = (tracksData && tracksData.length > 0) ? tracksData : defaultTracks;
+
+  const getTrackIcon = (index) => {
+    const icons = [ShieldCheck, Cpu, Dna, BookMarked, Award, Sparkles, Compass];
+    return icons[index % icons.length];
+  };
 
   return (
     <section id="tracks" className="py-20 bg-brand-bg relative">
@@ -62,8 +65,9 @@ export default function AcademicTracks({ onOpenRegister }) {
 
         {/* Track Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {tracks.map((track) => {
-            const Icon = track.icon;
+          {tracksToRender.map((track, idx) => {
+            const Icon = getTrackIcon(idx);
+            const topicsList = Array.isArray(track.topics) ? track.topics : (track.topics ? track.topics.split(',') : []);
             return (
               <div 
                 key={track.id}
@@ -94,9 +98,9 @@ export default function AcademicTracks({ onOpenRegister }) {
 
                 <div>
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {track.topics.map((t, idx) => (
-                      <span key={idx} className="text-xs font-semibold px-2.5 py-1 rounded-md bg-brand-pale text-brand-dark border border-brand-light">
-                        #{t}
+                    {topicsList.map((t, topicIdx) => (
+                      <span key={topicIdx} className="text-xs font-semibold px-2.5 py-1 rounded-md bg-brand-pale text-brand-dark border border-brand-light">
+                        #{t.trim()}
                       </span>
                     ))}
                   </div>

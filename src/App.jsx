@@ -11,6 +11,8 @@ import BrochureModal from './components/BrochureModal';
 import Footer from './components/Footer';
 import AdminDashboard from './components/AdminDashboard';
 
+import { supabase } from './lib/supabase';
+
 export default function App() {
   // Check initial URL hash / path for admin access (e.g. #admin or /admin)
   const [isAdminView, setIsAdminView] = useState(() => {
@@ -22,8 +24,8 @@ export default function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isBrochureOpen, setIsBrochureOpen] = useState(false);
 
-  // Shared sessions state so CMS edits reflect on public site
-  const [sessionsData, setSessionsData] = useState([
+  // Initial default sessions
+  const defaultSessionsList = [
     {
       id: 'session-1',
       speakerName: 'Zack Wilson',
@@ -57,7 +59,126 @@ export default function App() {
       bio: 'Sheikh Ibrahim Al-Kerali is a pioneer in Islamic Fintech and cryptocurrency jurisprudence.',
       abstract: 'Evaluating liquidity pool staking, automated market makers (AMMs), and algorithmic stablecoins under traditional legal maxims.'
     }
-  ]);
+  ];
+
+  // Shared sessions state
+  const [sessionsData, setSessionsData] = useState(defaultSessionsList);
+
+  // Initial default academic tracks
+  const defaultTracksList = [
+    {
+      id: 'track-1',
+      title: 'Decentralized Crypto Finance & Smart Contracts',
+      code: 'TRACK 01',
+      description: 'Examining tokenomics, decentralized liquidity pools, automated market makers (AMMs), and staking rewards under Islamic jurisprudence and Usul al-Fiqh.',
+      topics: ['DeFi Yield Farming', 'Algorithmic Stablecoins', 'Smart Contract Gharar'],
+      speakersCount: '4 Keynotes'
+    },
+    {
+      id: 'track-2',
+      title: 'Artificial Intelligence & Algorithmic Fatwa Limits',
+      code: 'TRACK 02',
+      description: 'Delineating ethical boundary conditions, LLM hallucination risks, and legal accountability when AI agents generate legal opinions or fatwas.',
+      topics: ['LLM Jurisprudential Limits', 'Autonomous Ijtihad Risks', 'Algorithmic Bias'],
+      speakersCount: '5 Sessions'
+    },
+    {
+      id: 'track-3',
+      title: 'CRISPR Gene Editing & Bioethical Jurisprudence',
+      code: 'TRACK 03',
+      description: 'Scholarly evaluation of somatic vs. germline modification, human enhancement boundaries, synthetic biology, and genetic patenting in Fiqh.',
+      topics: ['Germline Editing Limits', 'Gene Therapy Fiqh', 'Genomic Privacy'],
+      speakersCount: '3 Panels'
+    },
+    {
+      id: 'track-4',
+      title: 'Makhdoomi Shafi\'i Heritage & Applied Jurisprudence',
+      code: 'TRACK 04',
+      description: 'Tracing the Indian Ocean jurisprudence tradition from Ponnani Makhdooms to contemporary Malabar Coast legal applications.',
+      topics: ['Makhdoomi Manuscripts', 'Maritime Jurisprudence', 'Contemporary Nawazil'],
+      speakersCount: '6 Lectures'
+    }
+  ];
+
+  // Shared tracks state
+  const [tracksData, setTracksData] = useState(defaultTracksList);
+
+  const fetchSupabaseSessions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        const mapped = data.map((s) => ({
+          id: s.id,
+          speakerName: s.speaker_name || s.speakerName,
+          flag: s.flag || '🇬🇧',
+          role: s.role,
+          affiliation: s.affiliation,
+          photo: s.photo || '/zack_wilson.jpg',
+          tags: Array.isArray(s.tags) ? s.tags : (s.tags ? s.tags.split(',') : []),
+          bio: s.bio,
+          abstract: s.abstract
+        }));
+        setSessionsData(mapped);
+      }
+    } catch (err) {
+      console.log('Supabase sessions fetch note:', err.message);
+    }
+  };
+
+  const fetchSupabaseTracks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tracks')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        const mapped = data.map((t) => ({
+          id: t.id,
+          title: t.title,
+          code: t.code || 'TRACK 01',
+          description: t.description,
+          topics: Array.isArray(t.topics) ? t.topics : (t.topics ? t.topics.split(',') : []),
+          speakersCount: t.speakers_count || t.speakersCount || '4 Sessions'
+        }));
+        setTracksData(mapped);
+      }
+    } catch (err) {
+      console.log('Supabase tracks fetch note:', err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupabaseSessions();
+    fetchSupabaseTracks();
+
+    const channelSessions = supabase
+      .channel('public:sessions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'sessions' },
+        () => fetchSupabaseSessions()
+      )
+      .subscribe();
+
+    const channelTracks = supabase
+      .channel('public:tracks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tracks' },
+        () => fetchSupabaseTracks()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channelSessions);
+      supabase.removeChannel(channelTracks);
+    };
+  }, []);
 
   // Listen for URL changes dynamically
   useEffect(() => {
@@ -96,6 +217,8 @@ export default function App() {
         onReturnToPublic={handleReturnToPublic}
         sessionsData={sessionsData}
         setSessionsData={setSessionsData}
+        tracksData={tracksData}
+        setTracksData={setTracksData}
       />
     );
   }
@@ -126,6 +249,7 @@ export default function App() {
         {/* 3. Academic Tracks Grid */}
         <AcademicTracks 
           onOpenRegister={() => setIsRegisterOpen(true)}
+          tracksData={tracksData}
         />
 
         {/* 4. Scheduled Sessions Carousel */}
