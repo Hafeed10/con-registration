@@ -22,14 +22,11 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
   const [filterStudyRange, setFilterStudyRange] = useState('All');
   const [loading, setLoading] = useState(false);
 
-  // Local & Supabase delegates state
+  // Real delegates state (No hardcoded mock data allowed)
   const [delegates, setDelegates] = useState(() => {
     const saved = localStorage.getItem('confiqh_delegates');
     if (saved) return JSON.parse(saved);
-    return [
-      { id: 'CF-2026-1001', fullName: 'Muhammed Hafiz', age: 24, address: 'Parapram, Pinarayi, Kannur', phone: '+91 98765 43210', whatsapp: '+91 98765 43210', studyRange: 'Muthawwal', birudam: 'Wafy', status: 'Student', campus: 'AHLUSSUFFA Dars', position: 'N/A', studiedAlfiyyaAndFathulMueen: true, registeredAt: '2026-08-18' },
-      { id: 'CF-2026-1002', fullName: 'Abdullah K. P.', age: 28, address: 'Ponnani, Malappuram', phone: '+91 91234 56789', whatsapp: '+91 91234 56789', studyRange: 'Muthawwal', birudam: 'B.A. Islamic Studies', status: 'Working', campus: 'N/A', position: 'Mudarris', studiedAlfiyyaAndFathulMueen: true, registeredAt: '2026-08-17' }
-    ];
+    return [];
   });
 
   const handleLoginSubmit = (e) => {
@@ -53,7 +50,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
     setLoading(true);
     try {
       const { data, error } = await supabase.from('delegates').select('*').order('created_at', { ascending: false });
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         const mapped = data.map(d => ({
           id: d.pass_id || d.id,
           fullName: d.full_name,
@@ -377,7 +374,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
                   {filteredDelegates.length === 0 && (
                     <tr>
                       <td colSpan="8" className="py-8 text-center text-gray-500 font-semibold">
-                        No delegates registered yet. Submit a registration form on public website!
+                        No delegates registered yet. Real registrations submitted on the website sync here automatically via Supabase!
                       </td>
                     </tr>
                   )}
