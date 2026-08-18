@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { 
-  Users, Calendar, FileText, Settings, Plus, Search, Download, 
-  Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight
+import {
+  Users, Calendar, FileText, Settings, Plus, Search, Download,
+  Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X
 } from 'lucide-react';
 
 export default function AdminDashboard({ onReturnToPublic, sessionsData, setSessionsData }) {
@@ -21,8 +21,12 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStudyRange, setFilterStudyRange] = useState('All');
   const [loading, setLoading] = useState(false);
+  const [dbConnected, setDbConnected] = useState(true);
 
-  // Real delegates state (No hardcoded mock data allowed)
+  // Modal to inspect delegate payment receipt screenshot
+  const [viewReceiptModal, setViewReceiptModal] = useState(null);
+
+  // Real delegates state - Primary source: Supabase Database
   const [delegates, setDelegates] = useState(() => {
     const saved = localStorage.getItem('confiqh_delegates');
     if (saved) return JSON.parse(saved);
@@ -49,8 +53,18 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
   const fetchSupabaseDelegates = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('delegates').select('*').order('created_at', { ascending: false });
-      if (!error && data) {
+      const { data, error } = await supabase
+        .from('delegates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase DB fetch error:', error.message);
+        setDbConnected(false);
+        const saved = localStorage.getItem('confiqh_delegates');
+        if (saved) setDelegates(JSON.parse(saved));
+      } else if (data) {
+        setDbConnected(true);
         const mapped = data.map(d => ({
           id: d.pass_id || d.id,
           fullName: d.full_name,
@@ -64,13 +78,18 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
           campus: d.campus,
           position: d.position,
           studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
-          registeredAt: new Date(d.created_at || Date.now()).toLocaleDateString()
+          paymentScreenshot: d.payment_screenshot || d.paymentScreenshot || null,
+          paymentStatus: d.payment_status || d.paymentStatus || 'Paid (₹200)',
+          registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
         }));
         setDelegates(mapped);
-        localStorage.setItem('confiqh_delegates', JSON.stringify(mapped));
+        try {
+          localStorage.setItem('confiqh_delegates', JSON.stringify(mapped));
+        } catch (e) {}
       }
     } catch (err) {
-      console.log('Supabase fetch note:', err.message);
+      console.error('Supabase connection exception:', err.message);
+      setDbConnected(false);
     }
     setLoading(false);
   };
@@ -78,25 +97,42 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
   useEffect(() => {
     if (isAuthenticated) {
       fetchSupabaseDelegates();
+
+      // Real-time Postgres database subscription for instant table updates
+      const channel = supabase
+        .channel('public:delegates')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'delegates' },
+          (payload) => {
+            console.log('Real-time database payload received:', payload);
+            fetchSupabaseDelegates();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [isAuthenticated]);
 
   const filteredDelegates = delegates.filter(d => {
-    const matchesSearch = d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          d.phone.includes(searchTerm) ||
-                          d.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.phone.includes(searchTerm) ||
+      d.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRange = filterStudyRange === 'All' || d.studyRange === filterStudyRange;
     return matchesSearch && matchesRange;
   });
 
   const handleExportCSV = () => {
     const headers = [
-      "Pass ID", "Full Name", "Age", "Address", "Phone No", "WhatsApp No", 
+      "Pass ID", "Full Name", "Age", "Address", "Phone No", "WhatsApp No",
       "Study Range", "Birudam", "Status", "Campus / Position", "Alfiyya & Fathul Mueen Studied", "Registration Date"
     ];
     const rows = delegates.map(d => [
-      d.id, `"${d.fullName}"`, d.age, `"${d.address}"`, d.phone, d.whatsapp, 
-      d.studyRange, `"${d.birudam}"`, d.status, `"${d.status === 'Student' ? d.campus : d.position}"`, 
+      d.id, `"${d.fullName}"`, d.age, `"${d.address}"`, d.phone, d.whatsapp,
+      d.studyRange, `"${d.birudam}"`, d.status, `"${d.status === 'Student' ? d.campus : d.position}"`,
       d.studiedAlfiyyaAndFathulMueen ? "Yes" : "No", d.registeredAt
     ]);
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -109,13 +145,50 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
     document.body.removeChild(link);
   };
 
-  const handleDeleteDelegate = async (id) => {
-    if (window.confirm(`Are you sure you want to remove delegate ${id}?`)) {
-      setDelegates(delegates.filter(d => d.id !== id));
+  const handleDeleteDelegate = async (targetId) => {
+    if (!targetId) return;
+
+    if (window.confirm(`Are you sure you want to delete delegate ${targetId}?`)) {
+      // 1. Immediately remove from React state (Instant UI delete)
+      setDelegates((prevDelegates) => {
+        const updated = prevDelegates.filter((d) => d.id !== targetId && d.pass_id !== targetId);
+        // 2. Immediately sync with LocalStorage cache so it stays deleted on refresh
+        try {
+          localStorage.setItem('confiqh_delegates', JSON.stringify(updated));
+        } catch (e) {
+          console.warn('LocalStorage update warning:', e);
+        }
+        return updated;
+      });
+
+      // 3. Delete from Supabase database cleanly
       try {
-        await supabase.from('delegates').delete().eq('pass_id', id);
+        let error = null;
+
+        // Try deleting by pass_id first
+        const res1 = await supabase
+          .from('delegates')
+          .delete()
+          .eq('pass_id', targetId);
+
+        error = res1.error;
+
+        // If pass_id delete failed or didn't match, try deleting by numeric/uuid id
+        if (error || (res1.count !== null && res1.count === 0)) {
+          const res2 = await supabase
+            .from('delegates')
+            .delete()
+            .eq('id', targetId);
+          error = res2.error;
+        }
+
+        if (error) {
+          console.error('Supabase DB delete error:', error.message);
+        } else {
+          console.log(`Successfully deleted ${targetId} from Supabase DB and UI.`);
+        }
       } catch (err) {
-        console.log('Supabase delete note:', err.message);
+        console.error('Supabase delete exception:', err.message);
       }
     }
   };
@@ -124,12 +197,12 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#17472B] flex items-center justify-center p-4 relative overflow-hidden font-sans">
-        
+
         {/* Subtle background overlay */}
         <div className="absolute inset-0 opacity-10 bg-islamic-pattern pointer-events-none" />
 
         <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative z-10 border border-[#354823]">
-          
+
           <div className="text-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-[#17472B] text-white flex items-center justify-center mx-auto mb-3 shadow-lg">
               <Lock className="w-7 h-7" />
@@ -207,18 +280,18 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
   // IF AUTHENTICATED: Render Full Secretariat Admin Dashboard
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col font-sans">
-      
+
       {/* Admin Header */}
       <header className="bg-[#17472B] text-white sticky top-0 z-40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            
+
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 select-none">
+              <div className="flex items-center space-x-2.5 select-none">
                 <span className="font-sans text-xl font-black text-white tracking-tight uppercase">
                   <span className="text-[#A1CF7F]">CON</span> FIQH
                 </span>
-                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#354823] text-white uppercase tracking-wider">
+                <span className="inline-block px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black bg-[#354823] text-white uppercase tracking-wider shadow-xs">
                   1ST EDITION
                 </span>
               </div>
@@ -261,16 +334,15 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-        
+
         {/* Nav Tabs */}
         <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4 mb-8">
           <button
             onClick={() => setActiveTab('delegates')}
-            className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
-              activeTab === 'delegates'
-                ? 'bg-[#17472B] text-white shadow-md'
-                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-            }`}
+            className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'delegates'
+              ? 'bg-[#17472B] text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
           >
             <Users className="w-4 h-4" />
             <span>Delegates Database ({delegates.length})</span>
@@ -279,7 +351,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
 
         {/* Delegates Table */}
         <div className="space-y-6">
-          
+
           <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
               <div className="relative flex-1 max-w-xs">
@@ -322,7 +394,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
                     <th className="py-3.5 px-4">Name & Age</th>
                     <th className="py-3.5 px-4">Phone & WhatsApp</th>
                     <th className="py-3.5 px-4">Study Range</th>
-                    <th className="py-3.5 px-4">Birudam</th>
+                    <th className="py-3.5 px-4">Payment (₹200)</th>
                     <th className="py-3.5 px-4">Status & Campus / Job</th>
                     <th className="py-3.5 px-4 text-right">Action</th>
                   </tr>
@@ -342,10 +414,33 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
                         <div className="text-[11px] text-emerald-700 font-bold">WA: {d.whatsapp}</div>
                       </td>
                       <td className="py-3.5 px-4 font-bold text-[#17472B]">
-                        {d.studyRange}
+                        <div>{d.studyRange}</div>
+                        <div className="text-[11px] text-gray-500 font-normal">{d.birudam || 'N/A'}</div>
                       </td>
-                      <td className="py-3.5 px-4 text-gray-700">
-                        {d.birudam || 'N/A'}
+                      <td className="py-3.5 px-4">
+                        <span className="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[10px] uppercase mb-1">
+                          Paid ₹200 ✓
+                        </span>
+                        {d.paymentScreenshot ? (
+                          <div className="flex items-center gap-2 mt-1">
+                            <img 
+                              src={d.paymentScreenshot} 
+                              alt={`Receipt thumbnail for ${d.fullName}`}
+                              className="w-9 h-9 rounded-lg border-2 border-emerald-400 object-cover cursor-pointer shadow-xs hover:scale-110 transition-transform shrink-0"
+                              onClick={() => setViewReceiptModal(d)}
+                              title="Click to view full payment receipt screenshot"
+                            />
+                            <button
+                              onClick={() => setViewReceiptModal(d)}
+                              className="text-[11px] text-[#17472B] hover:underline font-extrabold flex items-center gap-1"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>View Full Screenshot</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-gray-400 font-medium italic">No image attached</div>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 font-bold text-[10px] uppercase mb-0.5">
@@ -359,6 +454,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
                         <button
                           onClick={() => handleDeleteDelegate(d.id)}
                           className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
+                          title="Delete Delegate"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -380,6 +476,57 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData, setSess
         </div>
 
       </div>
+
+      {/* Payment Receipt Screenshot Modal for Secretariat Verification */}
+      {viewReceiptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-gray-200">
+            <button
+              onClick={() => setViewReceiptModal(null)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
+              <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg text-gray-900">
+                  Payment Receipt Verification
+                </h3>
+                <p className="text-xs text-gray-500 font-medium">
+                  Delegate: <strong>{viewReceiptModal.fullName}</strong> ({viewReceiptModal.id}) • Fee: <strong>₹200</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-2xl border border-gray-200 text-center">
+              {viewReceiptModal.paymentScreenshot ? (
+                <img 
+                  src={viewReceiptModal.paymentScreenshot} 
+                  alt={`Payment Screenshot for ${viewReceiptModal.fullName}`}
+                  className="max-h-[60vh] w-auto mx-auto rounded-xl object-contain shadow-md"
+                />
+              ) : (
+                <div className="py-12 text-gray-400 text-sm font-semibold">
+                  No payment screenshot uploaded for this delegate.
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setViewReceiptModal(null)}
+                className="bg-[#17472B] hover:bg-[#20603B] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow"
+              >
+                Close Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

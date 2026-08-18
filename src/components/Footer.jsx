@@ -5,17 +5,17 @@ export default function Footer({ onOpenRegister, onOpenBrochure, scrollToSection
   return (
     <footer className="bg-white text-gray-800 pt-16 pb-12 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Top 3-column layout matching PDF */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-gray-200">
-          
+
           {/* Left Column matching user text logo */}
           <div className="md:col-span-5 space-y-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2.5">
               <span className="font-sans text-2xl font-black tracking-tight uppercase">
                 <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
               </span>
-              <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#17472B] text-white uppercase tracking-wider">
+              <span className="inline-block px-2.5 py-1 rounded-xl text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider">
                 1ST EDITION
               </span>
             </div>
@@ -73,9 +73,9 @@ export default function Footer({ onOpenRegister, onOpenBrochure, scrollToSection
               <p className="font-bold text-[#17472B]">Ahlussuffa Dars Complex</p>
               <p>Parapram, Pinarayi, Kannur</p>
               <p>Kerala 670741, India</p>
-              
+
               <div className="pt-2">
-                <a 
+                <a
                   href="mailto:contact@confiqh.com"
                   className="inline-flex items-center gap-1.5 text-[#17472B] font-bold hover:underline"
                 >
@@ -90,7 +90,7 @@ export default function Footer({ onOpenRegister, onOpenBrochure, scrollToSection
 
         {/* Bottom Utility Bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-4">
-          
+
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 rounded-full bg-[#17472B] text-white flex items-center justify-center font-bold text-[10px]">
               N

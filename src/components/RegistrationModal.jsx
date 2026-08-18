@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
-import { 
-  X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin, 
-  BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy
+import {
+  X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
+  BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
+  Upload, AlertCircle, CreditCard, FileCheck, Image as ImageIcon, Trash2
 } from 'lucide-react';
 
 export default function RegistrationModal({ isOpen, onClose }) {
@@ -21,6 +22,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
     studiedAlfiyyaAndFathulMueen: false
   });
 
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+  const [screenshotFileName, setScreenshotFileName] = useState('');
+  const [paymentError, setPaymentError] = useState('');
+
   const [submitted, setSubmitted] = useState(false);
   const [delegatePass, setDelegatePass] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,9 +36,42 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setFormData((prev) => ({ ...prev, whatsapp: prev.phone }));
   };
 
+  const handleScreenshotChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setPaymentError('Please select a valid payment screenshot image file (PNG, JPG, JPEG, WEBP).');
+      return;
+    }
+
+    setScreenshotFileName(file.name);
+    setPaymentError('');
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPaymentScreenshot(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveScreenshot = () => {
+    setPaymentScreenshot(null);
+    setScreenshotFileName('');
+    setPaymentError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // STRICT VALIDATION: Payment screenshot is MANDATORY
+    if (!paymentScreenshot) {
+      setPaymentError('⚠️ Payment Screenshot Required! Please scan the QR code to pay ₹200 and attach your payment receipt screenshot before submitting.');
+      return;
+    }
+
     setIsSubmitting(true);
+    setPaymentError('');
 
     const passId = 'CF-2026-' + Math.floor(1000 + Math.random() * 9000);
     const newDelegate = {
@@ -49,34 +87,63 @@ export default function RegistrationModal({ isOpen, onClose }) {
       campus: formData.status === 'Student' ? formData.campus : 'N/A',
       position: formData.status === 'Working' ? formData.position : 'N/A',
       studiedAlfiyyaAndFathulMueen: formData.studiedAlfiyyaAndFathulMueen,
+      paymentScreenshot: paymentScreenshot,
+      paymentStatus: 'Paid (₹200)',
       registeredAt: new Date().toLocaleDateString()
     };
 
-    // Save to LocalStorage
-    const saved = localStorage.getItem('confiqh_delegates');
-    const existing = saved ? JSON.parse(saved) : [];
-    localStorage.setItem('confiqh_delegates', JSON.stringify([newDelegate, ...existing]));
-
-    // Async push to Supabase Cloud Database
+    // Primary save to Supabase Cloud Database with schema fallback safety
+    let dbSuccess = false;
     try {
-      await supabase.from('delegates').insert([
-        {
-          pass_id: passId,
-          full_name: formData.fullName,
-          age: parseInt(formData.age) || 20,
-          address: formData.address,
-          phone: formData.phone,
-          whatsapp: formData.whatsapp || formData.phone,
-          study_range: formData.studyRange,
-          birudam: formData.birudam || 'N/A',
-          status: formData.status,
-          campus: formData.status === 'Student' ? formData.campus : 'N/A',
-          position: formData.status === 'Working' ? formData.position : 'N/A',
-          studied_alfiyya: formData.studiedAlfiyyaAndFathulMueen
+      const basePayload = {
+        pass_id: passId,
+        full_name: formData.fullName,
+        age: parseInt(formData.age) || 20,
+        address: formData.address,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp || formData.phone,
+        study_range: formData.studyRange,
+        birudam: formData.birudam || 'N/A',
+        status: formData.status,
+        campus: formData.status === 'Student' ? formData.campus : 'N/A',
+        position: formData.status === 'Working' ? formData.position : 'N/A',
+        studied_alfiyya: formData.studiedAlfiyyaAndFathulMueen
+      };
+
+      const fullPayload = {
+        ...basePayload,
+        payment_screenshot: paymentScreenshot,
+        payment_status: 'Paid (₹200)'
+      };
+
+      // Try inserting with payment columns first
+      const res1 = await supabase.from('delegates').insert([fullPayload]).select();
+
+      if (res1.error) {
+        console.warn('Payment columns missing in Supabase schema. Retrying core payload insert:', res1.error.message);
+        // Fallback insert if payment_screenshot column doesn't exist in Supabase schema yet
+        const res2 = await supabase.from('delegates').insert([basePayload]).select();
+        if (res2.error) {
+          console.error('Supabase fallback DB Insert error:', res2.error.message);
+        } else {
+          dbSuccess = true;
+          console.log('Successfully saved delegate record to Supabase DB (core payload):', res2.data);
         }
-      ]);
+      } else {
+        dbSuccess = true;
+        console.log('Successfully saved delegate record to Supabase DB:', res1.data);
+      }
     } catch (err) {
-      console.log('Supabase sync note:', err.message);
+      console.error('Supabase connection exception:', err.message);
+    }
+
+    // Secondary backup cache in LocalStorage
+    try {
+      const saved = localStorage.getItem('confiqh_delegates');
+      const existing = saved ? JSON.parse(saved) : [];
+      localStorage.setItem('confiqh_delegates', JSON.stringify([newDelegate, ...existing]));
+    } catch (e) {
+      console.warn('LocalStorage backup failed:', e);
     }
 
     // Trigger celebration confetti
@@ -102,13 +169,16 @@ export default function RegistrationModal({ isOpen, onClose }) {
   const resetForm = () => {
     setSubmitted(false);
     setDelegatePass(null);
+    setPaymentScreenshot(null);
+    setScreenshotFileName('');
+    setPaymentError('');
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4 animate-fadeIn">
       <div className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-8 shadow-2xl relative max-h-[92vh] overflow-y-auto no-scrollbar border border-[#B3D98E] scroll-smooth">
-        
+
         {/* Close Button */}
         <button
           onClick={resetForm}
@@ -120,14 +190,14 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
         {!submitted ? (
           <div>
-            
-            {/* Form Header with CON FIQH Brand Logo */}
+
+            {/* Form Header matching third image brand logo */}
             <div className="flex items-center justify-between mb-5 sm:mb-6 border-b border-[#CCE5B4] pb-4">
-              <div className="flex items-center space-x-2 select-none">
+              <div className="flex items-center space-x-2.5 select-none">
                 <span className="font-sans text-2xl sm:text-3xl font-black tracking-tight uppercase">
                   <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
                 </span>
-                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#17472B] text-white uppercase tracking-wider">
+                <span className="inline-block px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider">
                   1ST EDITION
                 </span>
               </div>
@@ -147,7 +217,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
             {/* Fully Responsive Registration Form */}
             <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
-              
+
               {/* 1. Name & Age */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="sm:col-span-2">
@@ -255,11 +325,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
                     Study Range *
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                      formData.studyRange === 'Mukhtasar'
-                        ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
-                        : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
-                    }`}>
+                    <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center transition-all ${formData.studyRange === 'Mukhtasar'
+                      ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
+                      : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
+                      }`}>
                       <input
                         type="radio"
                         name="studyRange"
@@ -271,11 +340,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       Mukhtasar
                     </label>
 
-                    <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                      formData.studyRange === 'Muthawwal'
-                        ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
-                        : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
-                    }`}>
+                    <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center transition-all ${formData.studyRange === 'Muthawwal'
+                      ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
+                      : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
+                      }`}>
                       <input
                         type="radio"
                         name="studyRange"
@@ -312,11 +380,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
                   Current Occupation Status *
                 </label>
                 <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2.5 sm:mb-3">
-                  <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all ${
-                    formData.status === 'Student'
-                      ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
-                      : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
-                  }`}>
+                  <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all ${formData.status === 'Student'
+                    ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
+                    : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
+                    }`}>
                     <input
                       type="radio"
                       name="status"
@@ -329,11 +396,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
                     <span>Student</span>
                   </label>
 
-                  <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all ${
-                    formData.status === 'Working'
-                      ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
-                      : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
-                  }`}>
+                  <label className={`cursor-pointer py-2 sm:py-2.5 px-3 rounded-xl border text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all ${formData.status === 'Working'
+                    ? 'bg-[#17472B] text-white border-[#17472B] shadow-sm'
+                    : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
+                    }`}>
                     <input
                       type="radio"
                       name="status"
@@ -390,6 +456,152 @@ export default function RegistrationModal({ isOpen, onClose }) {
                 </div>
               </div>
 
+              {/* 7. Registration Fee (₹200) & Payment QR Code Section */}
+              <div className="pt-2 sm:pt-3">
+                <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-600/30 shadow-md space-y-4">
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-emerald-200/60 pb-3">
+                    <div className="flex items-start sm:items-center gap-2.5">
+                      <div className="p-2 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0 mt-0.5 sm:mt-0">
+                        <CreditCard className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
+                          Registration Fee: ₹200
+                        </h4>
+                        <p className="text-[11px] sm:text-xs text-gray-600">
+                          Scan QR Code to pay ₹200 & upload payment screenshot
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="self-start sm:self-auto px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm animate-pulse shrink-0">
+                      Payment Required
+                    </span>
+                  </div>
+
+                  {/* QR Code & UPI Instructions */}
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200">
+                    <div className="sm:col-span-5 flex flex-col items-center justify-center p-2 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
+                      <div className="relative group overflow-hidden rounded-lg border-2 border-orange-500/40 p-1 bg-white">
+                        <img 
+                          src="/payment_qr.jpg" 
+                          alt="conFiqh Registration Payment QR Code - ₹200"
+                          className="w-36 h-36 sm:w-40 sm:h-40 object-cover rounded shadow-sm"
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
+                        SCAN TO PAY ₹200
+                      </span>
+                    </div>
+
+                    <div className="sm:col-span-7 space-y-2.5">
+                      <div className="space-y-1">
+                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>1. Scan QR with any UPI App</span>
+                        </div>
+                        <p className="text-[11px] text-gray-600 pl-5">
+                          Google Pay, PhonePe, Paytm, BHIM, or Mobile Banking.
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>2. Complete ₹200 Payment</span>
+                        </div>
+                        <p className="text-[11px] text-gray-600 pl-5">
+                          Registration Fee: <strong>₹200 (INR)</strong>
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>3. Upload Screenshot Below</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Screenshot Upload Box */}
+                  <div>
+                    <label className="block text-[11px] sm:text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1.5">
+                      Upload Payment Screenshot *
+                    </label>
+
+                    {!paymentScreenshot ? (
+                      <div className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
+                        paymentError 
+                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50' 
+                          : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
+                      }`}>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleScreenshotChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className="flex flex-col items-center justify-center space-y-1.5">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#17472B] flex items-center justify-center">
+                            <Upload className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-xs sm:text-sm font-extrabold text-[#17472B] hover:underline">
+                              Click to select payment screenshot
+                            </span>
+                            <p className="text-[10px] font-semibold text-gray-500 mt-0.5">
+                              Supports JPG, PNG, WEBP receipts
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-2 shadow-sm overflow-hidden">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
+                            <img 
+                              src={paymentScreenshot} 
+                              alt="Payment Screenshot Preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
+                              <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                              <span className="truncate">Screenshot Attached</span>
+                            </div>
+                            <div className="text-[10px] sm:text-[11px] font-mono text-gray-600 truncate">
+                              {screenshotFileName || 'receipt.png'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleRemoveScreenshot}
+                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold flex items-center gap-1 shrink-0"
+                          title="Remove screenshot"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">Remove</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Payment Error Alert Box */}
+              {paymentError && (
+                <div className="p-3.5 bg-red-50 rounded-xl border-2 border-red-400 text-red-800 text-xs font-extrabold flex items-start gap-2.5 shadow-sm">
+                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <span>{paymentError}</span>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="pt-2 sm:pt-4">
                 <button
@@ -411,7 +623,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
         ) : (
           /* Success & Digital Pass Display */
           <div className="py-2">
-            
+
             <div className="text-center mb-5 sm:mb-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto mb-2">
                 <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -424,63 +636,53 @@ export default function RegistrationModal({ isOpen, onClose }) {
               </p>
             </div>
 
-            {/* Digital Printable Delegate Pass Card */}
-            <div id="printable-pass" className="bg-[#17472B] text-white rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden border-4 border-[#354823]">
-              
-              <div className="flex items-center justify-between border-b border-[#354823] pb-3 sm:pb-4 mb-3 sm:mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#C5DF9F] text-[#17472B] flex items-center justify-center font-black text-xs sm:text-sm">
-                    CF
-                  </div>
-                  <div>
-                    <div className="font-sans text-base sm:text-lg font-black text-[#C5DF9F]">conFiqh 2026</div>
-                    <div className="text-[9px] sm:text-[10px] text-gray-300 font-mono">DELEGATE ADMISSION PASS</div>
-                  </div>
+            {/* Digital Printable Delegate Pass Card (QR Code Removed) */}
+            <div id="printable-pass" className="bg-[#17472B] text-white rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden border-4 border-[#354823]">
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#354823] pb-3 sm:pb-4 mb-4">
+                <div className="flex flex-wrap items-center gap-2 select-none">
+                  <span className="font-sans text-lg sm:text-xl font-black text-[#C5DF9F] uppercase tracking-tight whitespace-nowrap">
+                    CON FIQH
+                  </span>
+                  <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#354823] text-white uppercase tracking-wider whitespace-nowrap">
+                    1ST EDITION
+                  </span>
                 </div>
 
-                <div className="text-right font-mono text-[10px] sm:text-xs text-[#C5DF9F] font-bold bg-[#354823] px-2 sm:px-2.5 py-1 rounded">
+                <div className="font-mono text-[10px] sm:text-xs text-[#C5DF9F] font-bold bg-[#354823] px-2.5 sm:px-3 py-1 rounded-lg shrink-0 self-start sm:self-auto">
                   {delegatePass.id}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                <div className="sm:col-span-8 space-y-2">
-                  <div>
-                    <span className="text-[9px] sm:text-[10px] font-extrabold text-gray-300 uppercase tracking-widest block">Delegate Name</span>
-                    <span className="font-sans text-lg sm:text-xl font-black text-white">{delegatePass.fullName} ({delegatePass.age} yrs)</span>
-                  </div>
+              {/* Delegate Details (QR Code Removed) */}
+              <div className="space-y-3.5 my-2">
+                <div>
+                  <span className="text-[9px] sm:text-[10px] font-extrabold text-gray-300 uppercase tracking-widest block mb-0.5">Delegate Name</span>
+                  <span className="font-sans text-xl sm:text-2xl font-black text-white">{delegatePass.fullName} ({delegatePass.age} yrs)</span>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-[9px] sm:text-[10px] text-gray-300 block">Study Range</span>
-                      <span className="font-bold text-[#C5DF9F]">{delegatePass.studyRange}</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] sm:text-[10px] text-gray-300 block">Status / Birudam</span>
-                      <span className="font-bold text-white truncate block">
-                        {delegatePass.status} {delegatePass.birudam !== 'N/A' ? `• ${delegatePass.birudam}` : ''}
-                      </span>
-                    </div>
-                  </div>
-
+                <div className="grid grid-cols-2 gap-3 text-xs bg-[#20603B]/60 p-3 rounded-xl border border-[#354823]">
                   <div>
-                    <span className="text-[9px] sm:text-[10px] text-gray-300 block">Institution / Job</span>
-                    <span className="text-xs font-semibold text-gray-200">
-                      {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
+                    <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Study Range</span>
+                    <span className="font-bold text-[#C5DF9F] text-sm">{delegatePass.studyRange}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Status / Birudam</span>
+                    <span className="font-bold text-white text-xs truncate block">
+                      {delegatePass.status} {delegatePass.birudam !== 'N/A' ? `• ${delegatePass.birudam}` : ''}
                     </span>
                   </div>
                 </div>
 
-                {/* QR Code */}
-                <div className="sm:col-span-4 flex flex-col items-center justify-center bg-white p-2.5 sm:p-3 rounded-xl text-[#17472B]">
-                  <QrCode className="w-16 h-16 sm:w-20 sm:h-20 text-[#17472B]" />
-                  <span className="text-[8px] sm:text-[9px] font-mono font-bold mt-1 text-center text-gray-700">
-                    SCAN AT AHLUSSUFFA
+                <div>
+                  <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Institution / Job</span>
+                  <span className="text-xs sm:text-sm font-semibold text-gray-200 block">
+                    {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#354823] flex items-center justify-between text-[9px] sm:text-[10px] text-gray-300">
+              <div className="mt-4 pt-3 border-t border-[#354823] flex items-center justify-between text-[10px] sm:text-[11px] text-gray-300 font-semibold">
                 <span>📍 Parapram, Pinarayi, Kannur</span>
                 <span>📅 11–12 Sept 2026</span>
               </div>
@@ -495,7 +697,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                 <Printer className="w-4 h-4" />
                 <span>Print / Save Pass</span>
               </button>
-              
+
               <button
                 onClick={resetForm}
                 className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-xs sm:text-sm"
