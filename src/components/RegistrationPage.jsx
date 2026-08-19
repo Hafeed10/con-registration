@@ -14,7 +14,8 @@ import {
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiDeepLink = "upi://pay?pa=abdulkhadirbava-1@okicici";
+  const upiParams = "pa=abdulkhadirbava-1@okicici&pn=Recipient&am=200&cu=INR";
+  const upiDeepLink = `gpay://upi/pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
     try {
@@ -41,7 +42,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setTimeout(() => setCopiedUpi(false), 3500);
   };
 
-  const handleUpiPayClick = (e) => {
+  const handleUpiPayClick = (e, app = 'gpay') => {
     if (e) e.preventDefault();
     if (navigator.clipboard) {
       navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
@@ -50,8 +51,18 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setTimeout(() => setCopiedUpi(false), 3500);
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      window.location.href = "upi://pay?pa=abdulkhadirbava-1@okicici";
+    if (!isMobile) return;
+
+    if (app === 'gpay') {
+      window.location.href = `gpay://upi/pay?${upiParams}`;
+    } else if (app === 'phonepe') {
+      window.location.href = `phonepe://upi/pay?${upiParams}`;
+    } else if (app === 'paytm') {
+      window.location.href = `paytmmp://upi/pay?${upiParams}`;
+    } else if (app === 'bhim') {
+      window.location.href = `bhim://upi/pay?${upiParams}`;
+    } else {
+      window.location.href = `upi://pay?${upiParams}`;
     }
   };
   const [formData, setFormData] = useState({
