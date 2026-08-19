@@ -677,7 +677,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Pay ₹200 via UPI App or Scan QR Code</span>
+                          <span>1. Pay ₹200 Scan QR Code</span>
                         </div>
                       </div>
 
