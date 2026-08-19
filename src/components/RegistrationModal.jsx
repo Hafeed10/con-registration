@@ -12,7 +12,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
   const MAX_DELEGATES_LIMIT = 200;
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR";
+  const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR";
   const upiDeepLink = `upi://pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -60,35 +60,34 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setTimeout(() => setCopiedUpi(false), 3500);
 
     const userAgent = navigator.userAgent || '';
-    const isAndroid = /Android/i.test(userAgent);
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
 
-    const upiParams = "pa=thulaib123@okicici&pn=Recipient&am=200&cu=INR";
+    const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR";
     const universalUpi = `upi://pay?${upiParams}`;
 
     let targetUrl = universalUpi;
 
     if (app === 'gpay') {
-      targetUrl = isAndroid
-        ? `intent://pay?${upiParams}#Intent;scheme=upi;package=com.google.android.apps.nfc.phone;end;`
-        : `gpay://upi/pay?${upiParams}`;
+      targetUrl = `gpay://upi/pay?${upiParams}`;
     } else if (app === 'phonepe') {
-      targetUrl = isAndroid
-        ? `intent://pay?${upiParams}#Intent;scheme=upi;package=com.phonepe.app;end;`
-        : `phonepe://upi/pay?${upiParams}`;
+      targetUrl = `phonepe://upi/pay?${upiParams}`;
     } else if (app === 'paytm') {
-      targetUrl = isAndroid
-        ? `intent://pay?${upiParams}#Intent;scheme=upi;package=net.one97.paytm;end;`
-        : `paytmmp://upi/pay?${upiParams}`;
+      targetUrl = `paytmmp://upi/pay?${upiParams}`;
     } else if (app === 'bhim') {
-      targetUrl = isAndroid
-        ? `intent://pay?${upiParams}#Intent;scheme=in.org.npci.upiapp;end;`
-        : `bhim://upi/pay?${upiParams}`;
+      targetUrl = `bhim://upi/pay?${upiParams}`;
     }
 
-    try {
-      window.location.href = targetUrl;
-    } catch (err) {
-      console.log('UPI payment launch error:', err);
+    if (isMobile) {
+      try {
+        const link = document.createElement('a');
+        link.href = targetUrl;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        window.location.href = targetUrl;
+      }
     }
   };
   const [formData, setFormData] = useState({
