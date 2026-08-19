@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
+import vectorSmartObject from '../assets/Vector Smart Object.png';
+import group8Img from '../assets/Group 8.png';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -215,23 +217,27 @@ export default function RegistrationPage({ onOpenAdmin }) {
           {!submitted ? (
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#CCE5B4] relative">
 
-              {/* Title Header */}
-              <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6 space-y-3">
+              {/* Title Header matching model mockup */}
+              <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6 flex flex-col items-center justify-center space-y-3">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EBF5DA] text-[#17472B] text-xs font-bold uppercase tracking-wider">
                   <ShieldCheck className="w-4 h-4 text-[#387B52]" />
                   <span>Official Delegate Registration</span>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                  <img src={confiqLogo} alt="CON FIQ Logo" className="h-8 sm:h-11 object-contain" />
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-[#17472B] text-white uppercase tracking-wider shadow-sm">
-                    1ST EDITION 2026
-                  </span>
+                {/* CONFIQ Logo */}
+                <div className="flex items-center justify-center pt-1">
+                  <img src={confiqLogo} alt="CON FIQ Logo" className="h-10 sm:h-14 object-contain" />
                 </div>
 
-                <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-xl mx-auto">
-                  Academic Summit for Applied Fiqh • 11–12 September 2026
-                </p>
+                {/* Keralam Fiqh Summit 2026 Banner */}
+                <div className="flex items-center justify-center px-2">
+                  <img src={vectorSmartObject} alt="Keralam Fiqh Summit 2026" className="h-8 sm:h-10 object-contain max-w-full" />
+                </div>
+
+                {/* Date & Location Graphic */}
+                <div className="flex items-center justify-center pt-1 px-2">
+                  <img src={group8Img} alt="11 12 September 2026 AHLUSSUFFA Parapram Pinarayi" className="h-9 sm:h-11 object-contain max-w-full" />
+                </div>
               </div>
 
               {/* Information Note */}
