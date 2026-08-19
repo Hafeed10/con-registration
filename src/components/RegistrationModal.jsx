@@ -39,15 +39,6 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
   };
-  const [copiedPhone, setCopiedPhone] = useState(false);
-
-  const handleCopyPhone = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText('7558889458');
-    }
-    setCopiedPhone(true);
-    setTimeout(() => setCopiedPhone(false), 3500);
-  };
 
   const handleUpiPayClick = (e) => {
     if (e) e.preventDefault();
