@@ -55,20 +55,20 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const handleUpiPayClick = (e, app = 'all') => {
     if (e) e.preventDefault();
 
-    // 1. Copy UPI ID to clipboard first
+    const upiId = 'thulaib123@okicici';
+    const name = 'CONFIQ Secretariat';
+    const amount = 200;
+
+    // Copy UPI ID to clipboard first
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('thulaib123@okicici');
+      navigator.clipboard.writeText(upiId);
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
 
-    const userAgent = navigator.userAgent || '';
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
+    const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
 
-    const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR";
-    const universalUpi = `upi://pay?${upiParams}`;
-
-    let targetUrl = universalUpi;
+    let targetUrl = `upi://pay?${upiParams}`;
 
     if (app === 'gpay') {
       targetUrl = `gpay://upi/pay?${upiParams}`;
@@ -80,17 +80,10 @@ export default function RegistrationPage({ onOpenAdmin }) {
       targetUrl = `bhim://upi/pay?${upiParams}`;
     }
 
-    if (isMobile) {
-      try {
-        const link = document.createElement('a');
-        link.href = targetUrl;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (err) {
-        window.location.href = targetUrl;
-      }
+    try {
+      window.location.href = targetUrl;
+    } catch (err) {
+      console.log('UPI payment launch error:', err);
     }
   };
   const [formData, setFormData] = useState({
