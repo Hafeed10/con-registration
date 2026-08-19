@@ -185,8 +185,8 @@ export default function RegistrationModal({ isOpen, onClose }) {
             {/* Form Header matching third image brand logo */}
             <div className="flex items-center justify-between mb-5 sm:mb-6 border-b border-[#CCE5B4] pb-4">
               <div className="flex items-center space-x-2.5 select-none">
-                <span className="font-sans text-2xl sm:text-3xl font-black tracking-tight uppercase">
-                  <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
+                <span className="font-sans text-2xl sm:text-3xl font-black tracking-tight">
+                  <span className="text-[#17472B]">conFiqh</span>
                 </span>
                 <span className="inline-block px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider">
                   1ST EDITION
@@ -632,8 +632,8 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#354823] pb-3 sm:pb-4 mb-4">
                 <div className="flex flex-wrap items-center gap-2 select-none">
-                  <span className="font-sans text-lg sm:text-xl font-black text-[#C5DF9F] uppercase tracking-tight whitespace-nowrap">
-                    CON FIQH
+                  <span className="font-sans text-lg sm:text-xl font-black tracking-tight whitespace-nowrap select-none">
+                    <span className="text-[#C5DF9F]">con</span><span className="text-white">Fiqh</span>
                   </span>
                   <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#354823] text-white uppercase tracking-wider whitespace-nowrap">
                     1ST EDITION

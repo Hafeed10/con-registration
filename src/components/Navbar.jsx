@@ -26,7 +26,7 @@ export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection
             <span className="font-sans text-lg sm:text-2xl font-black tracking-tight uppercase whitespace-nowrap">
               <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
             </span>
-            <span className="hidden sm:inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs">
+            <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs">
               1ST EDITION
             </span>
           </div>
@@ -102,7 +102,7 @@ export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection
       {/* Mobile Dropdown Menu Panel */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#EBF5DA] border-b border-[#C5DF9F] px-4 pt-3 pb-5 space-y-2 shadow-lg animate-fadeIn">
-          
+
           <div className="flex items-center justify-between pb-2 border-b border-[#C5DF9F]/60 gap-2">
             <span className="text-[11px] font-black text-[#17472B] uppercase tracking-wider whitespace-nowrap">
               Menu Navigation

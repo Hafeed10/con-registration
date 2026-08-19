@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck
+  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock
 } from 'lucide-react';
 
-export default function RegistrationPage() {
+export default function RegistrationPage({ onOpenAdmin }) {
   const [formData, setFormData] = useState({
     fullName: '',
     age: '',
@@ -90,7 +90,7 @@ export default function RegistrationPage() {
       registeredAt: new Date().toLocaleDateString()
     };
 
-    // Primary save to Supabase Cloud Database with schema fallback safety
+    // Save to Supabase Cloud Database with fallback safety
     try {
       const basePayload = {
         pass_id: passId,
@@ -174,20 +174,20 @@ export default function RegistrationPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F9F1] text-gray-900 flex flex-col font-sans selection:bg-[#17472B] selection:text-white">
-      
-      {/* Header Bar */}
+
+      {/* Top Header Bar */}
       <header className="bg-[#17472B] text-white border-b border-[#387B52]/40 shadow-lg sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3 select-none">
-            <span className="font-sans text-2xl sm:text-3xl font-black tracking-tight uppercase">
-              <span className="text-[#C5DF9F]">CON</span> <span className="text-white">FIQH</span>
+          <div className="flex items-center space-x-2.5 select-none">
+            <span className="font-sans text-2xl sm:text-3xl font-black tracking-tight uppercase select-none">
+              <span className="text-[#4CA46C]">CON</span> <span className="text-white">FIQH</span>
             </span>
-            <span className="inline-block px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black bg-[#354823] text-[#C5DF9F] uppercase tracking-wider border border-[#C5DF9F]/30">
+            <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-black bg-[#0E4023] text-white uppercase tracking-wider border border-[#C5DF9F]/30 shadow-xs">
               1ST EDITION
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center space-x-6 text-xs text-[#C5DF9F] font-semibold">
+          <div className="flex items-center space-x-6 text-xs text-[#C5DF9F] font-semibold">
             <div className="flex items-center space-x-1.5">
               <Calendar className="w-4 h-4 text-[#C5DF9F]" />
               <span>11–12 Sept 2026</span>
@@ -200,36 +200,43 @@ export default function RegistrationPage() {
         </div>
       </header>
 
-      {/* Main Registration Container */}
+      {/* Main Registration Form Area */}
       <main className="flex-grow py-8 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          
+
           {!submitted ? (
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#CCE5B4] relative">
-              
-              {/* Title Section */}
-              <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EBF5DA] text-[#17472B] text-xs font-bold uppercase tracking-wider mb-3">
+
+              {/* Title Header */}
+              <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6 space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EBF5DA] text-[#17472B] text-xs font-bold uppercase tracking-wider">
                   <ShieldCheck className="w-4 h-4 text-[#387B52]" />
-                  <span>Official Delegate Portal</span>
+                  <span>Official Delegate Registration</span>
                 </div>
-                <h1 className="text-2xl sm:text-4xl font-black text-[#17472B] tracking-tight">
-                  conFiqh 2026 Delegate Registration
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-600 font-medium mt-2 max-w-xl mx-auto">
+
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                  <span className="font-sans text-2xl sm:text-4xl font-black tracking-tight uppercase">
+                    <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-[#17472B] text-white uppercase tracking-wider shadow-sm">
+                    1ST EDITION 2026
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-xl mx-auto">
                   Academic Summit for Applied Fiqh • 11–12 September 2026
                 </p>
               </div>
 
-              {/* Information Banner */}
+              {/* Information Note */}
               <div className="bg-[#EBF5DA] p-4 rounded-2xl border border-[#CCE5B4] mb-8 flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-[#17472B] shrink-0 mt-0.5" />
                 <p className="text-xs sm:text-sm text-[#2A4222] font-medium leading-relaxed">
-                  Delegate registration is open for eligible Islamic scholars, Muthawwal & Mukhtasar students, and research fellows. Please complete your academic & personal details below.
+                  Delegate registration is open for eligible Islamic scholars, Muthawwal & Mukhtasar students, and research fellows. Please fill out your details below.
                 </p>
               </div>
 
-              {/* Registration Form */}
+              {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
 
                 {/* 1. Name & Age */}
@@ -468,9 +475,9 @@ export default function RegistrationPage() {
                   </div>
                 </div>
 
-                {/* 7. Registration Fee ₹200 & QR Code Section */}
+                {/* 7. Fee ₹200 & QR Code Section */}
                 <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-600/30 shadow-md space-y-4">
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-200/60 pb-3">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
@@ -495,8 +502,8 @@ export default function RegistrationPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center bg-white p-4 rounded-xl border border-gray-200">
                     <div className="sm:col-span-5 flex flex-col items-center justify-center p-3 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
                       <div className="relative group overflow-hidden rounded-xl border-2 border-orange-500/40 p-1.5 bg-white">
-                        <img 
-                          src="/payment_qr.jpg" 
+                        <img
+                          src="/payment_qr.jpg"
                           alt="conFiqh Registration Payment QR Code - ₹200"
                           className="w-40 h-40 sm:w-44 sm:h-44 object-cover rounded shadow-sm"
                         />
@@ -543,13 +550,12 @@ export default function RegistrationPage() {
                     </label>
 
                     {!paymentScreenshot ? (
-                      <div className={`relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
-                        paymentError 
-                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50' 
+                      <div className={`relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${paymentError
+                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
                           : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
-                      }`}>
-                        <input 
-                          type="file" 
+                        }`}>
+                        <input
+                          type="file"
                           accept="image/*"
                           onChange={handleScreenshotChange}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -572,9 +578,9 @@ export default function RegistrationPage() {
                       <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-3 shadow-sm overflow-hidden">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-14 h-14 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
-                            <img 
-                              src={paymentScreenshot} 
-                              alt="Payment Screenshot Preview" 
+                            <img
+                              src={paymentScreenshot}
+                              alt="Payment Screenshot Preview"
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -633,7 +639,7 @@ export default function RegistrationPage() {
           ) : (
             /* Success & Printable Delegate Pass */
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#CCE5B4] text-center">
-              
+
               <div className="w-14 h-14 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto mb-3">
                 <CheckCircle className="w-8 h-8" />
               </div>
@@ -649,10 +655,10 @@ export default function RegistrationPage() {
 
                 <div className="flex items-center justify-between border-b border-[#354823] pb-4 mb-5">
                   <div className="flex items-center space-x-2 select-none">
-                    <span className="font-sans text-xl sm:text-2xl font-black text-[#C5DF9F] uppercase tracking-tight">
-                      CON FIQH
+                    <span className="font-sans text-xl sm:text-2xl font-black tracking-tight uppercase whitespace-nowrap">
+                      <span className="text-[#387B52]">CON</span> <span className="text-[#C5DF9F]">FIQH</span>
                     </span>
-                    <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#354823] text-white uppercase tracking-wider">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-black bg-[#354823] text-white uppercase tracking-wider">
                       1ST EDITION
                     </span>
                   </div>
@@ -720,9 +726,9 @@ export default function RegistrationPage() {
         </div>
       </main>
 
-      {/* Simple Footer */}
-      <footer className="bg-[#17472B] text-white/80 py-6 border-t border-[#387B52]/40 text-xs text-center">
-        <div className="max-w-5xl mx-auto px-4 space-y-1">
+      {/* Footer */}
+      <footer className="bg-[#17472B] text-white/80 py-6 border-t border-[#387B52]/40 text-xs">
+        <div className="max-w-5xl mx-auto px-4 text-center space-y-1">
           <p className="font-semibold text-[#C5DF9F]">
             conFiqh 2026 Secretariat • Academic Summit for Applied Fiqh
           </p>

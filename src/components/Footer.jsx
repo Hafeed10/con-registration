@@ -99,17 +99,17 @@ export default function Footer({ onOpenRegister, onOpenBrochure, scrollToSection
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-4 font-medium text-gray-600">
             <span className="font-mono text-[#17472B] font-bold">www.confiqh.com</span>
             <span className="text-gray-300">•</span>
-            <a 
-              href="#privacy" 
-              onClick={(e) => { e.preventDefault(); alert('Privacy Policy: Delegate registration data is strictly used for summit organization.'); }} 
+            <a
+              href="#privacy"
+              onClick={(e) => { e.preventDefault(); alert('Privacy Policy: Delegate registration data is strictly used for summit organization.'); }}
               className="hover:text-[#17472B] transition-colors"
             >
               Privacy
             </a>
             <span className="text-gray-300">•</span>
-            <a 
-              href="#terms" 
-              onClick={(e) => { e.preventDefault(); alert('Terms: Registration is subject to eligibility requirements for scholars and students.'); }} 
+            <a
+              href="#terms"
+              onClick={(e) => { e.preventDefault(); alert('Terms: Registration is subject to eligibility requirements for scholars and students.'); }}
               className="hover:text-[#17472B] transition-colors"
             >
               Terms
