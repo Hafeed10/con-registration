@@ -51,7 +51,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setTimeout(() => setCopiedPhone(false), 3500);
   };
 
-  const handleUpiPayClick = (e, app = 'all') => {
+  const handleUpiPayClick = (e, app = 'phonepe') => {
     if (e) e.preventDefault();
 
     // Copy UPI ID to clipboard
@@ -61,24 +61,19 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
 
-    const userAgent = navigator.userAgent || '';
-    const isAndroid = /Android/i.test(userAgent);
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) return;
 
-    const baseParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR";
-    const universalUpi = `upi://pay?${baseParams}`;
-
-    if (isAndroid) {
-      if (app === 'phonepe') {
-        window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=com.phonepe.app;end;`;
-      } else if (app === 'gpay') {
-        window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=com.google.android.apps.nfc.phone;end;`;
+    if (app === 'gpay') {
+      window.location.href = `gpay://upi/pay?${upiParams}`;
+    } else if (app === 'phonepe') {
+      window.location.href = `phonepe://upi/pay?${upiParams}`;
       } else if (app === 'paytm') {
-        window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=net.one97.paytm;end;`;
+      window.location.href = `paytmmp://upi/pay?${upiParams}`;
+    } else if (app === 'bhim') {
+      window.location.href = `bhim://upi/pay?${upiParams}`;
       } else {
-        window.location.href = universalUpi;
-      }
-    } else {
-      window.location.href = universalUpi;
+      window.location.href = `upi://pay?${upiParams}`;
     }
   };
   const [formData, setFormData] = useState({
@@ -652,14 +647,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="mt-2.5 w-full grid grid-cols-2 gap-1.5">
                         <button
                           type="button"
-                          onClick={(e) => handleUpiPayClick(e, 'phonepe')}
-                          className="flex items-center justify-center gap-1 px-2 py-2 bg-[#5f259f] hover:bg-[#4d1d82] text-white rounded-lg text-[11px] font-extrabold shadow-sm transition-all text-center cursor-pointer"
-                        >
-                          <CreditCard className="w-3.5 h-3.5" />
-                          <span>PhonePe</span>
-                        </button>
-                        <button
-                          type="button"
                           onClick={(e) => handleUpiPayClick(e, 'gpay')}
                           className="flex items-center justify-center gap-1 px-2 py-2 bg-[#17472B] hover:bg-[#0E4023] text-white rounded-lg text-[11px] font-extrabold shadow-sm transition-all text-center cursor-pointer"
                         >
@@ -684,19 +671,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       </button>
 
                       {/* Copy Phone Number Button */}
-                      <button
-                        type="button"
-                        onClick={handleCopyPhone}
-                        className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
-                        title="Click to copy GPay/PhonePe Mobile Number"
-                      >
-                        <span className="truncate">Number: 7558889458</span>
-                        {copiedPhone ? (
-                          <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
-                        ) : (
-                          <Copy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        )}
-                      </button>
+              
                     </div>
 
                     <div className="sm:col-span-7 space-y-2.5">
