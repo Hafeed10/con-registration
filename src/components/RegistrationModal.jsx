@@ -48,18 +48,35 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setTimeout(() => setCopiedPhone(false), 3500);
   };
 
-  const handleUpiPayClick = (e) => {
+  const handleUpiPayClick = (e, app = 'all') => {
     if (e) e.preventDefault();
+
+    // Copy UPI ID to clipboard
     if (navigator.clipboard) {
       navigator.clipboard.writeText('thulaib123@okicici');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
 
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) return;
+    const userAgent = navigator.userAgent || '';
+    const isAndroid = /Android/i.test(userAgent);
 
-    window.location.href = `upi://pay?pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR`;
+    const baseParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR";
+    const universalUpi = `upi://pay?${baseParams}`;
+
+    if (isAndroid) {
+      if (app === 'phonepe') {
+        window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=com.phonepe.app;end;`;
+      } else if (app === 'gpay') {
+        window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=com.google.android.apps.nfc.phone;end;`;
+      } else if (app === 'paytm') {
+        window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=net.one97.paytm;end;`;
+      } else {
+        window.location.href = universalUpi;
+      }
+    } else {
+      window.location.href = universalUpi;
+    }
   };
   const [formData, setFormData] = useState({
     fullName: '',
@@ -548,15 +565,25 @@ export default function RegistrationModal({ isOpen, onClose }) {
                         <span>Download QR Code</span>
                       </button>
 
-                      {/* Direct GPay / PhonePe App Launch Button */}
-                      <a
-                        href={upiDeepLink}
-                        onClick={handleUpiPayClick}
-                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-[#17472B] hover:bg-[#0E4023] text-white rounded text-xs font-extrabold shadow-sm transition-all text-center shrink-0 cursor-pointer"
-                      >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Pay ₹200 via GPay / PhonePe</span>
-                      </a>
+                      {/* Direct PhonePe / GPay Launch Buttons */}
+                      <div className="mt-2 w-full grid grid-cols-2 gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpiPayClick(e, 'phonepe')}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-[#5f259f] hover:bg-[#4d1d82] text-white rounded text-[10px] font-extrabold shadow-sm transition-all text-center cursor-pointer"
+                        >
+                          <CreditCard className="w-3 h-3" />
+                          <span>PhonePe</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpiPayClick(e, 'gpay')}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-[#17472B] hover:bg-[#0E4023] text-white rounded text-[10px] font-extrabold shadow-sm transition-all text-center cursor-pointer"
+                        >
+                          <CreditCard className="w-3 h-3" />
+                          <span>GPay / UPI</span>
+                        </button>
+                      </div>
 
                       {/* Copy UPI ID Button */}
                       <button
