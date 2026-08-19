@@ -356,7 +356,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                     <Award className="w-4 h-4 text-gray-400 absolute left-3.5 top-3 sm:top-3.5" />
                     <input
                       type="text"
-                      placeholder="e.g. Wafy, Hadiya, B.A, M.A"
+                      placeholder="e.g. Saqafi, Ahsani, B.A, M.A"
                       value={formData.birudam}
                       onChange={(e) => setFormData({ ...formData, birudam: e.target.value })}
                       className="w-full pl-10 pr-4 py-2 sm:py-2.5 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-xs sm:text-sm font-medium outline-none transition-all"
