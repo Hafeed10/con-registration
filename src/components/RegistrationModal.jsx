@@ -4,13 +4,30 @@ import { supabase } from '../lib/supabase';
 import {
   X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Image as ImageIcon, Trash2, Download, ChevronDown
+  Upload, AlertCircle, CreditCard, FileCheck, Image as ImageIcon, Trash2, Download
 } from 'lucide-react';
 
 export default function RegistrationModal({ isOpen, onClose }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const upiDeepLink = "upi://pay?pa=abdulkhadirbava-1@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR&tn=CONFIQ%20Delegate%20Fee";
+
+  const handleDownloadQr = async () => {
+    try {
+      const response = await fetch(qrCodeImg);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'CONFIQ_Payment_QR.jpeg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      window.open(qrCodeImg, '_blank');
+    }
+  };
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
@@ -511,14 +528,14 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       </span>
 
                       {/* Download QR Code Button */}
-                      <a
-                        href={qrCodeImg}
-                        download="CONFIQ_Payment_QR.jpeg"
-                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-bold shadow-2xs transition-all text-center cursor-pointer"
+                      <button
+                        type="button"
+                        onClick={handleDownloadQr}
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-extrabold shadow-2xs transition-all text-center cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download QR Code</span>
-                      </a>
+                      </button>
 
                       {/* Direct GPay / PhonePe App Launch Button */}
                       <a
