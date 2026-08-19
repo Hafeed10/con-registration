@@ -20,11 +20,171 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   const [activeTab, setActiveTab] = useState('delegates');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStudyRange, setFilterStudyRange] = useState('All');
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState('All');
   const [loading, setLoading] = useState(false);
   const [dbConnected, setDbConnected] = useState(true);
 
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
+
+  const handleApprovePayment = async (targetId) => {
+    if (!targetId) return;
+    if (!window.confirm(`Approve payment and mark delegate ${targetId} as PAID?`)) return;
+
+    setDelegates((prev) =>
+      prev.map((d) => (d.id === targetId ? { ...d, paymentStatus: 'PAID' } : d))
+    );
+
+    try {
+      const res1 = await supabase
+        .from('delegates')
+        .update({
+          payment_status: 'PAID',
+          verified_at: new Date().toISOString()
+        })
+        .eq('pass_id', targetId);
+
+      if (res1.error) {
+        await supabase
+          .from('delegates')
+          .update({
+            payment_status: 'PAID',
+            verified_at: new Date().toISOString()
+          })
+          .eq('id', targetId);
+      }
+    } catch (err) {
+      console.error('Supabase approve payment exception:', err.message);
+    }
+  };
+
+  const handleRejectPayment = async (targetId) => {
+    if (!targetId) return;
+    const reason = window.prompt('Enter rejection reason (optional):', 'Invalid UTR or payment not received');
+    if (reason === null) return;
+
+    setDelegates((prev) =>
+      prev.map((d) => (d.id === targetId ? { ...d, paymentStatus: 'REJECTED' } : d))
+    );
+
+    try {
+      const res1 = await supabase
+        .from('delegates')
+        .update({
+          payment_status: 'REJECTED',
+          rejection_reason: reason
+        })
+        .eq('pass_id', targetId);
+
+      if (res1.error) {
+        await supabase
+          .from('delegates')
+          .update({
+            payment_status: 'REJECTED',
+            rejection_reason: reason
+          })
+          .eq('id', targetId);
+      }
+    } catch (err) {
+      console.error('Supabase reject payment exception:', err.message);
+    }
+  };
+
+  // Real delegates state - Source: Supabase Database ONLY
+  const [delegates, setDelegates] = useState([]);
+
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    if (username.trim() === 'confiqh' && password === 'confiqh123') {
+      sessionStorage.setItem('confiqh_admin_auth', 'true');
+      setIsAuthenticated(true);
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('confiqh_admin_auth');
+    setIsAuthenticated(false);
+    onReturnToPublic();
+  };
+
+  const fetchSupabaseDelegates = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('delegates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase DB fetch error:', error.message);
+        setDbConnected(false);
+      } else if (data) {
+        setDbConnected(true);
+        const mapped = data.map(d => ({
+          id: d.pass_id || d.id,
+          fullName: d.full_name,
+          age: d.age,
+          address: d.address,
+          phone: d.phone,
+          whatsapp: d.whatsapp,
+          studyRange: d.study_range,
+          birudam: d.birudam,
+          status: d.status,
+          campus: d.campus,
+          position: d.position,
+          studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
+          utrNumber: d.utr_number || d.utrNumber || 'N/A',
+          paymentScreenshot: d.payment_screenshot || d.paymentScreenshot || null,
+          paymentStatus: d.payment_status || d.paymentStatus || 'PENDING_VERIFICATION',
+          registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
+        }));
+        setDelegates(mapped);
+      }
+    } catch (err) {
+      console.error('Supabase connection exception:', err.message);
+      setDbConnected(false);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSupabaseDelegates();
+
+      // Real-time Postgres database subscription for instant table updates
+      const channel = supabase
+        .channel('public:delegates')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'delegates' },
+          (payload) => {
+            console.log('Real-time database payload received:', payload);
+            fetchSupabaseDelegates();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [isAuthenticated]);
+
+  const filteredDelegates = delegates.filter(d => {
+    const matchesSearch = d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.phone.includes(searchTerm) ||
+      d.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (d.utrNumber && d.utrNumber.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesRange = filterStudyRange === 'All' || d.studyRange === filterStudyRange;
+    const matchesStatus = filterPaymentStatus === 'All' || 
+      (filterPaymentStatus === 'PENDING_VERIFICATION' && d.paymentStatus === 'PENDING_VERIFICATION') ||
+      (filterPaymentStatus === 'PAID' && (d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)')) ||
+      (filterPaymentStatus === 'REJECTED' && d.paymentStatus === 'REJECTED');
+    return matchesSearch && matchesRange && matchesStatus;
+  });
 
   // Scheduled Sessions CMS Admin State
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
@@ -276,94 +436,6 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   };
 
   // Real delegates state - Source: Supabase Database ONLY
-  const [delegates, setDelegates] = useState([]);
-
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    if (username.trim() === 'confiqh' && password === 'confiqh123') {
-      sessionStorage.setItem('confiqh_admin_auth', 'true');
-      setIsAuthenticated(true);
-      setLoginError(false);
-    } else {
-      setLoginError(true);
-    }
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('confiqh_admin_auth');
-    setIsAuthenticated(false);
-    onReturnToPublic();
-  };
-
-  const fetchSupabaseDelegates = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('delegates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase DB fetch error:', error.message);
-        setDbConnected(false);
-      } else if (data) {
-        setDbConnected(true);
-        const mapped = data.map(d => ({
-          id: d.pass_id || d.id,
-          fullName: d.full_name,
-          age: d.age,
-          address: d.address,
-          phone: d.phone,
-          whatsapp: d.whatsapp,
-          studyRange: d.study_range,
-          birudam: d.birudam,
-          status: d.status,
-          campus: d.campus,
-          position: d.position,
-          studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
-          paymentScreenshot: d.payment_screenshot || d.paymentScreenshot || null,
-          paymentStatus: d.payment_status || d.paymentStatus || 'Paid (₹200)',
-          registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
-        }));
-        setDelegates(mapped);
-      }
-    } catch (err) {
-      console.error('Supabase connection exception:', err.message);
-      setDbConnected(false);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchSupabaseDelegates();
-
-      // Real-time Postgres database subscription for instant table updates
-      const channel = supabase
-        .channel('public:delegates')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'delegates' },
-          (payload) => {
-            console.log('Real-time database payload received:', payload);
-            fetchSupabaseDelegates();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [isAuthenticated]);
-
-  const filteredDelegates = delegates.filter(d => {
-    const matchesSearch = d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.phone.includes(searchTerm) ||
-      d.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRange = filterStudyRange === 'All' || d.studyRange === filterStudyRange;
-    return matchesSearch && matchesRange;
-  });
 
   const handleExportCSV = () => {
     const headers = [
@@ -612,12 +684,23 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                   <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
                   <input
                     type="text"
-                    placeholder="Search by name, phone, pass ID..."
+                    placeholder="Search by name, phone, pass ID, UTR..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-300 text-xs font-medium outline-none"
                   />
                 </div>
+
+                <select
+                  value={filterPaymentStatus}
+                  onChange={(e) => setFilterPaymentStatus(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
+                >
+                  <option value="All">All Payment Statuses</option>
+                  <option value="PENDING_VERIFICATION">🟡 Pending Verification</option>
+                  <option value="PAID">🟢 Paid (Verified)</option>
+                  <option value="REJECTED">🔴 Rejected</option>
+                </select>
 
                 <select
                   value={filterStudyRange}
@@ -648,9 +731,9 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                       <th className="py-3.5 px-4">Name & Age</th>
                       <th className="py-3.5 px-4">Phone & WhatsApp</th>
                       <th className="py-3.5 px-4">Study Range</th>
-                      <th className="py-3.5 px-4">Payment (₹200)</th>
-                      <th className="py-3.5 px-4">Status & Campus / Job</th>
-                      <th className="py-3.5 px-4 text-right">Action</th>
+                      <th className="py-3.5 px-4">UTR & Receipt (₹200)</th>
+                      <th className="py-3.5 px-4">Payment Status</th>
+                      <th className="py-3.5 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-xs font-medium">
@@ -672,11 +755,16 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                           <div className="text-[11px] text-gray-500 font-normal">{d.birudam || 'N/A'}</div>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[10px] uppercase mb-1">
-                            Paid ₹200 ✓
-                          </span>
+                          {d.utrNumber && d.utrNumber !== 'N/A' ? (
+                            <div className="font-mono text-[11px] font-bold text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 inline-block mb-1">
+                              UTR: {d.utrNumber}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-amber-700 font-medium italic mb-1">No UTR entered</div>
+                          )}
+
                           {d.paymentScreenshot ? (
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-0.5">
                               <img 
                                 src={d.paymentScreenshot} 
                                 alt={`Receipt thumbnail for ${d.fullName}`}
@@ -689,29 +777,61 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                                 className="text-[11px] text-[#17472B] hover:underline font-extrabold flex items-center gap-1"
                               >
                                 <FileText className="w-3.5 h-3.5 text-emerald-700" />
-                                <span>View Full Screenshot</span>
+                                <span>View Receipt</span>
                               </button>
                             </div>
                           ) : (
-                            <div className="text-[10px] text-gray-400 font-medium italic">No image attached</div>
+                            <div className="text-[10px] text-gray-400 font-medium italic">No screenshot</div>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-800 font-bold text-[10px] uppercase mb-0.5">
-                            {d.status}
-                          </span>
-                          <div className="text-[11px] text-gray-600 truncate max-w-[140px]">
+                          {(d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)') ? (
+                            <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] uppercase">
+                              🟢 PAID ₹200 ✓
+                            </span>
+                          ) : d.paymentStatus === 'REJECTED' ? (
+                            <span className="inline-block px-2.5 py-1 rounded-full bg-red-100 text-red-800 font-extrabold text-[10px] uppercase">
+                              🔴 REJECTED
+                            </span>
+                          ) : (
+                            <span className="inline-block px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[10px] uppercase">
+                              🟡 PENDING REVIEW
+                            </span>
+                          )}
+                          <div className="text-[10px] text-gray-500 mt-1">
                             {d.status === 'Student' ? d.campus : d.position}
                           </div>
                         </td>
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() => handleDeleteDelegate(d.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
-                            title="Delete Delegate"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            {(d.paymentStatus === 'PENDING_VERIFICATION' || d.paymentStatus === 'REJECTED') && (
+                              <button
+                                onClick={() => handleApprovePayment(d.id)}
+                                className="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-extrabold transition-all"
+                                title="Approve payment & mark Paid"
+                              >
+                                Approve
+                              </button>
+                            )}
+
+                            {d.paymentStatus !== 'REJECTED' && (
+                              <button
+                                onClick={() => handleRejectPayment(d.id)}
+                                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-extrabold transition-all"
+                                title="Reject payment"
+                              >
+                                Reject
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleDeleteDelegate(d.id)}
+                              className="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100"
+                              title="Delete Delegate"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

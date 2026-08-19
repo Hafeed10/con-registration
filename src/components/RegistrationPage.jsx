@@ -48,7 +48,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
     const upiId = 'thulaib123@okicici';
     const name = 'CONFIQ Secretariat';
-    const amount = 200;
 
     // Copy UPI ID to clipboard first
     if (navigator.clipboard) {
@@ -64,7 +63,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
     // Only launch scheme URL on real mobile devices to prevent Chrome DevTools/Desktop network errors
     if (!isMobileUA || !isTouchDevice) return;
 
-    const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&cu=INR`;
+    // Fixed UPI params: Added am=200 & cu=INR & tn=CONFIQ2026
+    const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=200&cu=INR&tn=CONFIQ2026`;
     const targetUrl = `upi://pay?${upiParams}`;
 
     try {
@@ -87,6 +87,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     studiedAlfiyyaAndFathulMueen: true
   });
 
+  const [utrNumber, setUtrNumber] = useState('');
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [screenshotFileName, setScreenshotFileName] = useState('');
   const [paymentError, setPaymentError] = useState('');
@@ -127,9 +128,16 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // STRICT VALIDATION: Payment screenshot is MANDATORY
-    if (!paymentScreenshot) {
-      setPaymentError('⚠️ Payment Screenshot Required! Please scan the QR code to pay ₹200 and attach your payment receipt screenshot before submitting.');
+    const trimmedUtr = utrNumber.trim();
+
+    // VALIDATION: Require at least ONE proof of payment (12-digit UTR OR Screenshot)
+    if (!trimmedUtr && !paymentScreenshot) {
+      setPaymentError('⚠️ Payment Verification Required! Please enter your 12-digit UTR / UPI Transaction Reference Number OR attach your payment receipt screenshot before submitting.');
+      return;
+    }
+
+    if (trimmedUtr && (!/^\d+$/.test(trimmedUtr) || trimmedUtr.length < 10 || trimmedUtr.length > 18)) {
+      setPaymentError('⚠️ Invalid UTR Number! Please enter a valid 12-digit numeric UPI Transaction Reference Number (e.g. 234567890123).');
       return;
     }
 
@@ -150,8 +158,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
       campus: formData.status === 'Student' ? formData.campus : 'N/A',
       position: formData.status === 'Working' ? formData.position : 'N/A',
       studiedAlfiyyaAndFathulMueen: formData.studiedAlfiyyaAndFathulMueen,
+      utrNumber: trimmedUtr || 'N/A',
       paymentScreenshot: paymentScreenshot,
-      paymentStatus: 'Paid (₹200)',
+      paymentStatus: 'PENDING_VERIFICATION',
       registeredAt: new Date().toLocaleDateString()
     };
 
@@ -174,8 +183,10 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
       const fullPayload = {
         ...basePayload,
+        utr_number: trimmedUtr || null,
         payment_screenshot: paymentScreenshot,
-        payment_status: 'Paid (₹200)'
+        payment_status: 'PENDING_VERIFICATION',
+        amount: 200
       };
 
       const res1 = await supabase.from('delegates').insert([fullPayload]).select();
@@ -219,6 +230,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const resetForm = () => {
     setSubmitted(false);
     setDelegatePass(null);
+    setUtrNumber('');
     setPaymentScreenshot(null);
     setScreenshotFileName('');
     setPaymentError('');
@@ -684,16 +696,34 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>3. Upload Screenshot Below</span>
+                          <span>3. Enter UTR Number OR Upload Screenshot Below</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
+                  {/* UTR Input Field */}
+                  <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200">
+                    <label className="block text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
+                      UPI UTR / Transaction Reference ID (Optional if Screenshot Uploaded)
+                    </label>
+                    <p className="text-[11px] text-gray-500 mb-2 font-medium">
+                      Enter 12-digit UTR from GPay / PhonePe receipt (e.g. 234567890123)
+                    </p>
+                    <input
+                      type="text"
+                      maxLength="18"
+                      placeholder="e.g. 234567890123"
+                      value={utrNumber}
+                      onChange={(e) => setUtrNumber(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-xs sm:text-sm font-mono font-bold outline-none transition-all"
+                    />
+                  </div>
+
                   {/* Screenshot Upload Box */}
                   <div>
                     <label className="block text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1.5">
-                      Upload Payment Screenshot *
+                      Upload Payment Screenshot (Optional if UTR Provided)
                     </label>
 
                     {!paymentScreenshot ? (
@@ -775,7 +805,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     {isSubmitting ? (
                       <span>Processing Registration...</span>
                     ) : (
-                      <span>Submit Registration & Issue Pass</span>
+                      <span>Submit Payment & Register</span>
                     )}
                   </button>
                 </div>
@@ -787,14 +817,17 @@ export default function RegistrationPage({ onOpenAdmin }) {
             /* Success & Printable Delegate Pass */
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#CCE5B4] text-center">
 
-              <div className="w-14 h-14 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="w-8 h-8" />
+              <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                <ShieldCheck className="w-8 h-8 text-amber-600" />
               </div>
               <h2 className="font-sans text-2xl sm:text-3xl font-black text-[#17472B]">
-                Registration Confirmed!
+                Registration Received!
               </h2>
-              <p className="text-xs sm:text-sm font-semibold text-[#387B52] mt-1 mb-8">
-                Your official delegate pass for conFiqh 2026 has been generated.
+              <div className="inline-block my-2 px-3 py-1 bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-xs font-black uppercase tracking-wider">
+                🟡 PAYMENT UNDER VERIFICATION
+              </div>
+              <p className="text-xs sm:text-sm font-semibold text-[#387B52] mt-1 mb-6 max-w-md mx-auto">
+                Your payment details have been submitted. Your delegate pass will be fully activated upon Secretariat verification against bank records.
               </p>
 
               {/* Printable Pass Card */}
@@ -832,6 +865,13 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     </div>
                   </div>
 
+                  {delegatePass.utrNumber && delegatePass.utrNumber !== 'N/A' && (
+                    <div className="text-xs bg-[#123620] p-2.5 rounded-lg border border-emerald-700/60 flex items-center justify-between font-mono">
+                      <span className="text-gray-300 text-[11px]">UTR Ref:</span>
+                      <span className="font-bold text-[#C5DF9F]">{delegatePass.utrNumber}</span>
+                    </div>
+                  )}
+
                   <div>
                     <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider">Institution / Designation</span>
                     <span className="text-sm font-semibold text-gray-200 block">
@@ -854,7 +894,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                   className="flex-1 bg-[#17472B] hover:bg-[#20603B] text-white py-3.5 rounded-xl font-bold text-sm shadow flex items-center justify-center gap-2 transition-all"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Print / Save Delegate Pass</span>
+                  <span>Print / Save Pass</span>
                 </button>
 
                 <button
