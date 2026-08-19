@@ -212,11 +212,11 @@ export default function RegistrationPage({ onOpenAdmin }) {
       </header>
 
       {/* Main Registration Form Area */}
-      <main className="flex-grow py-8 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
+      <main className="flex-grow py-4 sm:py-8 px-2.5 sm:px-6 w-full max-w-full overflow-x-hidden">
+        <div className="max-w-3xl mx-auto w-full">
 
           {!submitted ? (
-            <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#CCE5B4] relative">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-xl border border-[#CCE5B4] relative w-full max-w-full overflow-hidden">
 
               {/* Title Header matching model mockup */}
               <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6 flex flex-col items-center justify-center space-y-3">
@@ -497,66 +497,66 @@ export default function RegistrationPage({ onOpenAdmin }) {
                 </div>
 
                 {/* 7. Fee ₹200 & QR Code Section */}
-                <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-600/30 shadow-md space-y-4">
+                <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-3.5 sm:p-6 border-2 border-emerald-600/30 shadow-md space-y-4 max-w-full overflow-hidden">
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-200/60 pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
-                        <CreditCard className="w-5 h-5" />
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 border-b border-emerald-200/60 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 sm:p-2.5 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
+                        <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <div>
-                        <h4 className="font-extrabold text-base text-[#17472B]">
+                        <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
                           Registration Fee: ₹200
                         </h4>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-[11px] sm:text-xs text-gray-600">
                           Scan QR Code to pay ₹200 & upload payment screenshot
                         </p>
                       </div>
                     </div>
 
-                    <span className="self-start sm:self-auto px-3 py-1 bg-amber-500 text-white rounded-full text-xs font-black uppercase tracking-wider shadow-sm shrink-0">
+                    <span className="self-start xs:self-auto px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm shrink-0">
                       Payment Required
                     </span>
                   </div>
 
                   {/* QR Code & UPI Instructions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center bg-white p-4 rounded-xl border border-gray-200">
-                    <div className="sm:col-span-5 flex flex-col items-center justify-center p-3 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
-                      <div className="relative group overflow-hidden rounded-xl border-2 border-orange-500/40 p-1.5 bg-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-center bg-white p-3 sm:p-4 rounded-xl border border-gray-200">
+                    <div className="sm:col-span-5 flex flex-col items-center justify-center p-2.5 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
+                      <div className="relative group overflow-hidden rounded-xl border-2 border-orange-500/40 p-1 bg-white">
                         <img
                           src={qrCodeImg}
                           alt="conFiqh Registration Payment QR Code - ₹200"
-                          className="w-40 h-40 sm:w-44 sm:h-44 object-contain rounded shadow-sm"
+                          className="w-36 h-36 xs:w-40 xs:h-40 sm:w-44 sm:h-44 max-w-full object-contain rounded shadow-sm"
                         />
                       </div>
-                      <span className="text-xs font-mono font-bold text-orange-800 mt-2.5 bg-orange-100/90 px-2.5 py-0.5 rounded">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
                         SCAN TO PAY ₹200
                       </span>
                     </div>
 
-                    <div className="sm:col-span-7 space-y-3">
+                    <div className="sm:col-span-7 space-y-2.5">
                       <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-800 flex items-center gap-2">
+                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>1. Scan QR with any UPI App</span>
                         </div>
-                        <p className="text-xs text-gray-600 pl-6">
+                        <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
                           Google Pay, PhonePe, Paytm, BHIM, or Mobile Banking.
                         </p>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-800 flex items-center gap-2">
+                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>2. Complete ₹200 Payment</span>
                         </div>
-                        <p className="text-xs text-gray-600 pl-6">
+                        <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
                           Registration Fee: <strong>₹200 (INR)</strong>
                         </p>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-800 flex items-center gap-2">
+                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>3. Upload Screenshot Below</span>
                         </div>
@@ -566,12 +566,12 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                   {/* Screenshot Upload Box */}
                   <div>
-                    <label className="block text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-2">
+                    <label className="block text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1.5">
                       Upload Payment Screenshot *
                     </label>
 
                     {!paymentScreenshot ? (
-                      <div className={`relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${paymentError
+                      <div className={`relative border-2 border-dashed rounded-xl p-3.5 sm:p-5 text-center cursor-pointer transition-all ${paymentError
                         ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
                         : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
                         }`}>
@@ -581,24 +581,24 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           onChange={handleScreenshotChange}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className="flex flex-col items-center justify-center space-y-2">
-                          <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#17472B] flex items-center justify-center">
-                            <Upload className="w-5 h-5" />
+                        <div className="flex flex-col items-center justify-center space-y-1.5">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-100 text-[#17472B] flex items-center justify-center">
+                            <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                           </div>
                           <div>
-                            <span className="text-sm font-extrabold text-[#17472B] hover:underline">
+                            <span className="text-xs sm:text-sm font-extrabold text-[#17472B] hover:underline">
                               Click to select payment screenshot
                             </span>
-                            <p className="text-xs font-semibold text-gray-500 mt-0.5">
+                            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 mt-0.5">
                               Supports JPG, PNG, WEBP receipts
                             </p>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-3 shadow-sm overflow-hidden">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-14 h-14 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
+                      <div className="bg-white p-2.5 sm:p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-2.5 shadow-sm overflow-hidden">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
                             <img
                               src={paymentScreenshot}
                               alt="Payment Screenshot Preview"
@@ -606,11 +606,11 @@ export default function RegistrationPage({ onOpenAdmin }) {
                             />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1.5">
+                            <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
                               <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                               <span className="truncate">Screenshot Attached</span>
                             </div>
-                            <div className="text-xs font-mono text-gray-600 truncate mt-0.5">
+                            <div className="text-[11px] font-mono text-gray-600 truncate mt-0.5">
                               {screenshotFileName || 'receipt.png'}
                             </div>
                           </div>
@@ -623,7 +623,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           title="Remove screenshot"
                         >
                           <Trash2 className="w-4 h-4" />
-                          <span>Remove</span>
+                          <span className="hidden sm:inline">Remove</span>
                         </button>
                       </div>
                     )}
@@ -633,18 +633,18 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                 {/* Error Box */}
                 {paymentError && (
-                  <div className="p-4 bg-red-50 rounded-xl border-2 border-red-400 text-red-800 text-xs font-extrabold flex items-start gap-3 shadow-sm">
-                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <div className="p-3.5 bg-red-50 rounded-xl border-2 border-red-400 text-red-800 text-xs font-extrabold flex items-start gap-2.5 shadow-sm">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                     <span>{paymentError}</span>
                   </div>
                 )}
 
                 {/* Submit Button */}
-                <div className="pt-4">
+                <div className="pt-3 sm:pt-4">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-4 rounded-2xl font-extrabold text-base shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-3.5 sm:py-4 px-3 sm:px-6 rounded-2xl font-extrabold text-sm sm:text-base leading-snug shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <span>Processing Registration...</span>

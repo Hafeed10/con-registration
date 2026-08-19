@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
+import qrCodeImg from '../assets/q.code.jpeg';
 import {
   X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -476,9 +477,9 @@ export default function RegistrationModal({ isOpen, onClose }) {
                     <div className="sm:col-span-5 flex flex-col items-center justify-center p-2 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
                       <div className="relative group overflow-hidden rounded-lg border-2 border-orange-500/40 p-1 bg-white">
                         <img 
-                          src="/payment_qr.jpg" 
+                          src={qrCodeImg} 
                           alt="conFiqh Registration Payment QR Code - ₹200"
-                          className="w-36 h-36 sm:w-40 sm:h-40 object-cover rounded shadow-sm"
+                          className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded shadow-sm"
                         />
                       </div>
                       <span className="text-[10px] font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
