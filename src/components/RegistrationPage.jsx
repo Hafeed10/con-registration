@@ -177,26 +177,35 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
       {/* Top Header Bar */}
       <header className="bg-[#17472B] text-white border-b border-[#387B52]/40 shadow-lg sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2.5 select-none">
-            <span className="font-sans text-2xl sm:text-3xl font-black tracking-tight uppercase select-none">
-              <span className="text-[#4CA46C]">CON</span> <span className="text-white">FIQH</span>
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+          
+          {/* Logo & Edition Badge */}
+          <div className="flex items-center space-x-2 sm:space-x-3 select-none shrink-0">
+            <span className="font-sans text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase whitespace-nowrap">
+              <span className="text-[#50A76C]">CON</span> <span className="text-white">FIQH</span>
             </span>
-            <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-black bg-[#0E4023] text-white uppercase tracking-wider border border-[#C5DF9F]/30 shadow-xs">
+            <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#0E4023] text-white uppercase tracking-wider border border-[#C5DF9F]/30 shadow-xs whitespace-nowrap shrink-0">
               1ST EDITION
             </span>
           </div>
 
-          <div className="flex items-center space-x-6 text-xs text-[#C5DF9F] font-semibold">
+          {/* Right side info (Desktop & Tablet) */}
+          <div className="hidden sm:flex items-center space-x-4 md:space-x-6 text-xs text-[#C5DF9F] font-semibold whitespace-nowrap shrink-0">
             <div className="flex items-center space-x-1.5">
-              <Calendar className="w-4 h-4 text-[#C5DF9F]" />
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C5DF9F] shrink-0" />
               <span>11–12 Sept 2026</span>
             </div>
             <div className="flex items-center space-x-1.5">
-              <MapPinIcon className="w-4 h-4 text-[#C5DF9F]" />
+              <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C5DF9F] shrink-0" />
               <span>Parapram, Kannur</span>
             </div>
           </div>
+
+          {/* Mobile date pill badge */}
+          <div className="sm:hidden font-mono text-[10px] font-extrabold bg-[#0E4023] text-[#C5DF9F] px-2.5 py-1 rounded-lg border border-[#C5DF9F]/30 whitespace-nowrap shrink-0">
+            11–12 SEPT 2026
+          </div>
+
         </div>
       </header>
 
