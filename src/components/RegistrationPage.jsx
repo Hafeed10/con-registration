@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
-import qrCodeImg from '../assets/q.code.jpeg';
+import qrCodeImg from '../assets/q.code1.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -749,7 +749,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       <footer className="bg-[#17472B] text-white/80 py-6 border-t border-[#387B52]/40 text-xs">
         <div className="max-w-5xl mx-auto px-4 text-center space-y-1">
           <p className="font-semibold text-[#C5DF9F]">
-            conFiqh 2026 Secretariat • Academic Summit for Applied Fiqh
+            CONFIQ 2026 Secretariat • Academic Summit for Applied Fiqh
           </p>
           <p className="text-white/60">
             Venue: Parapram, Pinarayi, Kannur • Dates: 11–12 September 2026
