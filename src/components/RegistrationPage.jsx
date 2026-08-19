@@ -14,8 +14,8 @@ import {
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=thulaib123@okicici&pn=Recipient&am=200&cu=INR";
-  const upiDeepLink = `gpay://upi/pay?${upiParams}`;
+  const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR";
+  const upiDeepLink = `upi://pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
     try {
@@ -701,6 +701,17 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         </div>
                         <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
                           General Fee: <strong>₹200 (INR)</strong>
+                        </p>
+                      </div>
+
+                      {/* Bank Limit Notice Fix */}
+                      <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-950 font-medium space-y-1">
+                        <span className="font-bold text-amber-900 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          Bank Limit Error Fix:
+                        </span>
+                        <p className="pl-4 leading-normal text-amber-900/90">
+                          If GPay / Bank shows <em>"Exceeded bank limit"</em>, tap <strong>UPI ID</strong> or <strong>Number</strong> to copy, then paste directly into GPay/PhonePe to complete payment.
                         </p>
                       </div>
 
