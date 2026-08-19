@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
+import confiqLogo from '../assets/CONFIQ.png';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -175,34 +176,32 @@ export default function RegistrationPage({ onOpenAdmin }) {
   return (
     <div className="min-h-screen bg-[#F4F9F1] text-gray-900 flex flex-col font-sans selection:bg-[#17472B] selection:text-white">
 
-      {/* Top Header Bar */}
-      <header className="bg-[#17472B] text-white border-b border-[#387B52]/40 shadow-lg sticky top-0 z-30">
+      {/* Top Header Bar (Light Green Theme) */}
+      <header className="bg-[#EBF5DA]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
           
           {/* Logo & Edition Badge */}
-          <div className="flex items-center space-x-2 sm:space-x-3 select-none shrink-0">
-            <span className="font-sans text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase whitespace-nowrap">
-              <span className="text-[#50A76C]">CON</span> <span className="text-white">FIQ</span>
-            </span>
-            <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#0E4023] text-white uppercase tracking-wider border border-[#C5DF9F]/30 shadow-xs whitespace-nowrap shrink-0">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 select-none shrink-0">
+            <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-8 object-contain" />
+            <span className="inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs whitespace-nowrap shrink-0">
               1ST EDITION
             </span>
           </div>
 
           {/* Right side info (Desktop & Tablet) */}
-          <div className="hidden sm:flex items-center space-x-4 md:space-x-6 text-xs text-[#C5DF9F] font-semibold whitespace-nowrap shrink-0">
+          <div className="hidden sm:flex items-center space-x-4 md:space-x-6 text-xs text-[#17472B] font-bold whitespace-nowrap shrink-0">
             <div className="flex items-center space-x-1.5">
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C5DF9F] shrink-0" />
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#387B52] shrink-0" />
               <span>11–12 Sept 2026</span>
             </div>
             <div className="flex items-center space-x-1.5">
-              <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C5DF9F] shrink-0" />
+              <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#387B52] shrink-0" />
               <span>Parapram, Kannur</span>
             </div>
           </div>
 
           {/* Mobile date pill badge */}
-          <div className="sm:hidden font-mono text-[10px] font-extrabold bg-[#0E4023] text-[#C5DF9F] px-2.5 py-1 rounded-lg border border-[#C5DF9F]/30 whitespace-nowrap shrink-0">
+          <div className="sm:hidden font-mono text-[10px] font-extrabold bg-[#17472B] text-white px-2.5 py-1 rounded-lg shadow-xs whitespace-nowrap shrink-0">
             11–12 SEPT 2026
           </div>
 
@@ -224,9 +223,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                  <span className="font-sans text-2xl sm:text-4xl font-black tracking-tight uppercase">
-                    <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQ</span>
-                  </span>
+                  <img src={confiqLogo} alt="CON FIQ Logo" className="h-8 sm:h-11 object-contain" />
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-[#17472B] text-white uppercase tracking-wider shadow-sm">
                     1ST EDITION 2026
                   </span>
@@ -664,9 +661,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                 <div className="flex items-center justify-between border-b border-[#354823] pb-4 mb-5">
                   <div className="flex items-center space-x-2 select-none">
-                    <span className="font-sans text-xl sm:text-2xl font-black tracking-tight uppercase whitespace-nowrap">
-                      <span className="text-[#387B52]">CON</span> <span className="text-[#C5DF9F]">FIQ</span>
-                    </span>
+                    <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-8 object-contain brightness-0 invert" />
                     <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-black bg-[#354823] text-white uppercase tracking-wider">
                       1ST EDITION
                     </span>

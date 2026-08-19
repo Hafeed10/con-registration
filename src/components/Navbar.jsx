@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Menu, X, Layers, Calendar, Clock, Download, Home, UserCheck } from 'lucide-react';
+import confiqLogo from '../assets/CONFIQ.png';
 
 export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,14 +19,12 @@ export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-18">
 
-          {/* Logo: CON FIQH (Single line, whitespace-nowrap) */}
+          {/* Logo: CON FIQ Image */}
           <div
             className="flex items-center space-x-1.5 sm:space-x-2.5 cursor-pointer select-none shrink-0"
             onClick={() => handleNavClick('top')}
           >
-            <span className="font-sans text-lg sm:text-2xl font-black tracking-tight uppercase whitespace-nowrap">
-              <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQ</span>
-            </span>
+            <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-8 object-contain" />
             <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs">
               1ST EDITION
             </span>

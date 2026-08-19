@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
+  <style>
+    .con { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; fill: #387B52; font-size: 38px; letter-spacing: -1px; }
+    .fiq { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 900; fill: #17472B; font-size: 38px; letter-spacing: -1px; }
+  </style>
+  <text x="0" y="44">
+    <tspan class="con">CON</tspan>
+    <tspan className="fiq" dx="6" fill="#17472B" font-weight="900">FIQ</tspan>
+  </text>
+</svg>
