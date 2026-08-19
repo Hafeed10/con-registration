@@ -8,10 +8,11 @@ import qrCodeImg from '../assets/q.code1.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock
+  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown
 } from 'lucide-react';
 
 export default function RegistrationPage({ onOpenAdmin }) {
+  const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     age: '',
@@ -506,7 +507,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       </div>
                       <div>
                         <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                          Registration Fee: ₹200
+                          General Pass: ₹200
                         </h4>
                         <p className="text-[11px] sm:text-xs text-gray-600">
                           Scan QR Code to pay ₹200 & upload payment screenshot
@@ -517,6 +518,42 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     <span className="self-start xs:self-auto px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm shrink-0">
                       Payment Required
                     </span>
+                  </div>
+
+                  {/* Fee Includes Collapsible Dropdown Option */}
+                  <div className="bg-emerald-50/80 rounded-xl p-2.5 sm:p-3 border border-emerald-200/80">
+                    <button
+                      type="button"
+                      onClick={() => setShowFeeIncludes(!showFeeIncludes)}
+                      className="w-full flex items-center justify-between gap-2 text-left font-extrabold text-xs sm:text-sm text-[#17472B] hover:text-[#0E4023] transition-colors"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Fee Includes (Click to {showFeeIncludes ? 'Close' : 'Open'})</span>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-emerald-700 transition-transform duration-200 shrink-0 ${showFeeIncludes ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showFeeIncludes && (
+                      <div className="mt-2.5 pt-2.5 border-t border-emerald-200/60 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-[#17472B] animate-fadeIn">
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Full access to CONFIQ-2026</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Food & Refreshments</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Accommodation</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>CONFIQ Summit Note / Study Material</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* QR Code & UPI Instructions */}
@@ -551,7 +588,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           <span>2. Complete ₹200 Payment</span>
                         </div>
                         <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
-                          Registration Fee: <strong>₹200 (INR)</strong>
+                          General Fee: <strong>₹200 (INR)</strong>
                         </p>
                       </div>
 
