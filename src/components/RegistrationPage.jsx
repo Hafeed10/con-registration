@@ -248,7 +248,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
           <div className="hidden sm:flex items-center space-x-4 md:space-x-6 text-xs text-[#17472B] font-bold whitespace-nowrap shrink-0">
             <div className="flex items-center space-x-1.5">
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#387B52] shrink-0" />
-              <span>11–12 Sept 2026</span>
+              <span>11 , 12 Sept 2026</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#387B52] shrink-0" />
