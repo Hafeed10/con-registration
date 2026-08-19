@@ -639,8 +639,8 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
                     {!paymentScreenshot ? (
                       <div className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${paymentError
-                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
-                          : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
+                        ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
+                        : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
                         }`}>
                         <input
                           type="file"
