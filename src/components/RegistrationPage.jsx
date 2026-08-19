@@ -14,7 +14,7 @@ import {
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiDeepLink = "upi://pay?pa=abdulkhadirbava-1@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR&tn=CONFIQ%20Delegate%20Fee";
+  const upiDeepLink = "upi://pay?pa=abdulkhadirbava-1@okicici&am=200&cu=INR";
 
   const handleDownloadQr = async () => {
     try {
@@ -38,7 +38,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
     }
     setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 2500);
+    setTimeout(() => setCopiedUpi(false), 3000);
   };
 
   const handleUpiPayClick = (e) => {
@@ -47,11 +47,11 @@ export default function RegistrationPage({ onOpenAdmin }) {
       navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
     }
     setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 2500);
+    setTimeout(() => setCopiedUpi(false), 3000);
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isMobile) {
-      window.location.href = upiDeepLink;
+      window.location.href = "upi://pay?pa=abdulkhadirbava-1@okicici&am=200&cu=INR";
     }
   };
   const [formData, setFormData] = useState({
@@ -880,7 +880,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
           </p>
           <p>
-            Email: confiq.ahlussuffadars.in
+            Email: confiq@ahlussuffadars.in
           </p>
         </div>
       </footer>
