@@ -12,9 +12,10 @@ import {
 } from 'lucide-react';
 
 export default function RegistrationPage({ onOpenAdmin }) {
+  const MAX_DELEGATES_LIMIT = 200;
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR";
+  const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR";
   const upiDeepLink = `upi://pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -62,32 +63,35 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setTimeout(() => setCopiedUpi(false), 3500);
 
     const userAgent = navigator.userAgent || '';
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
     const isAndroid = /Android/i.test(userAgent);
 
-    // On Desktop computers, do NOT launch scheme URLs (prevents 'Failed to launch scheme' browser errors)
-    if (!isMobile) return;
+    const upiParams = "pa=thulaib123@okicici&pn=Recipient&am=200&cu=INR";
+    const universalUpi = `upi://pay?${upiParams}`;
 
-    const baseParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR";
-    const universalUpi = `upi://pay?${baseParams}`;
+    let targetUrl = universalUpi;
+
+    if (app === 'gpay') {
+      targetUrl = isAndroid
+        ? `intent://pay?${upiParams}#Intent;scheme=upi;package=com.google.android.apps.nfc.phone;end;`
+        : `gpay://upi/pay?${upiParams}`;
+    } else if (app === 'phonepe') {
+      targetUrl = isAndroid
+        ? `intent://pay?${upiParams}#Intent;scheme=upi;package=com.phonepe.app;end;`
+        : `phonepe://upi/pay?${upiParams}`;
+    } else if (app === 'paytm') {
+      targetUrl = isAndroid
+        ? `intent://pay?${upiParams}#Intent;scheme=upi;package=net.one97.paytm;end;`
+        : `paytmmp://upi/pay?${upiParams}`;
+    } else if (app === 'bhim') {
+      targetUrl = isAndroid
+        ? `intent://pay?${upiParams}#Intent;scheme=in.org.npci.upiapp;end;`
+        : `bhim://upi/pay?${upiParams}`;
+    }
 
     try {
-      if (isAndroid) {
-        if (app === 'phonepe') {
-          window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=com.phonepe.app;end;`;
-        } else if (app === 'gpay') {
-          window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=com.google.android.apps.nfc.phone;end;`;
-        } else if (app === 'paytm') {
-          window.location.href = `intent://pay?${baseParams}#Intent;scheme=upi;package=net.one97.paytm;end;`;
-        } else {
-          window.location.href = universalUpi;
-        }
-      } else {
-        // iOS / Safari
-        window.location.href = universalUpi;
-      }
+      window.location.href = targetUrl;
     } catch (err) {
-      console.log('UPI launcher fallback:', err);
+      console.log('UPI payment launch error:', err);
     }
   };
   const [formData, setFormData] = useState({
@@ -647,11 +651,64 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         SCAN TO PAY ₹200
                       </span>
 
+                      {/* Main Payment Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleUpiPayClick(e, 'all')}
+                        className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white rounded-lg text-xs font-extrabold shadow-md hover:shadow-lg transition-all text-center cursor-pointer active:scale-95"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Pay ₹200 via UPI App</span>
+                      </button>
+
+                      {/* Quick UPI Apps Grid */}
+                      <div className="mt-2 w-full grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpiPayClick(e, 'gpay')}
+                          className="flex items-center justify-center gap-1 px-2 py-1.5 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                          title="Pay using Google Pay (GPay)"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                          <span>GPay</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpiPayClick(e, 'phonepe')}
+                          className="flex items-center justify-center gap-1 px-2 py-1.5 bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-[11px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                          title="Pay using PhonePe"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                          <span>PhonePe</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpiPayClick(e, 'paytm')}
+                          className="flex items-center justify-center gap-1 px-2 py-1.5 bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                          title="Pay using Paytm"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+                          <span>Paytm</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpiPayClick(e, 'bhim')}
+                          className="flex items-center justify-center gap-1 px-2 py-1.5 bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 rounded-lg text-[11px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                          title="Pay using BHIM UPI"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                          <span>BHIM</span>
+                        </button>
+                      </div>
+
                       {/* Download QR Code Button */}
                       <button
                         type="button"
                         onClick={handleDownloadQr}
-                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-extrabold shadow-2xs transition-all text-center cursor-pointer"
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-extrabold shadow-2xs transition-all text-center cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download QR Code</span>
@@ -673,11 +730,11 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       </button>
                     </div>
 
-                    <div className="sm:col-span-7 space-y-2.5">
+                    <div className="sm:col-span-7 space-y-3">
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Pay ₹200 Scan QR Code</span>
+                          <span>1. Pay ₹200 via UPI App or Scan QR Code</span>
                         </div>
                       </div>
 
@@ -686,9 +743,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>2. Complete ₹200 Payment</span>
                         </div>
-                       
                       </div>
-
 
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
