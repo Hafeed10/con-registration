@@ -528,158 +528,158 @@ export default function RegistrationModal({ isOpen, onClose }) {
                           Registration Fee: ₹200
                         </h4>
                         <p className="text-[11px] sm:text-xs text-gray-600">
-                  {/* Primary Razorpay Action Card */}
-                  <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-left">
-                      <div className="flex items-center justify-center sm:justify-start gap-2">
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full uppercase tracking-wider">
-                          Instant Checkout
-                        </span>
-                        <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-                          <ShieldCheck className="w-3.5 h-3.5" /> Razorpay Secured
-                        </span>
+                          {/* Primary Razorpay Action Card */}
+                          <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="space-y-1 text-center sm:text-left">
+                              <div className="flex items-center justify-center sm:justify-start gap-2">
+                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full uppercase tracking-wider">
+                                  Instant Checkout
+                                </span>
+                                <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                                  <ShieldCheck className="w-3.5 h-3.5" /> Razorpay Secured
+                                </span>
+                              </div>
+                              <h5 className="font-extrabold text-sm sm:text-base text-[#17472B]">
+                                Pay ₹200 Online (UPI, Cards, NetBanking, Paytm)
+                              </h5>
+                              <a
+                                href="https://rzp.io/rzp/afiIk3Q"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#17472B] to-[#20603B] hover:from-[#0E4023] hover:to-[#17472B] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                <span>Pay ₹200 via Razorpay</span>
+                                <ExternalLink className="w-4 h-4 text-amber-300" />
+                              </a>
+                            </div>
+
+
+
+                          </div>
                       </div>
-                      <h5 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                        Pay ₹200 Online (UPI, Cards, NetBanking, Paytm)
-                      </h5>
-                    <a
-                      href="https://rzp.io/rzp/afiIk3Q"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#17472B] to-[#20603B] hover:from-[#0E4023] hover:to-[#17472B] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span>Pay ₹200 via Razorpay</span>
-                      <ExternalLink className="w-4 h-4 text-amber-300" />
-                    </a>
+
+                      {/* Payment Error Alert Box */}
+                      {paymentError && (
+                        <div className="p-3.5 bg-red-50 rounded-xl border-2 border-red-400 text-red-800 text-xs font-extrabold flex items-start gap-2.5 shadow-sm">
+                          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                          <span>{paymentError}</span>
+                        </div>
+                      )}
+
+                      {/* Submit Button */}
+                      <div className="pt-2 sm:pt-4">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                          {isSubmitting ? (
+                            <span>Processing Registration...</span>
+                          ) : (
+                            <span>Submit Payment & Register</span>
+                          )}
+                        </button>
+                      </div>
+
+                    </form>
+
                   </div>
-
-
-
-                </div>
-              </div>
-
-              {/* Payment Error Alert Box */}
-              {paymentError && (
-                <div className="p-3.5 bg-red-50 rounded-xl border-2 border-red-400 text-red-800 text-xs font-extrabold flex items-start gap-2.5 shadow-sm">
-                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                  <span>{paymentError}</span>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <div className="pt-2 sm:pt-4">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <span>Processing Registration...</span>
                   ) : (
-                    <span>Submit Payment & Register</span>
-                  )}
-                </button>
-              </div>
+                  /* Success & Digital Pass Display */
+                  <div className="py-2">
 
-            </form>
+                    <div className="text-center mb-5 sm:mb-6">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
+                      </div>
+                      <h3 className="font-sans text-xl sm:text-2xl font-black text-[#17472B]">
+                        Registration Received!
+                      </h3>
+                      <div className="inline-block my-1.5 px-3 py-0.5 bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                        🟡 PAYMENT UNDER VERIFICATION
+                      </div>
+                      <p className="text-[11px] sm:text-xs font-semibold text-[#387B52]">
+                        Your payment details have been submitted. Pass activation is subject to Secretariat verification.
+                      </p>
+                    </div>
 
-          </div>
-        ) : (
-          /* Success & Digital Pass Display */
-          <div className="py-2">
+                    {/* Digital Printable Delegate Pass Card (QR Code Removed) */}
+                    <div id="printable-pass" className="bg-[#17472B] text-white rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden border-4 border-[#354823]">
 
-            <div className="text-center mb-5 sm:mb-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600" />
-              </div>
-              <h3 className="font-sans text-xl sm:text-2xl font-black text-[#17472B]">
-                Registration Received!
-              </h3>
-              <div className="inline-block my-1.5 px-3 py-0.5 bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider">
-                🟡 PAYMENT UNDER VERIFICATION
-              </div>
-              <p className="text-[11px] sm:text-xs font-semibold text-[#387B52]">
-                Your payment details have been submitted. Pass activation is subject to Secretariat verification.
-              </p>
-            </div>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#354823] pb-3 sm:pb-4 mb-4">
+                        <div className="flex flex-wrap items-center gap-2 select-none">
+                          <span className="font-sans text-lg sm:text-xl font-black tracking-tight whitespace-nowrap select-none">
+                            <span className="text-[#C5DF9F]">con</span><span className="text-white">Fiqh</span>
+                          </span>
+                          <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#354823] text-white uppercase tracking-wider whitespace-nowrap">
+                            1ST EDITION
+                          </span>
+                        </div>
 
-            {/* Digital Printable Delegate Pass Card (QR Code Removed) */}
-            <div id="printable-pass" className="bg-[#17472B] text-white rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden border-4 border-[#354823]">
+                        <div className="font-mono text-[10px] sm:text-xs text-[#C5DF9F] font-bold bg-[#354823] px-2.5 sm:px-3 py-1 rounded-lg shrink-0 self-start sm:self-auto">
+                          {delegatePass.id}
+                        </div>
+                      </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#354823] pb-3 sm:pb-4 mb-4">
-                <div className="flex flex-wrap items-center gap-2 select-none">
-                  <span className="font-sans text-lg sm:text-xl font-black tracking-tight whitespace-nowrap select-none">
-                    <span className="text-[#C5DF9F]">con</span><span className="text-white">Fiqh</span>
-                  </span>
-                  <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#354823] text-white uppercase tracking-wider whitespace-nowrap">
-                    1ST EDITION
-                  </span>
-                </div>
+                      {/* Delegate Details (QR Code Removed) */}
+                      <div className="space-y-3.5 my-2">
+                        <div>
+                          <span className="text-[9px] sm:text-[10px] font-extrabold text-gray-300 uppercase tracking-widest block mb-0.5">Delegate Name</span>
+                          <span className="font-sans text-xl sm:text-2xl font-black text-white">{delegatePass.fullName} ({delegatePass.age} yrs)</span>
+                        </div>
 
-                <div className="font-mono text-[10px] sm:text-xs text-[#C5DF9F] font-bold bg-[#354823] px-2.5 sm:px-3 py-1 rounded-lg shrink-0 self-start sm:self-auto">
-                  {delegatePass.id}
-                </div>
-              </div>
+                        <div className="grid grid-cols-2 gap-3 text-xs bg-[#20603B]/60 p-3 rounded-xl border border-[#354823]">
+                          <div>
+                            <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Study Range</span>
+                            <span className="font-bold text-[#C5DF9F] text-sm">{delegatePass.studyRange}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Status / Birudam</span>
+                            <span className="font-bold text-white text-xs truncate block">
+                              {delegatePass.status} {delegatePass.birudam !== 'N/A' ? `• ${delegatePass.birudam}` : ''}
+                            </span>
+                          </div>
+                        </div>
 
-              {/* Delegate Details (QR Code Removed) */}
-              <div className="space-y-3.5 my-2">
-                <div>
-                  <span className="text-[9px] sm:text-[10px] font-extrabold text-gray-300 uppercase tracking-widest block mb-0.5">Delegate Name</span>
-                  <span className="font-sans text-xl sm:text-2xl font-black text-white">{delegatePass.fullName} ({delegatePass.age} yrs)</span>
-                </div>
+                        <div>
+                          <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Institution / Job</span>
+                          <span className="text-xs sm:text-sm font-semibold text-gray-200 block">
+                            {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
+                          </span>
+                        </div>
+                      </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs bg-[#20603B]/60 p-3 rounded-xl border border-[#354823]">
-                  <div>
-                    <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Study Range</span>
-                    <span className="font-bold text-[#C5DF9F] text-sm">{delegatePass.studyRange}</span>
+                      <div className="mt-4 pt-3 border-t border-[#354823] flex items-center justify-between text-[10px] sm:text-[11px] text-gray-300 font-semibold">
+                        <span>📍 Parapram, Pinarayi, Kannur</span>
+                        <span>📅 11–12 Sept 2026</span>
+                      </div>
+
+                    </div>
+
+                    <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+                      <button
+                        onClick={handlePrint}
+                        className="flex-1 bg-[#17472B] hover:bg-[#20603B] text-white py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm shadow flex items-center justify-center gap-2"
+                      >
+                        <Printer className="w-4 h-4" />
+                        <span>Print / Save Pass</span>
+                      </button>
+
+                      <button
+                        onClick={resetForm}
+                        className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-xs sm:text-sm"
+                      >
+                        Done
+                      </button>
+                    </div>
+
                   </div>
-                  <div>
-                    <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Status / Birudam</span>
-                    <span className="font-bold text-white text-xs truncate block">
-                      {delegatePass.status} {delegatePass.birudam !== 'N/A' ? `• ${delegatePass.birudam}` : ''}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[9px] sm:text-[10px] text-gray-300 block mb-0.5">Institution / Job</span>
-                  <span className="text-xs sm:text-sm font-semibold text-gray-200 block">
-                    {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-[#354823] flex items-center justify-between text-[10px] sm:text-[11px] text-gray-300 font-semibold">
-                <span>📍 Parapram, Pinarayi, Kannur</span>
-                <span>📅 11–12 Sept 2026</span>
-              </div>
-
-            </div>
-
-            <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
-              <button
-                onClick={handlePrint}
-                className="flex-1 bg-[#17472B] hover:bg-[#20603B] text-white py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm shadow flex items-center justify-center gap-2"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Print / Save Pass</span>
-              </button>
-
-              <button
-                onClick={resetForm}
-                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-xs sm:text-sm"
-              >
-                Done
-              </button>
-            </div>
-
-          </div>
         )}
 
-      </div>
+                </div>
 
 
-    </div>
-  );
+              </div>
+              );
 }
