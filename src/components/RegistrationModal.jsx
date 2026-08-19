@@ -63,6 +63,12 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
 
+    const userAgent = navigator.userAgent || '';
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
+
+    // On Desktop computers, do NOT launch custom scheme URLs to prevent browser console errors
+    if (!isMobile) return;
+
     const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
 
     let targetUrl = `upi://pay?${upiParams}`;
