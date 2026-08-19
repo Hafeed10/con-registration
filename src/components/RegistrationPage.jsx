@@ -180,10 +180,10 @@ export default function RegistrationPage({ onOpenAdmin }) {
       <header className="bg-[#EBF5DA]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
           
-          {/* Logo & Edition Badge */}
+          {/* Logo & Desktop Edition Badge */}
           <div className="flex items-center space-x-2.5 sm:space-x-3 select-none shrink-0">
             <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-8 object-contain" />
-            <span className="inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs whitespace-nowrap shrink-0">
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs whitespace-nowrap shrink-0">
               1ST EDITION
             </span>
           </div>
@@ -200,9 +200,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
             </div>
           </div>
 
-          {/* Mobile date pill badge */}
-          <div className="sm:hidden font-mono text-[10px] font-extrabold bg-[#17472B] text-white px-2.5 py-1 rounded-lg shadow-xs whitespace-nowrap shrink-0">
-            11–12 SEPT 2026
+          {/* Mobile Edition Badge (Clean right alignment on phones) */}
+          <div className="sm:hidden font-sans text-[10px] font-black bg-[#17472B] text-white px-2.5 py-1 rounded-full shadow-xs whitespace-nowrap shrink-0">
+            1ST EDITION
           </div>
 
         </div>
@@ -557,8 +557,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                     {!paymentScreenshot ? (
                       <div className={`relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${paymentError
-                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
-                          : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
+                        ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
+                        : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
                         }`}>
                         <input
                           type="file"
