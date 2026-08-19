@@ -182,7 +182,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       {/* Top Header Bar (Light Green Theme - Compact Slim Height) */}
       <header className="bg-[#f5faed]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2">
-          
+
           {/* Logo & Desktop Edition Badge */}
           <div className="flex items-center space-x-2 sm:space-x-3 select-none shrink-0">
             <img src={confiqLogo} alt="CON FIQ Logo" className="h-5 sm:h-7 object-contain" />
@@ -220,7 +220,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
               {/* Title Header matching model mockup */}
               <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6 flex flex-col items-center justify-center space-y-3">
-                
+
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EBF5DA] text-[#17472B] text-xs font-bold uppercase tracking-wider">
                   <ShieldCheck className="w-4 h-4 text-[#387B52]" />
                   <span>Official Delegate Registration</span>
@@ -230,7 +230,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                   <p className="text-[11px] sm:text-xs font-bold text-[#17472B]/80 tracking-widest uppercase mb-1">
                     The First Edition of
                   </p>
-                  
+
                   {/* CONFIQ Logo Image */}
                   <div className="flex items-center justify-center">
                     <img src={confiqLogo} alt="CON FIQ Logo" className="w-[240px] sm:w-[340px] md:w-[400px] max-w-full h-auto object-contain" />
@@ -745,14 +745,28 @@ export default function RegistrationPage({ onOpenAdmin }) {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-[#17472B] text-white/80 py-6 border-t border-[#387B52]/40 text-xs">
-        <div className="max-w-5xl mx-auto px-4 text-center space-y-1">
-          <p className="font-semibold text-[#C5DF9F]">
-            CONFIQ 2026 Secretariat • Academic Summit for Applied Fiqh
+      {/* Footer (Light Green Navbar Theme) */}
+      <footer className="bg-[#EBF5DA] text-[#17472B] py-6 border-t border-[#C5DF9F] text-xs">
+        <div className="max-w-5xl mx-auto px-4 text-center space-y-2">
+          {/* CONFIQ Logo */}
+          <div className="flex items-center justify-center">
+            <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-7 object-contain" />
+          </div>
+          <p className="font-extrabold text-[#17472B]">
+            Keralam Fiqh Summit 2026
           </p>
-          <p className="text-white/60">
-            Venue: Parapram, Pinarayi, Kannur • Dates: 11–12 September 2026
+          <p className="text-[#387B52] font-extrabold text-xs sm:text-sm">
+            AHLUSSUFFA Dars • Parapram, Pinarayi, Kannur, Kerala
+          </p>
+          <p className="text-gray-600 text-[18px]  font-semibold">
+
+            Date: <span className="font-extrabold text-[#17472B]">
+              11 , 12 September
+            </span> 2026
+
+          </p>
+          <p>
+            Email: confiq.ahlussuffadars.in
           </p>
         </div>
       </footer>
