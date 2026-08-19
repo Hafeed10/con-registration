@@ -14,7 +14,7 @@ import {
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=muhammedumerpk-1@oksbi&pn=Recipient&am=50&cu=INR";
+  const upiParams = "pa=mhafeed253-2@okaxis&pn=Recipient&am=50&cu=INR";
   const upiDeepLink = `gpay://upi/pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -36,7 +36,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('muhammedumerpk-1@oksbi');
+      navigator.clipboard.writeText('mhafeed253-2@okaxis');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -45,7 +45,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const handleUpiPayClick = (e, app = 'gpay') => {
     if (e) e.preventDefault();
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('muhammedumerpk-1@oksbi');
+      navigator.clipboard.writeText('mhafeed253-2@okaxis');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -649,7 +649,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
                         title="Click to copy UPI ID"
                       >
-                        <span className="truncate">muhammedumerpk-1@oksbi</span>
+                        <span className="truncate">mhafeed253-2@okaxis</span>
                         {copiedUpi ? (
                           <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
                         ) : (
