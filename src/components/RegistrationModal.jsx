@@ -1,15 +1,38 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
-import qrCodeImg from '../assets/q.code1.jpeg';
 import {
   X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Image as ImageIcon, Trash2, ChevronDown
+  Upload, AlertCircle, CreditCard, FileCheck, Image as ImageIcon, Trash2, Download, ChevronDown
 } from 'lucide-react';
 
 export default function RegistrationModal({ isOpen, onClose }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const upiDeepLink = "upi://pay?pa=abdulkhadirbava-1@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR&tn=CONFIQ%20Delegate%20Fee";
+
+  const handleCopyUpi = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+    }
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+  };
+
+  const handleUpiPayClick = (e) => {
+    if (e) e.preventDefault();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+    }
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = upiDeepLink;
+    }
+  };
   const [formData, setFormData] = useState({
     fullName: '',
     age: '',
@@ -452,7 +475,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
               {/* 7. Registration Fee (₹200) & Payment QR Code Section */}
               <div className="pt-2 sm:pt-3">
                 <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-600/30 shadow-md space-y-4">
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-emerald-200/60 pb-3">
                     <div className="flex items-start sm:items-center gap-2.5">
                       <div className="p-2 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0 mt-0.5 sm:mt-0">
@@ -460,7 +483,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       </div>
                       <div>
                         <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                          General Fee: ₹200
+                          Registration Fee: ₹200
                         </h4>
                         <p className="text-[11px] sm:text-xs text-gray-600">
                           Scan QR Code to pay ₹200 & upload payment screenshot
@@ -473,48 +496,12 @@ export default function RegistrationModal({ isOpen, onClose }) {
                     </span>
                   </div>
 
-                  {/* Fee Includes Collapsible Dropdown Option */}
-                  <div className="bg-emerald-50/80 rounded-xl p-2.5 sm:p-3 border border-emerald-200/80">
-                    <button
-                      type="button"
-                      onClick={() => setShowFeeIncludes(!showFeeIncludes)}
-                      className="w-full flex items-center justify-between gap-2 text-left font-extrabold text-xs sm:text-sm text-[#17472B] hover:text-[#0E4023] transition-colors"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Fee Includes (Click to {showFeeIncludes ? 'Close' : 'Open'})</span>
-                      </div>
-                      <ChevronDown className={`w-4 h-4 text-emerald-700 transition-transform duration-200 shrink-0 ${showFeeIncludes ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {showFeeIncludes && (
-                      <div className="mt-2.5 pt-2.5 border-t border-emerald-200/60 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-[#17472B] animate-fadeIn">
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Full access to CONFIQ-2026</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Food & Refreshments</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Accommodation</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>CONFIQ Summit Note / Study Material</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
                   {/* QR Code & UPI Instructions */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200">
                     <div className="sm:col-span-5 flex flex-col items-center justify-center p-2 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
                       <div className="relative group overflow-hidden rounded-lg border-2 border-orange-500/40 p-1 bg-white">
-                        <img 
-                          src={qrCodeImg} 
+                        <img
+                          src={qrCodeImg}
                           alt="conFiqh Registration Payment QR Code - ₹200"
                           className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded shadow-sm"
                         />
@@ -522,17 +509,74 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       <span className="text-[10px] font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
                         SCAN TO PAY ₹200
                       </span>
+
+                      {/* Download QR Code Button */}
+                      <a
+                        href={qrCodeImg}
+                        download="CONFIQ_Payment_QR.jpeg"
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-bold shadow-2xs transition-all text-center cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Download QR Code</span>
+                      </a>
+
+                      {/* Direct GPay / PhonePe App Launch Button */}
+                      <a
+                        href={upiDeepLink}
+                        onClick={handleUpiPayClick}
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-[#17472B] hover:bg-[#0E4023] text-white rounded text-xs font-extrabold shadow-sm transition-all text-center shrink-0 cursor-pointer"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Pay ₹200 via GPay / PhonePe</span>
+                      </a>
+
+                      {/* Copy UPI ID Button */}
+                      <button
+                        type="button"
+                        onClick={handleCopyUpi}
+                        className="mt-1 w-full flex items-center justify-between gap-1 px-2 py-1 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded text-[10px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
+                        title="Click to copy UPI ID"
+                      >
+                        <span className="truncate">abdulkhadirbava-1@okicici</span>
+                        {copiedUpi ? (
+                          <span className="text-[9px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded shrink-0">Copied!</span>
+                        ) : (
+                          <Copy className="w-3 h-3 text-emerald-600 shrink-0" />
+                        )}
+                      </button>
                     </div>
 
                     <div className="sm:col-span-7 space-y-2.5">
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Scan QR with any UPI App</span>
+                          <span>1. Pay via UPI App or Scan QR</span>
                         </div>
                         <p className="text-[11px] text-gray-600 pl-5">
-                          Google Pay, PhonePe, Paytm, BHIM, or Mobile Banking.
+                          Tap button below to launch Google Pay, PhonePe, Paytm, or BHIM directly:
                         </p>
+                        <div className="pl-5 pt-1 flex flex-wrap gap-2 items-center">
+                          <a
+                            href={upiDeepLink}
+                            onClick={handleUpiPayClick}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#17472B] hover:bg-[#0E4023] text-white rounded text-xs font-bold shadow-xs transition-all cursor-pointer"
+                          >
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>Open GPay / PhonePe App</span>
+                          </a>
+                          <button
+                            type="button"
+                            onClick={handleCopyUpi}
+                            className="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-[#17472B] border border-emerald-300 rounded text-[11px] font-mono font-bold transition-all cursor-pointer"
+                          >
+                            <span>Copy UPI ID</span>
+                            {copiedUpi ? (
+                              <span className="text-[9px] font-sans text-emerald-700 font-bold bg-emerald-200 px-1 py-0.5 rounded">Copied!</span>
+                            ) : (
+                              <Copy className="w-3 h-3 text-emerald-600" />
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-1">
@@ -541,7 +585,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                           <span>2. Complete ₹200 Payment</span>
                         </div>
                         <p className="text-[11px] text-gray-600 pl-5">
-                          General Fee: <strong>₹200 (INR)</strong>
+                          Registration Fee: <strong>₹200 (INR)</strong>
                         </p>
                       </div>
 
@@ -561,13 +605,12 @@ export default function RegistrationModal({ isOpen, onClose }) {
                     </label>
 
                     {!paymentScreenshot ? (
-                      <div className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
-                        paymentError 
-                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50' 
+                      <div className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${paymentError
+                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
                           : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
-                      }`}>
-                        <input 
-                          type="file" 
+                        }`}>
+                        <input
+                          type="file"
                           accept="image/*"
                           onChange={handleScreenshotChange}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -590,9 +633,9 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-2 shadow-sm overflow-hidden">
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
-                            <img 
-                              src={paymentScreenshot} 
-                              alt="Payment Screenshot Preview" 
+                            <img
+                              src={paymentScreenshot}
+                              alt="Payment Screenshot Preview"
                               className="w-full h-full object-cover"
                             />
                           </div>

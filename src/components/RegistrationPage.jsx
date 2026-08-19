@@ -8,11 +8,35 @@ import qrCodeImg from '../assets/q.code1.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown
+  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown, Download
 } from 'lucide-react';
 
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const upiDeepLink = "upi://pay?pa=abdulkhadirbava-1@okicici&pn=CONFIQ%20Secretariat&am=200&cu=INR&tn=CONFIQ%20Delegate%20Fee";
+
+  const handleCopyUpi = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+    }
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+  };
+
+  const handleUpiPayClick = (e) => {
+    if (e) e.preventDefault();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+    }
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = upiDeepLink;
+    }
+  };
   const [formData, setFormData] = useState({
     fullName: '',
     age: '',
@@ -569,17 +593,53 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <span className="text-[10px] sm:text-xs font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
                         SCAN TO PAY ₹200
                       </span>
+
+                      {/* Download QR Code Button */}
+                      <a
+                        href={qrCodeImg}
+                        download="CONFIQ_Payment_QR.jpeg"
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-2xs transition-all text-center cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Download QR Code</span>
+                      </a>
+
+                      {/* Direct GPay / PhonePe App Launch Button */}
+                      <a
+                        href={upiDeepLink}
+                        onClick={handleUpiPayClick}
+                        className="mt-2.5 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#17472B] hover:bg-[#0E4023] text-white rounded-lg text-xs font-extrabold shadow-sm transition-all text-center shrink-0 cursor-pointer"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Pay ₹200 via GPay / PhonePe</span>
+                      </a>
+
+                      {/* Copy UPI ID Button */}
+                      <button
+                        type="button"
+                        onClick={handleCopyUpi}
+                        className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
+                        title="Click to copy UPI ID"
+                      >
+                        <span className="truncate">abdulkhadirbava-1@okicici</span>
+                        {copiedUpi ? (
+                          <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        )}
+                      </button>
                     </div>
 
                     <div className="sm:col-span-7 space-y-2.5">
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Scan QR with any UPI App</span>
+                          <span>1. Pay via UPI App or Scan QR</span>
                         </div>
                         <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
-                          Google Pay, PhonePe, Paytm, BHIM, or Mobile Banking.
+                          Tap button below to launch Google Pay, PhonePe, Paytm, or BHIM directly:
                         </p>
+                        
                       </div>
 
                       <div className="space-y-1">
