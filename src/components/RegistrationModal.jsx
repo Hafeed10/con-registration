@@ -120,7 +120,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
     // STRICT VALIDATION: Payment screenshot is MANDATORY
     if (!paymentScreenshot) {
-      setPaymentError('⚠️ Payment Screenshot Required! Please scan the QR code to pay ₹200 and attach your payment receipt screenshot before submitting.');
+      setPaymentError('⚠️ Payment Screenshot Required! Please scan the QR code to pay ₹50 and attach your payment receipt screenshot before submitting.');
       return;
     }
 
@@ -142,7 +142,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
       position: formData.status === 'Working' ? formData.position : 'N/A',
       studiedAlfiyyaAndFathulMueen: formData.studiedAlfiyyaAndFathulMueen,
       paymentScreenshot: paymentScreenshot,
-      paymentStatus: 'Paid (₹200)',
+      paymentStatus: 'Paid (₹50)',
       registeredAt: new Date().toLocaleDateString()
     };
 
@@ -167,7 +167,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
       const fullPayload = {
         ...basePayload,
         payment_screenshot: paymentScreenshot,
-        payment_status: 'Paid (₹200)'
+        payment_status: 'Paid (₹50)'
       };
 
       // Try inserting with payment columns first
@@ -501,7 +501,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* 7. Registration Fee (₹200) & Payment QR Code Section */}
+              {/* 7. Registration Fee (₹50) & Payment QR Code Section */}
               <div className="pt-2 sm:pt-3">
                 <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-600/30 shadow-md space-y-4">
 
@@ -512,10 +512,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       </div>
                       <div>
                         <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                          Registration Fee: ₹200
+                          Registration Fee: ₹50
                         </h4>
                         <p className="text-[11px] sm:text-xs text-gray-600">
-                          Scan QR Code to pay ₹200 & upload payment screenshot
+                          Scan QR Code to pay ₹50 & upload payment screenshot
                         </p>
                       </div>
                     </div>
@@ -531,12 +531,12 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       <div className="relative group overflow-hidden rounded-lg border-2 border-orange-500/40 p-1 bg-white">
                         <img
                           src={qrCodeImg}
-                          alt="conFiqh Registration Payment QR Code - ₹200"
+                          alt="conFiqh Registration Payment QR Code - ₹50"
                           className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded shadow-sm"
                         />
                       </div>
                       <span className="text-[10px] font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
-                        SCAN TO PAY ₹200
+                        SCAN TO PAY ₹50
                       </span>
 
                       {/* Download QR Code Button */}
@@ -556,7 +556,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                         className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-[#17472B] hover:bg-[#0E4023] text-white rounded text-xs font-extrabold shadow-sm transition-all text-center shrink-0 cursor-pointer"
                       >
                         <CreditCard className="w-3.5 h-3.5" />
-                        <span>Pay ₹200 via GPay / PhonePe</span>
+                        <span>Pay ₹50 via GPay / PhonePe</span>
                       </a>
 
                       {/* Copy UPI ID Button */}
@@ -611,10 +611,10 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>2. Complete ₹200 Payment</span>
+                          <span>2. Complete ₹50 Payment</span>
                         </div>
                         <p className="text-[11px] text-gray-600 pl-5">
-                          Registration Fee: <strong>₹200 (INR)</strong>
+                          Registration Fee: <strong>₹50 (INR)</strong>
                         </p>
                       </div>
 

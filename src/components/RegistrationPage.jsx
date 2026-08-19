@@ -14,7 +14,7 @@ import {
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=muhammedumerpk-1@oksbi&pn=Recipient&am=200&cu=INR";
+  const upiParams = "pa=muhammedumerpk-1@oksbi&pn=Recipient&am=50&cu=INR";
   const upiDeepLink = `gpay://upi/pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -121,7 +121,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
     // STRICT VALIDATION: Payment screenshot is MANDATORY
     if (!paymentScreenshot) {
-      setPaymentError('⚠️ Payment Screenshot Required! Please scan the QR code to pay ₹200 and attach your payment receipt screenshot before submitting.');
+      setPaymentError('⚠️ Payment Screenshot Required! Please scan the QR code to pay ₹50 and attach your payment receipt screenshot before submitting.');
       return;
     }
 
@@ -143,7 +143,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       position: formData.status === 'Working' ? formData.position : 'N/A',
       studiedAlfiyyaAndFathulMueen: formData.studiedAlfiyyaAndFathulMueen,
       paymentScreenshot: paymentScreenshot,
-      paymentStatus: 'Paid (₹200)',
+      paymentStatus: 'Paid (₹50)',
       registeredAt: new Date().toLocaleDateString()
     };
 
@@ -167,7 +167,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       const fullPayload = {
         ...basePayload,
         payment_screenshot: paymentScreenshot,
-        payment_status: 'Paid (₹200)'
+        payment_status: 'Paid (₹50)'
       };
 
       const res1 = await supabase.from('delegates').insert([fullPayload]).select();
@@ -549,7 +549,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                   </div>
                 </div>
 
-                {/* 7. Fee ₹200 & QR Code Section */}
+                {/* 7. Fee ₹50 & QR Code Section */}
                 <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-3.5 sm:p-6 border-2 border-emerald-600/30 shadow-md space-y-4 max-w-full overflow-hidden">
 
                   <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 border-b border-emerald-200/60 pb-3">
@@ -559,10 +559,10 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       </div>
                       <div>
                         <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                          General Pass: ₹200
+                          General Pass: ₹50
                         </h4>
                         <p className="text-[11px] sm:text-xs text-gray-600">
-                          Scan QR Code to pay ₹200 & upload payment screenshot
+                          Scan QR Code to pay ₹50 & upload payment screenshot
                         </p>
                       </div>
                     </div>
@@ -614,12 +614,12 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="relative group overflow-hidden rounded-xl border-2 border-orange-500/40 p-1 bg-white">
                         <img
                           src={qrCodeImg}
-                          alt="conFiqh Registration Payment QR Code - ₹200"
+                          alt="conFiqh Registration Payment QR Code - ₹50"
                           className="w-36 h-36 xs:w-40 xs:h-40 sm:w-44 sm:h-44 max-w-full object-contain rounded shadow-sm"
                         />
                       </div>
                       <span className="text-[10px] sm:text-xs font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
-                        SCAN TO PAY ₹200
+                        SCAN TO PAY ₹50
                       </span>
 
                       {/* Download QR Code Button */}
@@ -639,7 +639,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         className="mt-2.5 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#17472B] hover:bg-[#0E4023] text-white rounded-lg text-xs font-extrabold shadow-sm transition-all text-center shrink-0 cursor-pointer"
                       >
                         <CreditCard className="w-3.5 h-3.5" />
-                        <span>Pay ₹200 via GPay / PhonePe</span>
+                        <span>Pay ₹50 via GPay / PhonePe</span>
                       </a>
 
                       {/* Copy UPI ID Button */}
@@ -673,10 +673,10 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>2. Complete ₹200 Payment</span>
+                          <span>2. Complete ₹50 Payment</span>
                         </div>
                         <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
-                          General Fee: <strong>₹200 (INR)</strong>
+                          General Fee: <strong>₹50 (INR)</strong>
                         </p>
                       </div>
 
