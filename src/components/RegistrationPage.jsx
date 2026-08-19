@@ -182,7 +182,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
           {/* Logo & Edition Badge */}
           <div className="flex items-center space-x-2 sm:space-x-3 select-none shrink-0">
             <span className="font-sans text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase whitespace-nowrap">
-              <span className="text-[#50A76C]">CON</span> <span className="text-white">FIQH</span>
+              <span className="text-[#50A76C]">CON</span> <span className="text-white">FIQ</span>
             </span>
             <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#0E4023] text-white uppercase tracking-wider border border-[#C5DF9F]/30 shadow-xs whitespace-nowrap shrink-0">
               1ST EDITION
@@ -225,7 +225,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                   <span className="font-sans text-2xl sm:text-4xl font-black tracking-tight uppercase">
-                    <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
+                    <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQ</span>
                   </span>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-[#17472B] text-white uppercase tracking-wider shadow-sm">
                     1ST EDITION 2026
@@ -665,7 +665,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                 <div className="flex items-center justify-between border-b border-[#354823] pb-4 mb-5">
                   <div className="flex items-center space-x-2 select-none">
                     <span className="font-sans text-xl sm:text-2xl font-black tracking-tight uppercase whitespace-nowrap">
-                      <span className="text-[#387B52]">CON</span> <span className="text-[#C5DF9F]">FIQH</span>
+                      <span className="text-[#387B52]">CON</span> <span className="text-[#C5DF9F]">FIQ</span>
                     </span>
                     <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-black bg-[#354823] text-white uppercase tracking-wider">
                       1ST EDITION
