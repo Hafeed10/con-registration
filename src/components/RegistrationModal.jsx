@@ -11,7 +11,7 @@ import {
 export default function RegistrationModal({ isOpen, onClose }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=mhafeed253-2@okaxis&pn=Recipient&am=50&cu=INR";
+  const upiParams = "pa=7558889458@yespop&pn=Recipient&am=50&cu=INR";
   const upiDeepLink = `gpay://upi/pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -33,7 +33,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('mhafeed253-2@okaxis');
+      navigator.clipboard.writeText('7558889458@yespop');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -42,7 +42,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
   const handleUpiPayClick = (e, app = 'gpay') => {
     if (e) e.preventDefault();
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('mhafeed253-2@okaxis');
+      navigator.clipboard.writeText('7558889458@yespop');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -566,7 +566,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                         className="mt-1 w-full flex items-center justify-between gap-1 px-2 py-1 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded text-[10px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
                         title="Click to copy UPI ID"
                       >
-                        <span className="truncate">mhafeed253-2@okaxis</span>
+                        <span className="truncate">7558889458@yespop</span>
                         {copiedUpi ? (
                           <span className="text-[9px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded shrink-0">Copied!</span>
                         ) : (
