@@ -60,7 +60,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     // On Desktop computers, do NOT launch custom scheme URLs to prevent browser console errors
     if (!isMobile) return;
 
-    const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
+    const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&cu=INR`;
     const targetUrl = `upi://pay?${upiParams}`;
 
     try {
