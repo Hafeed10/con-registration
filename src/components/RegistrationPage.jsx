@@ -177,7 +177,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     <div className="min-h-screen bg-[#F4F9F1] text-gray-900 flex flex-col font-sans selection:bg-[#17472B] selection:text-white">
 
       {/* Top Header Bar (Light Green Theme) */}
-      <header className="bg-[#EBF5DA]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
+      <header className="bg-[#eef5e4]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
           
           {/* Logo & Desktop Edition Badge */}
