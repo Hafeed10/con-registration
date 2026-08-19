@@ -49,7 +49,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setTimeout(() => setCopiedPhone(false), 3500);
   };
 
-  const handleUpiPayClick = (e, app = 'all') => {
+  const handleUpiPayClick = (e) => {
     if (e) e.preventDefault();
 
     const upiId = 'thulaib123@okicici';
@@ -70,18 +70,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     if (!isMobile) return;
 
     const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
-
-    let targetUrl = `upi://pay?${upiParams}`;
-
-    if (app === 'gpay') {
-      targetUrl = `gpay://upi/pay?${upiParams}`;
-    } else if (app === 'phonepe') {
-      targetUrl = `phonepe://upi/pay?${upiParams}`;
-    } else if (app === 'paytm') {
-      targetUrl = `paytmmp://upi/pay?${upiParams}`;
-    } else if (app === 'bhim') {
-      targetUrl = `bhim://upi/pay?${upiParams}`;
-    }
+    const targetUrl = `upi://pay?${upiParams}`;
 
     try {
       window.location.href = targetUrl;
