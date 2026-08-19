@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
-import qrCodeImg from '../assets/q.code 3.jpeg';
+import qrCodeImg from '../assets/q.code4.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -657,26 +657,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         <span>Download QR Code</span>
                       </button>
 
-                      {/* Direct PhonePe / GPay Launch Buttons */}
-                      <div className="mt-2.5 w-full grid grid-cols-2 gap-1.5">
-                        <button
-                          type="button"
-                          onClick={(e) => handleUpiPayClick(e, 'phonepe')}
-                          className="flex items-center justify-center gap-1 px-2 py-2 bg-[#5f259f] hover:bg-[#4d1d82] text-white rounded-lg text-[11px] font-extrabold shadow-sm transition-all text-center cursor-pointer"
-                        >
-                          <CreditCard className="w-3.5 h-3.5" />
-                          <span>PhonePe</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => handleUpiPayClick(e, 'gpay')}
-                          className="flex items-center justify-center gap-1 px-2 py-2 bg-[#17472B] hover:bg-[#0E4023] text-white rounded-lg text-[11px] font-extrabold shadow-sm transition-all text-center cursor-pointer"
-                        >
-                          <CreditCard className="w-3.5 h-3.5" />
-                          <span>GPay / UPI</span>
-                        </button>
-                      </div>
-
                       {/* Copy UPI ID Button */}
                       <button
                         type="button"
@@ -691,33 +671,14 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           <Copy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         )}
                       </button>
-
-                      {/* Copy Phone Number Button */}
-                      <button
-                        type="button"
-                        onClick={handleCopyPhone}
-                        className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
-                        title="Click to copy GPay/PhonePe Mobile Number"
-                      >
-                        <span className="truncate">Number: 7558889458</span>
-                        {copiedPhone ? (
-                          <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
-                        ) : (
-                          <Copy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        )}
-                      </button>
                     </div>
 
                     <div className="sm:col-span-7 space-y-2.5">
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Pay ₹200 via UPI App, Mobile Number, or QR Code</span>
+                          <span>1. Pay ₹200 via UPI App or Scan QR Code</span>
                         </div>
-                        <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6 leading-relaxed">
-                          Mobile Number: <strong className="text-[#17472B] font-mono">7558889458</strong><br />
-                          UPI ID: <strong className="text-[#17472B] font-mono">thulaib123@okicici</strong>
-                        </p>
                       </div>
 
                       <div className="space-y-1">
@@ -725,21 +686,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>2. Complete ₹200 Payment</span>
                         </div>
-                        <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
-                          General Fee: <strong>₹200 (INR)</strong>
-                        </p>
+                       
                       </div>
 
-                      {/* Bank Limit Notice Fix */}
-                      <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-950 font-medium space-y-1">
-                        <span className="font-bold text-amber-900 flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          Bank Limit Error Fix:
-                        </span>
-                        <p className="pl-4 leading-normal text-amber-900/90">
-                          If GPay / Bank shows <em>"Exceeded bank limit"</em>, tap <strong>UPI ID</strong> or <strong>Number</strong> to copy, then paste directly into GPay/PhonePe to complete payment.
-                        </p>
-                      </div>
 
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
