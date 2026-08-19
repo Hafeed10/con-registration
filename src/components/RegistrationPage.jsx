@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
+import qrCodeImg from '../assets/q.code.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -523,9 +524,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     <div className="sm:col-span-5 flex flex-col items-center justify-center p-3 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
                       <div className="relative group overflow-hidden rounded-xl border-2 border-orange-500/40 p-1.5 bg-white">
                         <img
-                          src="/payment_qr.jpg"
+                          src={qrCodeImg}
                           alt="conFiqh Registration Payment QR Code - ₹200"
-                          className="w-40 h-40 sm:w-44 sm:h-44 object-cover rounded shadow-sm"
+                          className="w-40 h-40 sm:w-44 sm:h-44 object-contain rounded shadow-sm"
                         />
                       </div>
                       <span className="text-xs font-mono font-bold text-orange-800 mt-2.5 bg-orange-100/90 px-2.5 py-0.5 rounded">
