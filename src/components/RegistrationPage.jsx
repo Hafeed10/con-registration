@@ -176,14 +176,14 @@ export default function RegistrationPage({ onOpenAdmin }) {
   return (
     <div className="min-h-screen bg-[#F4F9F1] text-gray-900 flex flex-col font-sans selection:bg-[#17472B] selection:text-white">
 
-      {/* Top Header Bar (Light Green Theme) */}
-      <header className="bg-[#eef5e4]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+      {/* Top Header Bar (Light Green Theme - Compact Slim Height) */}
+      <header className="bg-[#f5faed]/95 backdrop-blur-md text-[#17472B] border-b border-[#C5DF9F] shadow-xs sticky top-0 z-30">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2">
           
           {/* Logo & Desktop Edition Badge */}
-          <div className="flex items-center space-x-2.5 sm:space-x-3 select-none shrink-0">
-            <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-8 object-contain" />
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs whitespace-nowrap shrink-0">
+          <div className="flex items-center space-x-2 sm:space-x-3 select-none shrink-0">
+            <img src={confiqLogo} alt="CON FIQ Logo" className="h-5 sm:h-7 object-contain" />
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs whitespace-nowrap shrink-0">
               1ST EDITION
             </span>
           </div>
@@ -200,8 +200,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
             </div>
           </div>
 
-          {/* Mobile Edition Badge (Clean right alignment on phones) */}
-          <div className="sm:hidden font-sans text-[10px] font-black bg-[#17472B] text-white px-2.5 py-1 rounded-full shadow-xs whitespace-nowrap shrink-0">
+          {/* Mobile Edition Badge */}
+          <div className="sm:hidden font-sans text-[9px] font-black bg-[#17472B] text-white px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap shrink-0">
             1ST EDITION
           </div>
 
