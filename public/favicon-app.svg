@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="22" fill="#17472B"/>
+  <text x="50" y="62" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="32" text-anchor="middle" letter-spacing="-1">
+    <tspan fill="#85D19A">CON</tspan><tspan fill="#FFFFFF">FIQ</tspan>
+  </text>
+</svg>
