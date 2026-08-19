@@ -133,19 +133,6 @@ export default function RegistrationModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const trimmedUtr = utrNumber.trim();
-
-    // VALIDATION: Require at least ONE proof of payment (12-digit UTR OR Screenshot)
-    if (!trimmedUtr && !paymentScreenshot) {
-      setPaymentError('⚠️ Payment Verification Required! Please enter your 12-digit UTR / UPI Transaction Reference Number OR attach your payment receipt screenshot before submitting.');
-      return;
-    }
-
-    if (trimmedUtr && (!/^\d+$/.test(trimmedUtr) || trimmedUtr.length < 10 || trimmedUtr.length > 18)) {
-      setPaymentError('⚠️ Invalid UTR Number! Please enter a valid 12-digit numeric UPI Transaction Reference Number (e.g. 234567890123).');
-      return;
-    }
-
     setIsSubmitting(true);
     setPaymentError('');
 
@@ -541,188 +528,33 @@ export default function RegistrationModal({ isOpen, onClose }) {
                           Registration Fee: ₹200
                         </h4>
                         <p className="text-[11px] sm:text-xs text-gray-600">
-                          Scan QR Code to pay ₹200 & upload payment screenshot
-                        </p>
-                      </div>
-                    </div>
-
-                    <span className="self-start sm:self-auto px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm animate-pulse shrink-0">
-                      Payment Required
-                    </span>
-                  </div>
-
-                  {/* Razorpay Quick Link Banner */}
-                  <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-xl p-3.5 sm:p-4 text-white shadow-lg border border-indigo-700/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  {/* Primary Razorpay Action Card */}
+                  <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1 text-center sm:text-left">
                       <div className="flex items-center justify-center sm:justify-start gap-2">
-                        <span className="px-2 py-0.5 bg-blue-500/30 text-blue-200 text-[10px] font-bold rounded-full border border-blue-400/40 uppercase tracking-wider">
-                          Fast & Secure Payment
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full uppercase tracking-wider">
+                          Instant Checkout
                         </span>
-                        <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
-                          <ShieldCheck className="w-3.5 h-3.5" /> Razorpay Verified
+                        <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5" /> Razorpay Secured
                         </span>
                       </div>
-                      <h5 className="font-extrabold text-sm sm:text-base text-white">
-                        Pay ₹200 via Razorpay (UPI, Cards, NetBanking, Paytm)
+                      <h5 className="font-extrabold text-sm sm:text-base text-[#17472B]">
+                        Pay ₹200 Online (UPI, Cards, NetBanking, Paytm)
                       </h5>
-                      <p className="text-[11px] text-blue-200/90">
-                        Instant payment confirmation using any payment method
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleOpenRazorpay}
-                      className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
+                    <a
+                      href="https://rzp.io/rzp/afiIk3Q"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#17472B] to-[#20603B] hover:from-[#0E4023] hover:to-[#17472B] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
                     >
                       <CreditCard className="w-4 h-4" />
                       <span>Pay ₹200 via Razorpay</span>
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </button>
+                      <ExternalLink className="w-4 h-4 text-amber-300" />
+                    </a>
                   </div>
 
-                  {/* QR Code & UPI Instructions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200">
-                    <div className="sm:col-span-5 flex flex-col items-center justify-center p-2 bg-gradient-to-b from-orange-50 to-amber-50 rounded-xl border border-orange-200/80 shadow-inner">
-                      <div className="relative group overflow-hidden rounded-lg border-2 border-orange-500/40 p-1 bg-white">
-                        <img
-                          src={qrCodeImg}
-                          alt="conFiqh Registration Payment QR Code - ₹200"
-                          className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded shadow-sm"
-                        />
-                      </div>
-                      <span className="text-[10px] font-mono font-bold text-orange-800 mt-2 bg-orange-100/90 px-2 py-0.5 rounded">
-                        SCAN TO PAY ₹200
-                      </span>
 
-                      {/* Razorpay Direct Link Button */}
-                      <button
-                        type="button"
-                        onClick={handleOpenRazorpay}
-                        className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-lg text-xs font-extrabold shadow-md hover:shadow-lg transition-all text-center cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        <span>Pay ₹200 on Razorpay</span>
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Download QR Code Button */}
-                      <button
-                        type="button"
-                        onClick={handleDownloadQr}
-                        className="mt-1.5 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded text-xs font-extrabold shadow-2xs transition-all text-center cursor-pointer"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Download QR Code</span>
-                      </button>
-                    </div>
-
-                    <div className="sm:col-span-7 space-y-3">
-                      <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Click Razorpay link OR scan QR / UPI code</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>2. Complete ₹200 Payment</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>3. Enter UTR / Payment ID OR Upload Screenshot</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* UTR Input Field */}
-                  <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200">
-                    <label className="block text-[11px] sm:text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
-                      UPI UTR / Transaction Reference ID (Optional if Screenshot Uploaded)
-                    </label>
-                    <p className="text-[10px] sm:text-[11px] text-gray-500 mb-2 font-medium">
-                      Enter 12-digit UTR from GPay / PhonePe receipt (e.g. 234567890123)
-                    </p>
-                    <input
-                      type="text"
-                      maxLength="18"
-                      placeholder="e.g. 234567890123"
-                      value={utrNumber}
-                      onChange={(e) => setUtrNumber(e.target.value)}
-                      className="w-full px-4 py-2 sm:py-2.5 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-xs sm:text-sm font-mono font-bold outline-none transition-all"
-                    />
-                  </div>
-
-                  {/* Screenshot Upload Box */}
-                  <div>
-                    <label className="block text-[11px] sm:text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1.5">
-                      Upload Payment Screenshot (Optional if UTR Provided)
-                    </label>
-
-                    {!paymentScreenshot ? (
-                      <div className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${paymentError
-                        ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
-                        : 'border-emerald-600/40 bg-emerald-50/30 hover:bg-emerald-50/70 hover:border-emerald-600'
-                        }`}>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleScreenshotChange}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        <div className="flex flex-col items-center justify-center space-y-1.5">
-                          <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#17472B] flex items-center justify-center">
-                            <Upload className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <span className="text-xs sm:text-sm font-extrabold text-[#17472B] hover:underline">
-                              Click to select payment screenshot
-                            </span>
-                            <p className="text-[10px] font-semibold text-gray-500 mt-0.5">
-                              Supports JPG, PNG, WEBP receipts
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-2 shadow-sm overflow-hidden">
-                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
-                            <img
-                              src={paymentScreenshot}
-                              alt="Payment Screenshot Preview"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
-                              <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                              <span className="truncate">Screenshot Attached</span>
-                            </div>
-                            <div className="text-[10px] sm:text-[11px] font-mono text-gray-600 truncate">
-                              {screenshotFileName || 'receipt.png'}
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={handleRemoveScreenshot}
-                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold flex items-center gap-1 shrink-0"
-                          title="Remove screenshot"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span className="hidden sm:inline">Remove</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
 
                 </div>
               </div>
@@ -847,75 +679,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
       </div>
 
-      {/* Razorpay Inline Payment Modal Overlay */}
-      {showRazorpayModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col h-[85vh] max-h-[700px] animate-scaleUp">
-            
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 px-4 py-3 text-white flex items-center justify-between shrink-0 shadow-md">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-blue-500/20 rounded-lg text-blue-300 border border-blue-400/30">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-sm sm:text-base text-white leading-tight">
-                    Razorpay Secure Checkout
-                  </h4>
-                  <p className="text-[11px] text-blue-200">Registration Fee: ₹200 • CONFIQ 2026</p>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://rzp.io/rzp/afiIk3Q"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden sm:flex items-center gap-1 text-[11px] bg-blue-600/60 hover:bg-blue-600 px-2.5 py-1 rounded-md text-white font-semibold transition-all border border-blue-400/30"
-                  title="Open in new window if preferred"
-                >
-                  <span>New Window</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => setShowRazorpayModal(false)}
-                  className="p-1.5 hover:bg-white/20 text-white rounded-full transition-colors cursor-pointer"
-                  title="Close Payment Modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Embedded Payment Frame */}
-            <div className="flex-1 bg-gray-50 relative overflow-hidden flex flex-col">
-              <iframe
-                src="https://rzp.io/rzp/afiIk3Q"
-                title="Razorpay Payment Checkout"
-                className="w-full h-full flex-1 border-0 rounded-b-xl"
-                allow="payment"
-              />
-            </div>
-
-            {/* Footer */}
-            <div className="bg-gray-100 px-4 py-2.5 border-t border-gray-200 flex items-center justify-between gap-2 shrink-0">
-              <span className="text-[10px] sm:text-[11px] text-gray-600 font-bold flex items-center gap-1">
-                🔒 256-Bit SSL Encrypted Payment
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowRazorpayModal(false)}
-                className="px-3.5 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white text-xs font-extrabold rounded-lg transition-all cursor-pointer shadow-sm"
-              >
-                Close & Return
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
     </div>
   );
 }
