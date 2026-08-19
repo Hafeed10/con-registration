@@ -48,7 +48,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setTimeout(() => setCopiedPhone(false), 3500);
   };
 
-  const handleUpiPayClick = (e, app = 'gpay') => {
+  const handleUpiPayClick = (e) => {
     if (e) e.preventDefault();
     if (navigator.clipboard) {
       navigator.clipboard.writeText('thulaib123@okicici');
@@ -59,17 +59,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (!isMobile) return;
 
-    if (app === 'gpay') {
-      window.location.href = `gpay://upi/pay?${upiParams}`;
-    } else if (app === 'phonepe') {
-      window.location.href = `phonepe://upi/pay?${upiParams}`;
-    } else if (app === 'paytm') {
-      window.location.href = `paytmmp://upi/pay?${upiParams}`;
-    } else if (app === 'bhim') {
-      window.location.href = `bhim://upi/pay?${upiParams}`;
-    } else {
-      window.location.href = `upi://pay?${upiParams}`;
-    }
+    window.location.href = `upi://pay?pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR`;
   };
   const [formData, setFormData] = useState({
     fullName: '',
