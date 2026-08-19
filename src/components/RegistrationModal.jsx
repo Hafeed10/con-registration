@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
-import qrCodeImg from '../assets/q.code 2.jpeg';
+import qrCodeImg from '../assets/q.code 3.jpeg';
 import {
   X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,

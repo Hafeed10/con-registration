@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
-import qrCodeImg from '../assets/q.code 2.jpeg';
+import qrCodeImg from '../assets/q.code 3.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
