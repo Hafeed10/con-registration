@@ -219,25 +219,33 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
               {/* Title Header matching model mockup */}
               <div className="text-center mb-8 border-b border-[#E0EFE0] pb-6 flex flex-col items-center justify-center space-y-3">
+                
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EBF5DA] text-[#17472B] text-xs font-bold uppercase tracking-wider">
                   <ShieldCheck className="w-4 h-4 text-[#387B52]" />
                   <span>Official Delegate Registration</span>
                 </div>
 
-                {/* CONFIQ Logo */}
-                <div className="flex items-center justify-center pt-1">
-                  <img src={confiqLogo} alt="CON FIQ Logo" className="h-10 sm:h-14 object-contain" />
+                <div className="text-center pt-1">
+                  <p className="text-[11px] sm:text-xs font-bold text-[#17472B]/80 tracking-widest uppercase mb-1">
+                    The First Edition of
+                  </p>
+                  
+                  {/* CONFIQ Logo Image */}
+                  <div className="flex items-center justify-center">
+                    <img src={confiqLogo} alt="CON FIQ Logo" className="w-[240px] sm:w-[340px] md:w-[400px] max-w-full h-auto object-contain" />
+                  </div>
                 </div>
 
                 {/* Keralam Fiqh Summit 2026 Banner */}
-                <div className="flex items-center justify-center px-2">
-                  <img src={vectorSmartObject} alt="Keralam Fiqh Summit 2026" className="h-8 sm:h-10 object-contain max-w-full" />
+                <div className="flex items-center justify-center pt-1">
+                  <img src={vectorSmartObject} alt="Keralam Fiqh Summit 2026" className="w-[220px] sm:w-[300px] md:w-[340px] max-w-full h-auto object-contain" />
                 </div>
 
                 {/* Date & Location Graphic */}
-                <div className="flex items-center justify-center pt-1 px-2">
-                  <img src={group8Img} alt="11 12 September 2026 AHLUSSUFFA Parapram Pinarayi" className="h-9 sm:h-11 object-contain max-w-full" />
+                <div className="flex items-center justify-center pt-1">
+                  <img src={group8Img} alt="11 12 September 2026 AHLUSSUFFA Parapram Pinarayi" className="w-[180px] sm:w-[240px] md:w-[270px] max-w-full h-auto object-contain" />
                 </div>
+
               </div>
 
               {/* Information Note */}
