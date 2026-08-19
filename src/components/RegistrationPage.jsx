@@ -40,6 +40,14 @@ export default function RegistrationPage({ onOpenAdmin }) {
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+
+  const handleCopyPhone = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('7558889458');
+    }
+    setCopiedPhone(true);
+    setTimeout(() => setCopiedPhone(false), 3500);
   };
 
   const handleUpiPayClick = (e, app = 'gpay') => {
@@ -649,8 +657,23 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
                         title="Click to copy UPI ID"
                       >
-                        <span className="truncate">7558889458@yespop</span>
+                        <span className="truncate">UPI ID: 7558889458@yespop</span>
                         {copiedUpi ? (
+                          <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        )}
+                      </button>
+
+                      {/* Copy Phone Number Button */}
+                      <button
+                        type="button"
+                        onClick={handleCopyPhone}
+                        className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
+                        title="Click to copy GPay/PhonePe Mobile Number"
+                      >
+                        <span className="truncate">Number: 7558889458</span>
+                        {copiedPhone ? (
                           <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
                         ) : (
                           <Copy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -662,12 +685,12 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>1. Pay via UPI App or Scan QR</span>
+                          <span>1. Pay ₹50 via UPI App, Mobile Number, or QR Code</span>
                         </div>
-                        <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6">
-                          Tap button below to launch Google Pay, PhonePe, Paytm, or BHIM directly:
+                        <p className="text-[11px] sm:text-xs text-gray-600 pl-5 sm:pl-6 leading-relaxed">
+                          Mobile Number: <strong className="text-[#17472B] font-mono">7558889458</strong><br />
+                          UPI ID: <strong className="text-[#17472B] font-mono">7558889458@yespop</strong>
                         </p>
-                        
                       </div>
 
                       <div className="space-y-1">
