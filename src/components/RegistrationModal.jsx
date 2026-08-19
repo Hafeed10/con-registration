@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
+import qrCodeImg from '../assets/q.code 2.jpeg';
 import {
   X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -10,7 +11,7 @@ import {
 export default function RegistrationModal({ isOpen, onClose }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=abdulkhadirbava-1@okicici&pn=Recipient&am=200&cu=INR";
+  const upiParams = "pa=muhammedumerpk-1@oksbi&pn=Recipient&am=200&cu=INR";
   const upiDeepLink = `gpay://upi/pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -32,7 +33,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+      navigator.clipboard.writeText('muhammedumerpk-1@oksbi');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -41,7 +42,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
   const handleUpiPayClick = (e, app = 'gpay') => {
     if (e) e.preventDefault();
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+      navigator.clipboard.writeText('muhammedumerpk-1@oksbi');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -565,7 +566,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                         className="mt-1 w-full flex items-center justify-between gap-1 px-2 py-1 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded text-[10px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
                         title="Click to copy UPI ID"
                       >
-                        <span className="truncate">abdulkhadirbava-1@okicici</span>
+                        <span className="truncate">muhammedumerpk-1@oksbi</span>
                         {copiedUpi ? (
                           <span className="text-[9px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1 py-0.5 rounded shrink-0">Copied!</span>
                         ) : (

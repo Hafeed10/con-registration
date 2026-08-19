@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
-import qrCodeImg from '../assets/q.code1.jpeg';
+import qrCodeImg from '../assets/q.code 2.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -14,7 +14,7 @@ import {
 export default function RegistrationPage({ onOpenAdmin }) {
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=abdulkhadirbava-1@okicici&pn=Recipient&am=200&cu=INR";
+  const upiParams = "pa=muhammedumerpk-1@oksbi&pn=Recipient&am=200&cu=INR";
   const upiDeepLink = `gpay://upi/pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
@@ -36,7 +36,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+      navigator.clipboard.writeText('muhammedumerpk-1@oksbi');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -45,7 +45,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const handleUpiPayClick = (e, app = 'gpay') => {
     if (e) e.preventDefault();
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('abdulkhadirbava-1@okicici');
+      navigator.clipboard.writeText('muhammedumerpk-1@oksbi');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -649,7 +649,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         className="mt-1.5 w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-[11px] font-mono font-bold shadow-2xs transition-all cursor-pointer"
                         title="Click to copy UPI ID"
                       >
-                        <span className="truncate">abdulkhadirbava-1@okicici</span>
+                        <span className="truncate">muhammedumerpk-1@oksbi</span>
                         {copiedUpi ? (
                           <span className="text-[10px] font-sans font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Copied!</span>
                         ) : (
