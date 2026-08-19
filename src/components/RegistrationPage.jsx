@@ -58,10 +58,11 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setTimeout(() => setCopiedUpi(false), 3500);
 
     const userAgent = navigator.userAgent || '';
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent);
+    const isMobileUA = /Android|iPhone|iPad|iPod/i.test(userAgent);
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-    // On Desktop computers, do NOT launch custom scheme URLs to prevent browser console errors
-    if (!isMobile) return;
+    // Only launch scheme URL on real mobile devices to prevent Chrome DevTools/Desktop network errors
+    if (!isMobileUA || !isTouchDevice) return;
 
     const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&cu=INR`;
     const targetUrl = `upi://pay?${upiParams}`;
