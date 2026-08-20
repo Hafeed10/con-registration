@@ -95,7 +95,7 @@ export default function CountdownSection({ onOpenRegister }) {
               onClick={onOpenRegister}
               className="bg-[#123C2C] hover:bg-[#1A4F3B] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-md transition-all"
             >
-              Register Delegate Seat
+              Login Delegate Portal
             </button>
           </div>
 

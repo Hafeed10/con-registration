@@ -11,9 +11,9 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
     return sessionStorage.getItem('confiqh_admin_auth') === 'true';
   });
 
-  // Login form inputs
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // Login form inputs (Phone Number & DOB DD/MM/YY)
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [dob, setDob] = useState('');
   const [loginError, setLoginError] = useState(false);
 
   // Dashboard state
@@ -25,6 +25,82 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
+
+  // Official Brochure Poster CMS State
+  const [brochuresData, setBrochuresData] = useState([
+    {
+      id: 'brochure-1',
+      title: 'conFiqh 2026 Official Summit Prospectus & Poster',
+      subtitle: '1st Edition • Annual Kerala Fiqh Summit',
+      posterImage: '',
+      date: '11–12 September 2026',
+      venue: 'Ahlussuffa Dars, Parapram, Pinarayi, Kannur, Kerala'
+    }
+  ]);
+  const [brochureModalOpen, setBrochureModalOpen] = useState(false);
+  const [editingBrochure, setEditingBrochure] = useState(null);
+  const [brochureForm, setBrochureForm] = useState({
+    title: '',
+    subtitle: '',
+    posterImage: '',
+    date: '11–12 September 2026',
+    venue: 'Ahlussuffa Dars, Parapram, Pinarayi, Kannur, Kerala'
+  });
+
+  const handleOpenAddBrochure = () => {
+    setEditingBrochure(null);
+    setBrochureForm({
+      title: '',
+      subtitle: '',
+      posterImage: '',
+      date: '11–12 September 2026',
+      venue: 'Ahlussuffa Dars, Parapram, Pinarayi, Kannur, Kerala'
+    });
+    setBrochureModalOpen(true);
+  };
+
+  const handleOpenEditBrochure = (brochure) => {
+    setEditingBrochure(brochure);
+    setBrochureForm({
+      title: brochure.title || '',
+      subtitle: brochure.subtitle || '',
+      posterImage: brochure.posterImage || '',
+      date: brochure.date || '11–12 September 2026',
+      venue: brochure.venue || 'Ahlussuffa Dars, Parapram, Pinarayi, Kannur, Kerala'
+    });
+    setBrochureModalOpen(true);
+  };
+
+  const handleBrochurePosterUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload a valid poster image file (PNG, JPG, WEBP).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBrochureForm((prev) => ({ ...prev, posterImage: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveBrochure = (e) => {
+    e.preventDefault();
+    if (editingBrochure) {
+      setBrochuresData(brochuresData.map(b => b.id === editingBrochure.id ? { ...editingBrochure, ...brochureForm } : b));
+    } else {
+      const newBrochure = { id: 'brochure-' + Date.now(), ...brochureForm };
+      setBrochuresData([...brochuresData, newBrochure]);
+    }
+    setBrochureModalOpen(false);
+  };
+
+  const handleDeleteBrochure = (brochureId) => {
+    if (window.confirm('Are you sure you want to delete this official brochure poster?')) {
+      setBrochuresData(brochuresData.filter(b => b.id !== brochureId));
+    }
+  };
 
   // Scheduled Sessions CMS Admin State
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
@@ -280,7 +356,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    if (username.trim() === 'confiqh' && password === 'confiqh123') {
+    if (phoneNumber.trim() && dob.trim()) {
       sessionStorage.setItem('confiqh_admin_auth', 'true');
       setIsAuthenticated(true);
       setLoginError(false);
@@ -439,46 +515,45 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
               <Lock className="w-7 h-7" />
             </div>
             <h2 className="font-sans text-2xl sm:text-3xl font-black text-[#17472B]">
-              Secretariat Portal
+              Registration Portal Login
             </h2>
             <p className="text-xs font-bold text-[#387B52] mt-1">
-              conFiqh 2026 • Authorized Access Only
+              conFiqh 2026 • Enter your Phone Number & Date of Birth
             </p>
           </div>
 
           {loginError && (
             <div className="bg-red-50 text-red-700 p-3.5 rounded-xl border border-red-200 text-xs font-bold mb-5 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
-              <span>Invalid username or password. Please try again.</span>
+              <span>Please enter a valid Phone Number and Date of Birth (DD/MM/YY).</span>
             </div>
           )}
 
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
-                Username
+                Phone Number *
               </label>
               <input
-                type="text"
+                type="tel"
                 required
-                placeholder="Enter admin username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. 7558889458"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-sm font-medium outline-none transition-all"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
-                Password
+                Date of Birth (Calendar) *
               </label>
               <input
-                type="password"
+                type="date"
                 required
-                placeholder="Enter admin password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-sm font-medium outline-none transition-all"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-sm font-medium outline-none transition-all cursor-pointer bg-white"
               />
             </div>
 
@@ -487,7 +562,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                 type="submit"
                 className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-3.5 rounded-xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2"
               >
-                <span>Login to Secretariat Portal</span>
+                <span>Login to Registration Portal</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -599,6 +674,17 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
           >
             <Layers className="w-4 h-4" />
             <span>Academic Tracks CMS ({tracksData.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('brochures')}
+            className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'brochures'
+              ? 'bg-[#17472B] text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Brochure Poster CMS ({brochuresData.length})</span>
           </button>
         </div>
 
@@ -974,6 +1060,102 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
           </div>
         )}
 
+        {/* TAB 4: Official Brochure Poster CMS */}
+        {activeTab === 'brochures' && (
+          <div className="space-y-6">
+
+            <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="font-extrabold text-lg text-[#17472B]">
+                  Official Summit Brochure Posters
+                </h3>
+                <p className="text-xs text-gray-500 font-medium">
+                  Upload and manage official summit posters displayed on the public website and brochure modal.
+                </p>
+              </div>
+
+              <button
+                onClick={handleOpenAddBrochure}
+                className="bg-[#17472B] hover:bg-[#20603B] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition-all shrink-0 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Upload New Brochure Poster</span>
+              </button>
+            </div>
+
+            {/* Brochure Posters Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {brochuresData.map((brochure) => (
+                <div key={brochure.id} className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+                  
+                  {/* Poster Image Container */}
+                  <div className="relative bg-gray-100 min-h-[220px] flex items-center justify-center overflow-hidden group">
+                    {brochure.posterImage ? (
+                      <img 
+                        src={brochure.posterImage} 
+                        alt={brochure.title}
+                        className="w-full h-auto max-h-[320px] object-contain transition-transform group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="p-8 text-center space-y-2">
+                        <ImageIcon className="w-12 h-12 text-emerald-700/40 mx-auto" />
+                        <span className="text-xs font-bold text-gray-400 block">No Poster Image Attached</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5 space-y-3 flex-grow flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-bold text-base text-[#17472B] leading-snug">
+                        {brochure.title}
+                      </h4>
+                      {brochure.subtitle && (
+                        <p className="text-xs text-gray-500 font-medium mt-1">
+                          {brochure.subtitle}
+                        </p>
+                      )}
+                      <div className="mt-2 text-[11px] text-gray-600 font-semibold space-y-0.5">
+                        <div>📅 {brochure.date}</div>
+                        <div>📍 {brochure.venue}</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => handleOpenEditBrochure(brochure)}
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Poster</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteBrochure(brochure.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer"
+                        title="Delete Brochure Poster"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              ))}
+
+              {brochuresData.length === 0 && (
+                <div className="md:col-span-3 bg-white p-12 rounded-3xl border border-gray-200 text-center space-y-3">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto" />
+                  <h4 className="text-lg font-bold text-gray-800">No Brochure Posters Added</h4>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                    Click the "Upload New Brochure Poster" button above to add summit posters.
+                  </p>
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
       </div>
 
       {/* Payment Receipt Screenshot Modal for Secretariat Verification */}
@@ -1333,6 +1515,153 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                   className="px-6 py-2.5 rounded-xl text-xs font-extrabold text-white bg-[#17472B] hover:bg-[#20603B] shadow"
                 >
                   {editingTrack ? 'Save Track Changes' : 'Publish Academic Track'}
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* Upload / Edit Brochure Poster Modal */}
+      {brochureModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-gray-200 max-h-[92vh] overflow-y-auto no-scrollbar">
+            
+            <button
+              onClick={() => setBrochureModalOpen(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-lg transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+              <div className="p-3 bg-[#17472B] text-white rounded-2xl shadow-sm">
+                <ImageIcon className="w-6 h-6 text-amber-300" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg sm:text-xl text-[#17472B]">
+                  {editingBrochure ? 'Edit Brochure Poster' : 'Upload Brochure Poster'}
+                </h3>
+                <p className="text-xs text-gray-500 font-medium">
+                  Upload official summit poster image and details
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveBrochure} className="space-y-4">
+              
+              <div>
+                <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
+                  Poster Title *
+                </label>
+                <input 
+                  type="text"
+                  required
+                  placeholder="e.g. conFiqh 2026 Official Summit Poster"
+                  value={brochureForm.title}
+                  onChange={(e) => setBrochureForm({ ...brochureForm, title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-[#17472B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
+                  Subtitle / Edition
+                </label>
+                <input 
+                  type="text"
+                  placeholder="e.g. 1st Edition • Annual Kerala Fiqh Summit"
+                  value={brochureForm.subtitle}
+                  onChange={(e) => setBrochureForm({ ...brochureForm, subtitle: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-[#17472B]"
+                />
+              </div>
+
+              {/* Poster Image File Upload */}
+              <div>
+                <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
+                  Poster Image (Upload Image File or Enter URL) *
+                </label>
+                
+                <div className="space-y-2">
+                  <div className="relative border-2 border-dashed border-emerald-600/40 rounded-xl p-3 bg-emerald-50/40 hover:bg-emerald-50 text-center cursor-pointer transition-all">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleBrochurePosterUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="flex items-center justify-center gap-2 text-[#17472B]">
+                      <Upload className="w-4 h-4" />
+                      <span className="text-xs font-extrabold">Choose Poster Image File (PNG, JPG, WEBP)</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text"
+                      placeholder="Or enter image URL: https://..."
+                      value={brochureForm.posterImage}
+                      onChange={(e) => setBrochureForm({ ...brochureForm, posterImage: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-[#17472B]"
+                    />
+
+                    {brochureForm.posterImage && (
+                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-emerald-500 shrink-0 bg-gray-100 shadow-sm" title="Poster preview">
+                        <img 
+                          src={brochureForm.posterImage} 
+                          alt="Poster Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
+                    Event Date
+                  </label>
+                  <input 
+                    type="text"
+                    placeholder="11–12 September 2026"
+                    value={brochureForm.date}
+                    onChange={(e) => setBrochureForm({ ...brochureForm, date: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-[#17472B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1">
+                    Venue
+                  </label>
+                  <input 
+                    type="text"
+                    placeholder="Ahlussuffa Dars, Pinarayi"
+                    value={brochureForm.venue}
+                    onChange={(e) => setBrochureForm({ ...brochureForm, venue: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-[#17472B]"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setBrochureModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl text-xs font-extrabold text-white bg-[#17472B] hover:bg-[#20603B] shadow cursor-pointer"
+                >
+                  {editingBrochure ? 'Save Poster Changes' : 'Publish Brochure Poster'}
                 </button>
               </div>
 

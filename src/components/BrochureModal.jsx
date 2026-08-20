@@ -54,33 +54,36 @@ export default function BrochureModal({ isOpen, onClose, onOpenRegister }) {
           </div>
         </div>
 
-        {/* Brochure Content Preview Cards */}
+        {/* Official Summit Poster Image View */}
         <div className="space-y-6">
           
-          {/* Cover Banner */}
-          <div className="bg-brand-dark text-white p-6 rounded-2xl relative overflow-hidden shadow-md">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-brand-gold/10 rounded-full blur-2xl pointer-events-none" />
-            <span className="inline-block px-3 py-1 bg-brand-gold/20 text-brand-gold rounded-full text-xs font-bold uppercase tracking-wider mb-2">
-              Official Publication
+          <div className="bg-[#F8FBF6] p-4 sm:p-6 rounded-2xl border border-emerald-200 shadow-sm text-center space-y-4">
+            <span className="inline-block px-3 py-1 bg-[#17472B] text-white rounded-full text-xs font-extrabold uppercase tracking-wider">
+              Official Summit Poster
             </span>
-            <h4 className="font-display text-2xl font-extrabold mb-2">
-              Keralam Fiqh Summit 2026 Prospectus
-            </h4>
-            <p className="text-xs text-brand-light max-w-xl leading-relaxed">
-              Explore the complete 2-day session schedule, academic paper guidelines, keynote speaker biographies, and venue maps for AHLUSSUFFA Dars, Parapram, Pinarayi.
-            </p>
+            
+            <div className="max-w-xl mx-auto rounded-2xl overflow-hidden shadow-lg border-2 border-[#17472B] bg-white">
+              <img 
+                src="/Group 8.png" 
+                alt="conFiqh 2026 Official Summit Poster"
+                className="w-full h-auto object-contain max-h-[60vh] mx-auto"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
           </div>
 
           {/* Schedule Highlights */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-brand-pale p-5 rounded-2xl border border-brand-light">
+            <div className="bg-[#F4F8F3] p-5 rounded-2xl border border-emerald-200">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold font-mono px-2.5 py-1 bg-brand-dark text-brand-gold rounded">
+                <span className="text-xs font-bold font-mono px-2.5 py-1 bg-[#17472B] text-white rounded">
                   DAY 1 • 11 SEPT 2026
                 </span>
-                <span className="text-xs font-bold text-brand-medium">09:00 AM – 05:00 PM</span>
+                <span className="text-xs font-bold text-emerald-800">09:00 AM – 05:00 PM</span>
               </div>
-              <h5 className="font-bold text-brand-dark text-base mb-2">Shafi'i Heritage & AI Limits</h5>
+              <h5 className="font-bold text-[#17472B] text-base mb-2">Shafi'i Heritage & AI Limits</h5>
               <ul className="text-xs text-gray-700 space-y-1.5 list-disc list-inside">
                 <li>Inaugural Keynote: Makhdoomi Tradition in Kerala</li>
                 <li>Panel 1: AI Fatwa Limits & Algorithmic Guardrails</li>
@@ -88,14 +91,14 @@ export default function BrochureModal({ isOpen, onClose, onOpenRegister }) {
               </ul>
             </div>
 
-            <div className="bg-brand-pale p-5 rounded-2xl border border-brand-light">
+            <div className="bg-[#F4F8F3] p-5 rounded-2xl border border-emerald-200">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold font-mono px-2.5 py-1 bg-brand-dark text-brand-gold rounded">
+                <span className="text-xs font-bold font-mono px-2.5 py-1 bg-[#17472B] text-white rounded">
                   DAY 2 • 12 SEPT 2026
                 </span>
-                <span className="text-xs font-bold text-brand-medium">09:30 AM – 04:30 PM</span>
+                <span className="text-xs font-bold text-emerald-800">09:30 AM – 04:30 PM</span>
               </div>
-              <h5 className="font-bold text-brand-dark text-base mb-2">Crypto Finance & CRISPR Bioethics</h5>
+              <h5 className="font-bold text-[#17472B] text-base mb-2">Crypto Finance & CRISPR Bioethics</h5>
               <ul className="text-xs text-gray-700 space-y-1.5 list-disc list-inside">
                 <li>Panel 2: Decentralized Crypto Yields & Smart Contract Gharar</li>
                 <li>Panel 3: CRISPR Germline Editing & Genomic Jurisprudence</li>
@@ -105,13 +108,13 @@ export default function BrochureModal({ isOpen, onClose, onOpenRegister }) {
           </div>
 
           {/* Secretariat info */}
-          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-brand-dark">
+          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-[#17472B]">
             <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-brand-emerald shrink-0" />
+              <MapPin className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>AHLUSSUFFA Dars Complex, Parapram, Pinarayi, Kannur, Kerala 670741</span>
             </div>
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-brand-emerald shrink-0" />
+              <Calendar className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>11–12 September 2026</span>
             </div>
           </div>
@@ -122,20 +125,17 @@ export default function BrochureModal({ isOpen, onClose, onOpenRegister }) {
         <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             onClick={handleDownload}
-            className="w-full sm:w-auto bg-brand-dark hover:bg-brand-emerald text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto bg-[#17472B] hover:bg-[#20603B] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Download className="w-4 h-4 text-brand-gold" />
-            <span>Download Official PDF Brochure</span>
+            <Download className="w-4 h-4 text-amber-300" />
+            <span>Download Official Poster & Prospectus</span>
           </button>
 
           <button
-            onClick={() => {
-              onClose();
-              onOpenRegister();
-            }}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm border-2 border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white transition-all text-center"
+            onClick={onClose}
+            className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition-all text-center cursor-pointer"
           >
-            Register as Delegate
+            Close
           </button>
         </div>
 

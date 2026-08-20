@@ -105,20 +105,13 @@ export default function ScheduledSessions({ onOpenRegister, sessionsData }) {
                   </div>
                 </div>
 
-                {/* Buttons matching user diagram: Stacked vertically full-width on mobile */}
+                {/* Buttons matching user diagram */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-4 pt-2 w-full">
                   <button
                     onClick={() => setBioModalSpeaker(currentSession)}
                     className="w-full sm:w-auto px-6 py-3 rounded-xl border border-gray-400 text-[#123C2C] font-bold text-xs sm:text-sm bg-white hover:bg-gray-50 shadow-xs transition-all text-center"
                   >
                     About
-                  </button>
-
-                  <button
-                    onClick={onOpenRegister}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#387B52] hover:bg-[#20603B] text-white font-extrabold text-xs sm:text-sm shadow-md transition-all text-center"
-                  >
-                    Book sector
                   </button>
                 </div>
 

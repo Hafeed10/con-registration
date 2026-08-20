@@ -6,8 +6,8 @@ import AcademicTracks from './components/AcademicTracks';
 import ScheduledSessions from './components/ScheduledSessions';
 import GeometricPatternDivider from './components/GeometricPatternDivider';
 import CountdownSection from './components/CountdownSection';
-import RegistrationModal from './components/RegistrationModal';
 import BrochureModal from './components/BrochureModal';
+import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -21,7 +21,7 @@ export default function App() {
     return hash === '#admin' || path === '/admin' || window.location.search.includes('admin');
   });
 
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isBrochureOpen, setIsBrochureOpen] = useState(false);
 
   // Initial default sessions
@@ -226,9 +226,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-brand-bg text-brand-textDark font-sans selection:bg-brand-dark selection:text-white flex flex-col">
       
-      {/* Navigation Header (Secretariat link fully hidden) */}
+      {/* Navigation Header */}
       <Navbar 
-        onOpenRegister={() => setIsRegisterOpen(true)}
+        onOpenRegister={() => setIsLoginOpen(true)}
         onOpenBrochure={() => setIsBrochureOpen(true)}
         scrollToSection={scrollToSection}
       />
@@ -238,7 +238,7 @@ export default function App() {
         
         {/* 1. Hero Section matching mockup */}
         <Hero 
-          onOpenRegister={() => setIsRegisterOpen(true)}
+          onOpenRegister={() => setIsLoginOpen(true)}
           onOpenBrochure={() => setIsBrochureOpen(true)}
           scrollToSection={scrollToSection}
         />
@@ -248,13 +248,13 @@ export default function App() {
 
         {/* 3. Academic Tracks Grid */}
         <AcademicTracks 
-          onOpenRegister={() => setIsRegisterOpen(true)}
+          onOpenRegister={() => setIsLoginOpen(true)}
           tracksData={tracksData}
         />
 
         {/* 4. Scheduled Sessions Carousel */}
         <ScheduledSessions 
-          onOpenRegister={() => setIsRegisterOpen(true)}
+          onOpenRegister={() => setIsLoginOpen(true)}
           sessionsData={sessionsData}
         />
 
@@ -263,29 +263,29 @@ export default function App() {
 
         {/* 6. Let's Witness the First Edition Countdown & Stats */}
         <CountdownSection 
-          onOpenRegister={() => setIsRegisterOpen(true)}
+          onOpenRegister={() => setIsLoginOpen(true)}
         />
 
       </main>
 
-      {/* Footer & Secretariat Desk (Secretariat link fully hidden) */}
+      {/* Footer & Secretariat Desk */}
       <Footer 
-        onOpenRegister={() => setIsRegisterOpen(true)}
+        onOpenRegister={() => setIsLoginOpen(true)}
         onOpenBrochure={() => setIsBrochureOpen(true)}
         scrollToSection={scrollToSection}
       />
 
-      {/* Delegate Registration Modal */}
-      <RegistrationModal 
-        isOpen={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
+      {/* Delegate Login Modal */}
+      <LoginModal 
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
       />
 
       {/* Official Brochure Viewer Modal */}
       <BrochureModal 
         isOpen={isBrochureOpen}
         onClose={() => setIsBrochureOpen(false)}
-        onOpenRegister={() => setIsRegisterOpen(true)}
+        onOpenRegister={() => setIsLoginOpen(true)}
       />
 
     </div>

@@ -201,7 +201,7 @@ export default function Hero({ onOpenRegister, onOpenBrochure, scrollToSection }
             className="col-span-2 w-full sm:w-auto bg-[#17472B] hover:bg-[#20603B] text-white px-6 py-3.5 rounded-2xl font-extrabold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 shrink-0"
           >
             <UserCheck className="w-4 h-4 text-white shrink-0" />
-            <span>Register <span className="font-black">Now</span></span>
+            <span>Login</span>
           </button>
         </div>
 

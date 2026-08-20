@@ -109,7 +109,7 @@ export default function AcademicTracks({ onOpenRegister, tracksData }) {
                     onClick={onOpenRegister}
                     className="w-full py-2.5 px-4 rounded-xl border-2 border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
-                    <span>Register for {track.code}</span>
+                    <span>Login to View {track.code}</span>
                     <ArrowUpRight className="w-4 h-4" />
                   </button>
                 </div>
