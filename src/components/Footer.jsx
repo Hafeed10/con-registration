@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail } from 'lucide-react';
+import confiqLogo from '../assets/CONFIQ.png';
 
 export default function Footer({ onOpenRegister, onOpenBrochure, scrollToSection }) {
   return (
@@ -9,12 +10,14 @@ export default function Footer({ onOpenRegister, onOpenBrochure, scrollToSection
         {/* Top 3-column layout matching PDF */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 sm:gap-10 pb-8 sm:pb-12 border-b border-gray-200">
 
-          {/* Left Column matching user text logo */}
+          {/* Left Column matching user logo */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center space-x-2.5">
-              <span className="font-sans text-2xl font-black tracking-tight uppercase">
-                <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
-              </span>
+              <img 
+                src={confiqLogo} 
+                alt="CONFIQ Logo" 
+                className="h-9 sm:h-11 w-auto object-contain select-none"
+              />
               <span className="inline-block px-2.5 py-1 rounded-xl text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider">
                 1ST EDITION
               </span>

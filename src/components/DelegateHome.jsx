@@ -10,6 +10,10 @@ import CountdownSection from './CountdownSection';
 import GeometricPatternDivider from './GeometricPatternDivider';
 import Footer from './Footer';
 
+import confiqLogo from '../assets/CONFIQ.png';
+import group8Img from '../assets/Group 8.png';
+import vectorSmartObj from '../assets/Vector Smart Object.png';
+
 export default function DelegateHome({ 
   currentUser, 
   onLogout, 
@@ -66,22 +70,39 @@ export default function DelegateHome({
 
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               
-              {/* Left Column: Greeting & Info */}
-              <div className="space-y-3 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#17472B] text-white rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
-                  <ShieldCheck className="w-4 h-4 text-amber-300" />
-                  <span>Authenticated Delegate Portal</span>
+              {/* Left Column: Greeting, CONFIQ Logo & Info */}
+              <div className="space-y-4 max-w-2xl">
+                
+                <div className="flex flex-wrap items-center gap-3">
+                  <img 
+                    src={confiqLogo} 
+                    alt="CONFIQ Logo" 
+                    className="h-10 sm:h-12 w-auto object-contain select-none"
+                  />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#17472B] text-white rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
+                    <ShieldCheck className="w-4 h-4 text-amber-300" />
+                    <span>Authenticated Delegate Portal</span>
+                  </div>
                 </div>
 
                 <h1 className="text-2xl sm:text-4xl font-black text-[#17472B] tracking-tight leading-tight">
                   Ahlan wa Sahlan, {currentUser?.fullName || 'Delegate'}!
                 </h1>
 
+                {/* Vector Smart Object Badge */}
+                <div>
+                  <img 
+                    src={vectorSmartObj} 
+                    alt="Keralam Fiqh Summit 2026" 
+                    className="h-9 sm:h-10 w-auto object-contain select-none"
+                  />
+                </div>
+
                 <p className="text-xs sm:text-sm text-gray-700 font-medium leading-relaxed">
                   Welcome to your official <strong>conFiqh 2026</strong> Delegate Home. You have full access to academic tracks, research session abstracts, speaker schedules, and delegate resources.
                 </p>
 
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">
                     <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                     Status: {currentUser?.status || 'Student'}
@@ -99,23 +120,35 @@ export default function DelegateHome({
                 </div>
               </div>
 
-              {/* Right Column: Pass Badge Preview & Print Button */}
-              <div className="w-full lg:w-auto shrink-0 flex flex-col sm:flex-row lg:flex-col gap-3">
-                <button
-                  onClick={handlePrint}
-                  className="bg-[#17472B] hover:bg-[#20603B] text-white px-6 py-3.5 rounded-2xl font-extrabold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#354823]"
-                >
-                  <Printer className="w-4 h-4 text-amber-300" />
-                  <span>Print Delegate Badge</span>
-                </button>
+              {/* Right Column: Date Graphic & Pass Badge Action */}
+              <div className="w-full lg:w-auto shrink-0 flex flex-col items-center lg:items-end gap-4">
+                
+                {/* Group 8.png Image Date & Location */}
+                <div className="bg-[#EBF5DA]/80 p-2.5 rounded-2xl border border-[#C5DF9F] shadow-sm">
+                  <img 
+                    src={group8Img} 
+                    alt="11-12 Sept 2026 Location" 
+                    className="h-16 sm:h-20 w-auto object-contain select-none"
+                  />
+                </div>
 
-                <button
-                  onClick={onLogout}
-                  className="bg-gray-100 hover:bg-red-50 hover:text-red-700 text-gray-700 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer border border-gray-200"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-3.5 w-full">
+                  <button
+                    onClick={handlePrint}
+                    className="bg-[#17472B] hover:bg-[#20603B] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#354823]"
+                  >
+                    <Printer className="w-4 h-4 text-amber-300" />
+                    <span>Print Delegate Badge</span>
+                  </button>
+
+                  <button
+                    onClick={onLogout}
+                    className="bg-gray-100 hover:bg-red-50 hover:text-red-700 text-gray-700 px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer border border-gray-200"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
               </div>
 
             </div>
@@ -125,13 +158,17 @@ export default function DelegateHome({
               <div id="home-printable-badge" className="bg-[#17472B] text-white rounded-2xl p-5 sm:p-6 shadow-xl border-4 border-[#354823] space-y-4">
                 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#354823] pb-3">
-                  <div>
-                    <span className="font-sans text-xl font-black text-[#C5DF9F] uppercase tracking-tight">
-                      CON FIQH 2026
-                    </span>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-                      Annual Kerala Fiqh Summit • 1st Edition
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={confiqLogo} 
+                      alt="CONFIQ Logo" 
+                      className="h-8 w-auto object-contain brightness-200 contrast-200"
+                    />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">
+                        Annual Kerala Fiqh Summit • 1st Edition
+                      </p>
+                    </div>
                   </div>
                   <span className="px-3 py-1 bg-[#354823] text-[#C5DF9F] font-mono text-xs font-bold rounded-xl border border-[#C5DF9F]/30">
                     PASS ID: {currentUser?.id || 'CF-2026-6249'}

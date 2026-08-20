@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Menu, X, Layers, Calendar, Clock, Download, Home, UserCheck, LogOut, User } from 'lucide-react';
+import confiqLogo from '../assets/CONFIQ.png';
 
 export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection, currentUser, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,14 +19,16 @@ export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-18">
 
-          {/* Logo: CON FIQH (Single line, whitespace-nowrap) */}
+          {/* Logo: Official CONFIQ.png Image Logo */}
           <div
-            className="flex items-center space-x-1.5 sm:space-x-2.5 cursor-pointer select-none shrink-0"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer select-none shrink-0"
             onClick={() => handleNavClick('top')}
           >
-            <span className="font-sans text-lg sm:text-2xl font-black tracking-tight uppercase whitespace-nowrap">
-              <span className="text-[#387B52]">CON</span> <span className="text-[#17472B]">FIQH</span>
-            </span>
+            <img 
+              src={confiqLogo} 
+              alt="CONFIQ Logo" 
+              className="h-8 sm:h-10 md:h-11 w-auto object-contain drop-shadow-xs"
+            />
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl text-[9px] sm:text-[11px] font-black bg-[#17472B] text-white uppercase tracking-wider shadow-xs">
               1ST EDITION
             </span>

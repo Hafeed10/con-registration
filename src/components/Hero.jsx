@@ -1,78 +1,52 @@
 import React from 'react';
 import { Compass, Download, UserCheck } from 'lucide-react';
+import confiqLogo from '../assets/CONFIQ.png';
+import group8Img from '../assets/Group 8.png';
+import vectorSmartObj from '../assets/Vector Smart Object.png';
 
 export default function Hero({ onOpenRegister, onOpenBrochure, scrollToSection }) {
   return (
-    <section className="relative bg-[#EBF5DA] pt-10 pb-16 lg:pb-20 overflow-hidden">
+    <section className="relative bg-[#EBF5DA] pt-8 pb-16 lg:pb-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Main Hero Layout matching user snippet */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-8">
+        {/* Main Hero Layout matching user layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-8">
 
-          {/* Left Column: CON FIQH Title & Central Badge */}
+          {/* Left Column: Official CONFIQ.png Logo & Vector Smart Object Pill Badge */}
           <div className="lg:col-span-7 space-y-6">
 
-            {/* CON FIQH Title */}
-            <div className="flex items-start gap-4">
-              <div>
-                {/* CON in medium forest green with drop shadow */}
-                <div
-                  className="font-sans font-medium text-[#387B52] text-7xl sm:text-8xl md:text-9xl tracking-tighter leading-none select-none"
-                  style={{ textShadow: '0 4px 10px rgba(24, 77, 47, 0.15)' }}
-                >
-                  CON
-                </div>
+            {/* CONFIQ.png Official Brand Logo */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-4">
+              <img 
+                src={confiqLogo} 
+                alt="CONFIQ - Annual Kerala Fiqh Summit" 
+                className="h-20 sm:h-28 md:h-32 lg:h-36 w-auto object-contain drop-shadow-md select-none"
+              />
 
-                {/* FIQH + The First Edition */}
-                <div className="flex items-baseline gap-4 -mt-2 sm:-mt-4">
-                  <div
-                    className="font-sans font-black text-[#17472B] text-8xl sm:text-9xl md:text-[10.5rem] tracking-tight leading-none uppercase"
-                    style={{ textShadow: '0 6px 16px rgba(24, 77, 47, 0.22)' }}
-                  >
-                    FIQH
-                  </div>
-
-                  <div className="font-serif text-sm sm:text-base font-semibold text-[#3D4C33] leading-snug tracking-tight">
-                    The <br />
-                    First <br />
-                    Edition
-                  </div>
-                </div>
+              <div className="font-serif text-sm sm:text-base font-semibold text-[#3D4C33] leading-snug tracking-tight">
+                The <br />
+                First <br />
+                Edition
               </div>
             </div>
 
-            {/* Central Dark Olive Pill Badge matching user snippet */}
+            {/* Vector Smart Object.png Image (Keralam Fiqh Summit 2026 Badge) */}
             <div className="pt-2">
-              <div className="inline-flex items-center gap-3">
-
-                {/* Left Dark Green 4-pointed Star Emblem */}
-                <svg className="w-6 h-6 text-[#17472B] shrink-0" viewBox="0 0 40 40" fill="currentColor">
-                  <path d="M20 0 L24 14 L38 14 L27 22 L31 36 L20 27 L9 36 L13 22 L2 14 L16 14 Z" />
-                </svg>
-
-                {/* Dark Olive Pill Container */}
-                <div className="bg-[#45522E] text-white px-8 py-3 rounded-2xl shadow-md flex items-center justify-center">
-                  <span className="text-xl sm:text-2xl font-normal tracking-wide text-white font-sans">
-                    Keralam <strong className="font-black text-white">Fiqh Summit</strong> 2026
-                  </span>
-                </div>
-
-                {/* Right Dark Green 4-pointed Star Emblem */}
-                <svg className="w-6 h-6 text-[#17472B] shrink-0" viewBox="0 0 40 40" fill="currentColor">
-                  <path d="M20 0 L24 14 L38 14 L27 22 L31 36 L20 27 L9 36 L13 22 L2 14 L16 14 Z" />
-                </svg>
-
-              </div>
+              <img 
+                src={vectorSmartObj} 
+                alt="Keralam Fiqh Summit 2026" 
+                className="h-12 sm:h-14 md:h-16 w-auto object-contain shadow-sm select-none"
+              />
             </div>
 
           </div>
 
-          {/* Right Column: Floating Tessellation Strip & Connected Date Badges */}
+          {/* Right Column: Group 8.png Image (Date & Location Graphic) */}
           <div className="lg:col-span-5 flex flex-col items-center lg:items-end">
 
             {/* Vertical Interlocking Tessellation Pattern Strip floating on #EBF5DA */}
-            <div className="mb-6 w-[200px] flex justify-center">
-              <svg width="200" height="260" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div className="mb-4 w-[200px] flex justify-center">
+              <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="snippetExactTessellation" width="50" height="50" patternUnits="userSpaceOnUse">
                     {/* Light Green 8-pointed Octagon Star Fill */}
@@ -91,49 +65,17 @@ export default function Hero({ onOpenRegister, onOpenBrochure, scrollToSection }
                     />
                   </pattern>
                 </defs>
-                <rect width="200" height="260" fill="url(#snippetExactTessellation)" />
+                <rect width="200" height="200" fill="url(#snippetExactTessellation)" />
               </svg>
             </div>
 
-            {/* Connected Date Badges (11 & 12) + September & Location */}
-            <div className="flex flex-col items-center lg:items-end text-center lg:text-right">
-
-              {/* Connected 8-pointed Star Badges 11 & 12 matching Snippet */}
-              <div className="flex items-center -space-x-1.5 mb-2">
-
-                {/* 11 Badge */}
-                <div className="relative w-15 h-15 flex items-center justify-center">
-                  <svg className="w-14 h-14 text-[#354823]" viewBox="0 0 50 50" fill="currentColor">
-                    <rect x="5" y="5" width="40" height="40" rx="3" />
-                    <rect x="5" y="5" width="40" height="40" rx="3" transform="rotate(45 25 25)" />
-                  </svg>
-                  <span className="absolute font-mono font-extrabold text-white text-2xl">11</span>
-                </div>
-
-                {/* 12 Badge */}
-                <div className="relative w-15 h-15 flex items-center justify-center z-10">
-                  <svg className="w-14 h-14 text-[#354823]" viewBox="0 0 50 50" fill="currentColor">
-                    <rect x="5" y="5" width="40" height="40" rx="3" />
-                    <rect x="5" y="5" width="40" height="40" rx="3" transform="rotate(45 25 25)" />
-                  </svg>
-                  <span className="absolute font-mono font-extrabold text-white text-2xl">12</span>
-                </div>
-
-              </div>
-
-              {/* 2026 September */}
-              <div className="text-xl font-normal text-[#17472B] tracking-tight mt-1">
-                2026 <span className="font-extrabold text-[#17472B]">September</span>
-              </div>
-
-              {/* Thin Horizontal Line Underline */}
-              <div className="w-36 h-[1.5px] bg-[#17472B] my-1" />
-
-              {/* Parapram,Pinarayi */}
-              <div className="text-base font-semibold text-[#1F281B] tracking-tight">
-                Parapram,Pinarayi
-              </div>
-
+            {/* Group 8.png Graphic Image (11-12 Sept 2026, Parapram Pinarayi) */}
+            <div className="bg-white/60 backdrop-blur-xs p-3 rounded-2xl border border-[#C5DF9F]/80 shadow-md">
+              <img 
+                src={group8Img} 
+                alt="11-12 September 2026 - AHLUSSUFFA Parapram, Pinarayi" 
+                className="h-20 sm:h-24 md:h-28 w-auto object-contain select-none"
+              />
             </div>
 
           </div>

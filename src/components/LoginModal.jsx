@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Phone, Calendar, ArrowRight, CheckCircle, ShieldAlert, Printer, User, Award, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import confiqLogo from '../assets/CONFIQ.png';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   if (!isOpen) return null;
@@ -150,13 +151,15 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 
         {!loggedInDelegate ? (
           <div>
-            {/* Header */}
+            {/* Header with CONFIQ Logo */}
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-[#17472B] text-white flex items-center justify-center mx-auto mb-3 shadow-lg">
-                <Lock className="w-7 h-7 text-amber-300" />
-              </div>
-              <h3 className="font-sans text-2xl font-black text-[#17472B]">
-                Delegate Login
+              <img 
+                src={confiqLogo} 
+                alt="CONFIQ Logo" 
+                className="h-10 sm:h-12 w-auto mx-auto mb-2 object-contain select-none"
+              />
+              <h3 className="font-sans text-xl font-black text-[#17472B]">
+                Delegate Portal Login
               </h3>
               <p className="text-xs font-bold text-[#387B52] mt-1">
                 Enter your Phone Number & Date of Birth (DD/MM/YY)
