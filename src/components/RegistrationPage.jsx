@@ -533,212 +533,154 @@ export default function RegistrationPage({ onOpenAdmin }) {
                   </div>
                 </div>
 
-                {/* 7. Fee ₹200 & QR Code Section */}
-                <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/40 to-white rounded-2xl p-4 sm:p-6 shadow-md space-y-4 max-w-full overflow-hidden">
-
-                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 pb-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2 sm:p-2.5 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
-                        <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
+                {/* 7. Registration Fee: ₹200 & QR Payment Section */}
+                <div className="bg-[#F4F8F3] p-5 sm:p-7 rounded-2xl shadow-sm space-y-6 max-w-full overflow-hidden">
+                  
+                  {/* Unified Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
+                        <CreditCard className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                          General Pass: ₹200
+                        <h4 className="font-extrabold text-base sm:text-lg text-[#17472B]">
+                          Registration Fee: ₹200
                         </h4>
-                        <p className="text-[11px] sm:text-xs text-gray-600">
-                          Scan QR Code to pay ₹200 & upload payment screenshot
+                        <p className="text-xs text-[#2A4222]/80 font-medium">
+                          Scan QR Code to pay ₹200 & upload payment screenshot below
                         </p>
                       </div>
                     </div>
 
-                    <span className="self-start xs:self-auto px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm shrink-0">
-                      Payment Required
+                    <span className="self-start sm:self-auto px-3 py-1 bg-[#17472B] text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-2xs shrink-0">
+                      Direct UPI Transfer
                     </span>
                   </div>
 
-                  {/* Fee Includes Collapsible Dropdown Option */}
-                  <div className="bg-emerald-50/80 rounded-xl p-2.5 sm:p-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowFeeIncludes(!showFeeIncludes)}
-                      className="w-full flex items-center justify-between gap-2 text-left font-extrabold text-xs sm:text-sm text-[#17472B] hover:text-[#0E4023] transition-colors"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Fee Includes (Click to {showFeeIncludes ? 'Close' : 'Open'})</span>
-                      </div>
-                      <ChevronDown className={`w-4 h-4 text-emerald-700 transition-transform duration-200 shrink-0 ${showFeeIncludes ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {showFeeIncludes && (
-                      <div className="mt-2.5 pt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-[#17472B] animate-fadeIn">
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Full access to CONFIQ-2026</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Food & Refreshments</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Accommodation</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>CONFIQ Summit Note / Study Material</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* PhonePe QR Code & Direct UPI Payment Card */}
-                  <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm space-y-5">
+                  {/* QR Code & UPI Details Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
                     
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
-                          <CreditCard className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-black text-base sm:text-lg text-[#17472B]">
-                            Registration Fee: ₹200
-                          </h4>
-                          <p className="text-xs text-gray-600 font-medium">
-                            Scan PhonePe / GPay QR Code or transfer via UPI ID below
-                          </p>
-                        </div>
+                    {/* QR Code Visual Box */}
+                    <div className="bg-white p-5 rounded-2xl shadow-2xs text-center flex flex-col items-center justify-center">
+                      <div className="text-xs font-extrabold text-[#17472B] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#17472B]" />
+                        Scan QR Code to Pay ₹200
                       </div>
 
-                      <span className="px-3 py-1 bg-emerald-100 text-[#17472B] text-xs font-black rounded-full uppercase tracking-wider self-start sm:self-auto">
-                        Direct UPI Transfer
-                      </span>
+                      <div className="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl overflow-hidden p-2 bg-[#F4F8F3] shadow-inner flex items-center justify-center">
+                        <img
+                          src={phonepeQrImg}
+                          alt="CONFIQ PhonePe Payment QR Code"
+                          className="w-full h-full object-contain rounded-xl"
+                        />
+                      </div>
+
+                      <div className="mt-3.5 flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={handleDownloadQr}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#17472B] hover:bg-[#20603B] text-white text-xs font-extrabold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
+                        >
+                          <Download className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Download QR Code</span>
+                        </button>
+                      </div>
                     </div>
 
-                    {/* QR Code & UPI Copy Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                    {/* UPI ID & UTR / Screenshot Inputs */}
+                    <div className="space-y-4">
                       
-                      {/* PhonePe QR Code Visual Box */}
-                      <div className="bg-emerald-50/50 p-4 rounded-2xl shadow-2xs text-center flex flex-col items-center justify-center">
-                        <div className="text-xs font-extrabold text-[#17472B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                          Scan QR Code to pay ₹200
-                        </div>
-
-                        <div className="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl overflow-hidden p-2 bg-white shadow-md flex items-center justify-center">
-                          <img
-                            src={phonepeQrImg}
-                            alt="CONFIQ PhonePe Payment QR Code"
-                            className="w-full h-full object-contain rounded-xl"
-                          />
-                        </div>
-
-                        <div className="mt-3 flex items-center justify-center gap-2">
+                      {/* UPI ID Box */}
+                      <div className="bg-white p-4 rounded-2xl shadow-2xs space-y-1.5">
+                        <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
+                          Official UPI ID / VPA
+                        </label>
+                        <div className="bg-[#F4F8F3] p-3 rounded-xl flex items-center justify-between gap-2">
+                          <span className="font-mono font-black text-base text-[#17472B] select-all">
+                            9605093107
+                          </span>
                           <button
                             type="button"
-                            onClick={handleDownloadQr}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white text-xs font-extrabold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
+                            onClick={handleCopyUpi}
+                            className="px-3.5 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white rounded-lg text-xs font-extrabold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 active:scale-95 shrink-0"
                           >
-                            <Download className="w-3.5 h-3.5 text-amber-300" />
-                            <span>Download QR Code</span>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>{copiedUpi ? 'Copied!' : 'Copy'}</span>
                           </button>
                         </div>
                       </div>
 
-                      {/* UPI ID & UTR / Screenshot Inputs */}
-                      <div className="space-y-4">
-                        
-                        {/* UPI ID Box */}
-                        <div className="bg-emerald-50/60 p-3.5 rounded-xl space-y-1.5">
-                          <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
-                            Official UPI ID / VPA
-                          </label>
-                          <div className="bg-white p-2.5 rounded-xl shadow-2xs flex items-center justify-between gap-2">
-                            <span className="font-mono font-black text-sm sm:text-base text-[#17472B] select-all">
-                              9605093107
-                            </span>
+                      {/* UTR Number Input */}
+                      <div className="bg-white p-4 rounded-2xl shadow-2xs space-y-1.5">
+                        <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
+                          UPI Reference / UTR Number (12-digit)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 423819283019 (Found in UPI receipt)"
+                          value={utrNumber}
+                          onChange={(e) => setUtrNumber(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold outline-none bg-[#F4F8F3] focus:bg-[#EBF3EA] text-[#17472B]"
+                        />
+                      </div>
+
+                      {/* Screenshot Upload Field */}
+                      <div className="bg-white p-4 rounded-2xl shadow-2xs space-y-1.5">
+                        <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
+                          Upload Payment Screenshot *
+                        </label>
+
+                        {!paymentScreenshot ? (
+                          <div className="relative bg-[#F4F8F3] hover:bg-[#EBF3EA] rounded-xl p-3.5 text-center cursor-pointer transition-all">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleScreenshotChange}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <div className="flex items-center justify-center gap-2">
+                              <Upload className="w-4 h-4 text-[#17472B]" />
+                              <span className="text-xs font-extrabold text-[#17472B]">
+                                Click to attach receipt image
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-[#F4F8F3] p-2.5 rounded-xl flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white">
+                                <img
+                                  src={paymentScreenshot}
+                                  alt="Payment Screenshot Preview"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-extrabold text-[#17472B] flex items-center gap-1">
+                                  <FileCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <span className="truncate">Screenshot Attached</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-gray-600 truncate">
+                                  {screenshotFileName || 'receipt.png'}
+                                </div>
+                              </div>
+                            </div>
+
                             <button
                               type="button"
-                              onClick={handleCopyUpi}
-                              className="px-3 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white rounded-lg text-xs font-extrabold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 active:scale-95 shrink-0"
+                              onClick={handleRemoveScreenshot}
+                              className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold shrink-0 cursor-pointer"
+                              title="Remove screenshot"
                             >
-                              <Copy className="w-3.5 h-3.5" />
-                              <span>{copiedUpi ? 'Copied!' : 'Copy'}</span>
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
-                        </div>
-
-                        {/* UTR Number Input */}
-                        <div>
-                          <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
-                            UPI Reference / UTR Number (12-digit)
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. 423819283019 (Found in UPI receipt)"
-                            value={utrNumber}
-                            onChange={(e) => setUtrNumber(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold outline-none bg-gray-100/80 focus:bg-gray-100 text-[#17472B]"
-                          />
-                        </div>
-
-                        {/* Screenshot Upload Field */}
-                        <div>
-                          <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
-                            Upload Payment Screenshot *
-                          </label>
-
-                          {!paymentScreenshot ? (
-                            <div className="relative bg-emerald-50/70 hover:bg-emerald-100/80 rounded-xl p-3.5 text-center cursor-pointer transition-all">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleScreenshotChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                              />
-                              <div className="flex items-center justify-center gap-2">
-                                <Upload className="w-4 h-4 text-[#17472B]" />
-                                <span className="text-xs font-extrabold text-[#17472B]">
-                                  Click to attach receipt image
-                                </span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="bg-white p-2.5 rounded-xl flex items-center justify-between gap-3 shadow-sm">
-                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-gray-100">
-                                  <img
-                                    src={paymentScreenshot}
-                                    alt="Payment Screenshot Preview"
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
-                                    <FileCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                    <span className="truncate">Screenshot Attached</span>
-                                  </div>
-                                  <div className="text-[10px] font-mono text-gray-600 truncate">
-                                    {screenshotFileName || 'receipt.png'}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={handleRemoveScreenshot}
-                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold shrink-0 cursor-pointer"
-                                title="Remove screenshot"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
+                        )}
                       </div>
+
                     </div>
                   </div>
+
                 </div>
 
                 {/* Error Box */}
