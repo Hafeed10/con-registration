@@ -37,7 +37,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('thulaib123@okicici');
+      navigator.clipboard.writeText('7558889458@upi');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -46,7 +46,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const handleUpiPayClick = (e) => {
     if (e) e.preventDefault();
 
-    const upiId = 'thulaib123@okicici';
+    const upiId = '7558889458@upi';
     const name = 'CONFIQ Secretariat';
 
     // Copy UPI ID to clipboard first
@@ -136,6 +136,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
     setIsSubmitting(true);
     setPaymentError('');
+    const trimmedUtr = utrNumber.trim();
 
     const passId = 'CF-2026-' + Math.floor(1000 + Math.random() * 9000);
     const newDelegate = {
@@ -652,8 +653,106 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     </a>
                   </div>
 
+                  {/* UPI Payment Copy Box & Screenshot Upload (No QR Code) */}
+                  <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-200 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-emerald-100 text-[#17472B] rounded-lg">
+                          <CreditCard className="w-4 h-4" />
+                        </div>
+                        <h5 className="font-extrabold text-sm sm:text-base text-[#17472B]">
+                          Pay via UPI ID & Upload Receipt
+                        </h5>
+                      </div>
+                    </div>
 
+                    {/* UPI ID Copy Link Box */}
+                    <div className="bg-emerald-50/80 p-3 sm:p-3.5 rounded-xl border border-emerald-200 flex items-center justify-between gap-3 shadow-xs">
+                      <div className="min-w-0">
+                        <span className="font-mono font-extrabold text-sm sm:text-base text-[#17472B] select-all block truncate">
+                          7558889458@upi
+                        </span>
+                      </div>
 
+                      <button
+                        type="button"
+                        onClick={handleCopyUpi}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                        title=""
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>{copiedUpi ? 'Copied!' : 'Copy'}</span>
+                      </button>
+                    </div>
+
+                    {/* Screenshot Upload Field */}
+                    <div className="pt-2 border-t border-gray-100">
+                      <label className="block text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
+                        Upload Payment Screenshot (Required if paying via UPI)
+                      </label>
+                      <p className="text-[11px] font-semibold text-gray-500 mb-2">
+                        Optional if paying via Razorpay online. Required only if using direct UPI transfer.
+                      </p>
+
+                      {!paymentScreenshot ? (
+                        <div className={`relative border-2 border-dashed rounded-xl p-4 sm:p-5 text-center cursor-pointer transition-all ${paymentError
+                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
+                          : 'border-emerald-600/40 bg-emerald-50/40 hover:bg-emerald-50/80 hover:border-emerald-600'
+                          }`}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleScreenshotChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div className="flex flex-col items-center justify-center space-y-1.5">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#17472B] flex items-center justify-center">
+                              <Upload className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="text-xs sm:text-sm font-extrabold text-[#17472B] hover:underline">
+                                Click to upload payment screenshot
+                              </span>
+                              <p className="text-[10px] sm:text-xs font-semibold text-gray-500 mt-0.5">
+                                Supports JPG, PNG, WEBP receipts (Optional for Razorpay)
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-3 shadow-sm overflow-hidden">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
+                              <img
+                                src={paymentScreenshot}
+                                alt="Payment Screenshot Preview"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
+                                <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span className="truncate">Screenshot Attached</span>
+                              </div>
+                              <div className="text-[11px] font-mono text-gray-600 truncate mt-0.5">
+                                {screenshotFileName || 'receipt.png'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleRemoveScreenshot}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+                            title="Remove screenshot"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="hidden sm:inline">Remove</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Error Box */}
