@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
-import phonepeQrImg from '../assets/phonepe-qr-code.jpg';
+import phonepeQrImg from '../assets/image.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -35,7 +35,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
   const handleCopyUpi = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('7558889458@upi');
+      navigator.clipboard.writeText('96050 93107');
     }
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 3500);
@@ -534,9 +534,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
                 </div>
 
                 {/* 7. Fee ₹200 & QR Code Section */}
-                <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/50 to-white rounded-2xl p-3.5 sm:p-6 border-2 border-emerald-600/30 shadow-md space-y-4 max-w-full overflow-hidden">
+                <div className="bg-gradient-to-br from-amber-50/80 via-emerald-50/40 to-white rounded-2xl p-4 sm:p-6 shadow-md space-y-4 max-w-full overflow-hidden">
 
-                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 border-b border-emerald-200/60 pb-3">
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 pb-2">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 sm:p-2.5 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
                         <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -557,7 +557,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                   </div>
 
                   {/* Fee Includes Collapsible Dropdown Option */}
-                  <div className="bg-emerald-50/80 rounded-xl p-2.5 sm:p-3 border border-emerald-200/80">
+                  <div className="bg-emerald-50/80 rounded-xl p-2.5 sm:p-3">
                     <button
                       type="button"
                       onClick={() => setShowFeeIncludes(!showFeeIncludes)}
@@ -571,20 +571,20 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     </button>
 
                     {showFeeIncludes && (
-                      <div className="mt-2.5 pt-2.5 border-t border-emerald-200/60 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-[#17472B] animate-fadeIn">
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                      <div className="mt-2.5 pt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-[#17472B] animate-fadeIn">
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>Full access to CONFIQ-2026</span>
                         </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>Food & Refreshments</span>
                         </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>Accommodation</span>
                         </div>
-                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-2xs">
                           <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>CONFIQ Summit Note / Study Material</span>
                         </div>
@@ -593,9 +593,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
                   </div>
 
                   {/* PhonePe QR Code & Direct UPI Payment Card */}
-                  <div className="bg-white p-4 sm:p-6 rounded-2xl border-2 border-emerald-600/30 shadow-md space-y-5">
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm space-y-5">
                     
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-emerald-100 pb-3.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
                           <CreditCard className="w-5 h-5" />
@@ -610,7 +610,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                         </div>
                       </div>
 
-                      <span className="px-3 py-1 bg-emerald-100 text-[#17472B] text-xs font-black rounded-full uppercase tracking-wider self-start sm:self-auto border border-emerald-300">
+                      <span className="px-3 py-1 bg-emerald-100 text-[#17472B] text-xs font-black rounded-full uppercase tracking-wider self-start sm:self-auto">
                         Direct UPI Transfer
                       </span>
                     </div>
@@ -619,13 +619,13 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
                       
                       {/* PhonePe QR Code Visual Box */}
-                      <div className="bg-emerald-50/50 p-4 rounded-2xl border-2 border-emerald-200 shadow-sm text-center flex flex-col items-center justify-center">
+                      <div className="bg-emerald-50/50 p-4 rounded-2xl shadow-2xs text-center flex flex-col items-center justify-center">
                         <div className="text-xs font-extrabold text-[#17472B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                           Scan QR Code to pay ₹200
                         </div>
 
-                        <div className="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-3 border-[#17472B] p-2 bg-white shadow-md flex items-center justify-center">
+                        <div className="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl overflow-hidden p-2 bg-white shadow-md flex items-center justify-center">
                           <img
                             src={phonepeQrImg}
                             alt="CONFIQ PhonePe Payment QR Code"
@@ -649,13 +649,13 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <div className="space-y-4">
                         
                         {/* UPI ID Box */}
-                        <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-2xs space-y-1.5">
+                        <div className="bg-emerald-50/60 p-3.5 rounded-xl space-y-1.5">
                           <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
                             Official UPI ID / VPA
                           </label>
-                          <div className="bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-300 flex items-center justify-between gap-2">
+                          <div className="bg-white p-2.5 rounded-xl shadow-2xs flex items-center justify-between gap-2">
                             <span className="font-mono font-black text-sm sm:text-base text-[#17472B] select-all">
-                              7558889458@upi
+                              9605093107
                             </span>
                             <button
                               type="button"
@@ -678,7 +678,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                             placeholder="e.g. 423819283019 (Found in UPI receipt)"
                             value={utrNumber}
                             onChange={(e) => setUtrNumber(e.target.value)}
-                            className="w-full px-3.5 py-2 rounded-xl border border-gray-300 focus:border-[#17472B] text-xs font-mono font-bold outline-none bg-white"
+                            className="w-full px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold outline-none bg-gray-100/80 focus:bg-gray-100 text-[#17472B]"
                           />
                         </div>
 
@@ -689,7 +689,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                           </label>
 
                           {!paymentScreenshot ? (
-                            <div className="relative border-2 border-dashed border-emerald-600/40 bg-emerald-50/40 hover:bg-emerald-50/80 hover:border-emerald-600 rounded-xl p-3 text-center cursor-pointer transition-all">
+                            <div className="relative bg-emerald-50/70 hover:bg-emerald-100/80 rounded-xl p-3.5 text-center cursor-pointer transition-all">
                               <input
                                 type="file"
                                 accept="image/*"
@@ -704,9 +704,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
                               </div>
                             </div>
                           ) : (
-                            <div className="bg-white p-2 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-3 shadow-sm">
+                            <div className="bg-white p-2.5 rounded-xl flex items-center justify-between gap-3 shadow-sm">
                               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                <div className="w-10 h-10 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-gray-100">
                                   <img
                                     src={paymentScreenshot}
                                     alt="Payment Screenshot Preview"
@@ -738,7 +738,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                       </div>
                     </div>
-
                   </div>
                 </div>
 
