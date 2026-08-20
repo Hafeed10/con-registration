@@ -10,6 +10,7 @@ import BrochureModal from './components/BrochureModal';
 import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
 import AdminDashboard from './components/AdminDashboard';
+import DelegateHome from './components/DelegateHome';
 
 import { supabase } from './lib/supabase';
 
@@ -21,8 +22,37 @@ export default function App() {
     return hash === '#admin' || path === '/admin' || window.location.search.includes('admin');
   });
 
+  // Track logged-in delegate state for Home Page display
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('confiqh_logged_in_delegate');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isBrochureOpen, setIsBrochureOpen] = useState(false);
+
+  const handleLoginSuccess = (delegateData) => {
+    setCurrentUser(delegateData);
+    try {
+      localStorage.setItem('confiqh_logged_in_delegate', JSON.stringify(delegateData));
+    } catch (e) {
+      console.error('Storage note:', e.message);
+    }
+    setIsLoginOpen(false);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('confiqh_logged_in_delegate');
+    } catch (e) {
+      console.error('Storage remove note:', e.message);
+    }
+  };
 
   // Initial default sessions
   const defaultSessionsList = [
@@ -223,6 +253,35 @@ export default function App() {
     );
   }
 
+  // Render Home Page upon Successful Delegate Login
+  if (currentUser) {
+    return (
+      <div className="min-h-screen bg-brand-bg text-brand-textDark font-sans selection:bg-brand-dark selection:text-white flex flex-col">
+        <Navbar
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onOpenBrochure={() => setIsBrochureOpen(true)}
+          scrollToSection={scrollToSection}
+        />
+        <DelegateHome
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onOpenBrochure={() => setIsBrochureOpen(true)}
+          scrollToSection={scrollToSection}
+          sessionsData={sessionsData}
+          tracksData={tracksData}
+          onOpenRegister={() => setIsLoginOpen(true)}
+        />
+        <BrochureModal
+          isOpen={isBrochureOpen}
+          onClose={() => setIsBrochureOpen(false)}
+          onOpenRegister={() => setIsLoginOpen(true)}
+        />
+      </div>
+    );
+  }
+
+  // Render Landing Page ONLY when not logged in
   return (
     <div className="min-h-screen bg-brand-bg text-brand-textDark font-sans selection:bg-brand-dark selection:text-white flex flex-col">
       
@@ -231,6 +290,7 @@ export default function App() {
         onOpenRegister={() => setIsLoginOpen(true)}
         onOpenBrochure={() => setIsBrochureOpen(true)}
         scrollToSection={scrollToSection}
+        currentUser={null}
       />
 
       {/* Main Content Sections */}
@@ -279,6 +339,7 @@ export default function App() {
       <LoginModal 
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
 
       {/* Official Brochure Viewer Modal */}

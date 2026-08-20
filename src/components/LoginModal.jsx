@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Lock, Phone, Calendar, ArrowRight, CheckCircle, ShieldAlert, Printer, User, Award, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-export default function LoginModal({ isOpen, onClose }) {
+export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   if (!isOpen) return null;
 
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -21,6 +21,8 @@ export default function LoginModal({ isOpen, onClose }) {
     setLoading(true);
     setErrorMsg('');
 
+    let delegateObj = null;
+
     try {
       const cleanPhone = phoneNumber.trim().replace(/\D/g, '');
       
@@ -34,7 +36,7 @@ export default function LoginModal({ isOpen, onClose }) {
 
       if (data && data.length > 0) {
         const found = data[0];
-        setLoggedInDelegate({
+        delegateObj = {
           id: found.pass_id || found.id,
           fullName: found.full_name || found.fullName,
           age: found.age,
@@ -47,10 +49,10 @@ export default function LoginModal({ isOpen, onClose }) {
           whatsapp: found.whatsapp,
           paymentStatus: found.payment_status || 'PAID',
           utrNumber: found.utr_number || found.utrNumber
-        });
+        };
       } else {
         // Fallback demo delegate pass if phone number not in database
-        setLoggedInDelegate({
+        delegateObj = {
           id: 'CF-2026-' + Math.floor(1000 + Math.random() * 9000),
           fullName: 'Registered Delegate (' + phoneNumber + ')',
           age: '22',
@@ -62,12 +64,12 @@ export default function LoginModal({ isOpen, onClose }) {
           whatsapp: phoneNumber,
           paymentStatus: 'PAID ₹200 ✓',
           utrNumber: 'UTR-9605093107'
-        });
+        };
       }
     } catch (err) {
       console.error('Login note:', err.message);
       // Fallback demo pass
-      setLoggedInDelegate({
+      delegateObj = {
         id: 'CF-2026-6249',
         fullName: 'Delegate (' + phoneNumber + ')',
         age: '22',
@@ -79,10 +81,24 @@ export default function LoginModal({ isOpen, onClose }) {
         whatsapp: phoneNumber,
         paymentStatus: 'PAID ₹200 ✓',
         utrNumber: 'UTR-9605093107'
-      });
+      };
     } finally {
       setLoading(false);
     }
+
+    if (delegateObj) {
+      setLoggedInDelegate(delegateObj);
+      if (onLoginSuccess) {
+        onLoginSuccess(delegateObj);
+      }
+    }
+  };
+
+  const handleProceedHome = () => {
+    if (loggedInDelegate && onLoginSuccess) {
+      onLoginSuccess(loggedInDelegate);
+    }
+    onClose();
   };
 
   const handleReset = () => {
@@ -258,19 +274,13 @@ export default function LoginModal({ isOpen, onClose }) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
               <button
-                onClick={handleReset}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
+                onClick={handleProceedHome}
+                className="w-full sm:w-auto px-5 py-2.5 bg-[#17472B] hover:bg-[#20603B] text-white font-extrabold text-xs rounded-xl shadow flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                Back
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="px-5 py-2 bg-[#17472B] hover:bg-[#20603B] text-white font-extrabold text-xs rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
-              >
-                <Printer className="w-4 h-4 text-amber-300" />
-                <span>Print Delegate Badge</span>
+                <span>Go to Home Page</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

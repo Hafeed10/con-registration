@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowRight, Menu, X, Layers, Calendar, Clock, Download, Home, UserCheck } from 'lucide-react';
+import { ArrowRight, Menu, X, Layers, Calendar, Clock, Download, Home, UserCheck, LogOut, User } from 'lucide-react';
 
-export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection }) {
+export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection, currentUser, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavClick = (sectionId) => {
@@ -78,18 +78,35 @@ export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection
 
           {/* Right Action CTA & Mobile Hamburger Menu Toggle */}
           <div className="flex items-center space-x-2 shrink-0">
-            <button
-              onClick={onOpenRegister}
-              className="bg-[#17472B] hover:bg-[#20603B] text-white px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl font-extrabold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-1 sm:gap-2 whitespace-nowrap"
-            >
-              <span>Login</span>
-              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-1.5 bg-[#17472B]/10 px-3 py-1.5 rounded-xl border border-[#17472B]/20 text-[#17472B] text-xs font-extrabold">
+                  <User className="w-3.5 h-3.5 text-[#17472B]" />
+                  <span className="max-w-[120px] truncate">{currentUser.fullName}</span>
+                </div>
+
+                <button
+                  onClick={onLogout}
+                  className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-extrabold text-xs sm:text-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenRegister}
+                className="bg-[#17472B] hover:bg-[#20603B] text-white px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl font-extrabold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer"
+              >
+                <span>Login</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
+            )}
 
             {/* Mobile Hamburger Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 sm:p-2 rounded-xl bg-[#DDF0C2] text-[#17472B] hover:bg-[#cbe3aa] transition-colors shrink-0"
+              className="md:hidden p-1.5 sm:p-2 rounded-xl bg-[#DDF0C2] text-[#17472B] hover:bg-[#cbe3aa] transition-colors shrink-0 cursor-pointer"
               aria-label="Toggle mobile menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -158,16 +175,29 @@ export default function Navbar({ onOpenRegister, onOpenBrochure, scrollToSection
           </div>
 
           <div className="pt-2 border-t border-[#C5DF9F]/60">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (onOpenRegister) onOpenRegister();
-              }}
-              className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-2.5 rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2"
-            >
-              <UserCheck className="w-4 h-4" />
-              <span>Login Delegate Portal</span>
-            </button>
+            {currentUser ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onLogout) onLogout();
+                }}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout ({currentUser.fullName})</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onOpenRegister) onOpenRegister();
+                }}
+                className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-2.5 rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Login Delegate Portal</span>
+              </button>
+            )}
           </div>
 
         </div>
