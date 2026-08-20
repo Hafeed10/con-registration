@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import confiqLogo from '../assets/CONFIQ.png';
 import vectorSmartObject from '../assets/Vector Smart Object.png';
 import group8Img from '../assets/Group 8.png';
-import qrCodeImg from '../assets/q.code4.jpeg';
+import phonepeQrImg from '../assets/phonepe-qr-code.jpg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -15,23 +15,21 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const MAX_DELEGATES_LIMIT = 200;
   const [showFeeIncludes, setShowFeeIncludes] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
-  const upiParams = "pa=thulaib123@okicici&pn=CONFIQ%20Secretariat&cu=INR";
-  const upiDeepLink = `upi://pay?${upiParams}`;
 
   const handleDownloadQr = async () => {
     try {
-      const response = await fetch(qrCodeImg);
+      const response = await fetch(phonepeQrImg);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'CONFIQ_Payment_QR.jpeg';
+      a.download = 'CONFIQ_Payment_QR.jpg';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      window.open(qrCodeImg, '_blank');
+      window.open(phonepeQrImg, '_blank');
     }
   };
 
@@ -43,36 +41,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setTimeout(() => setCopiedUpi(false), 3500);
   };
 
-  const handleUpiPayClick = (e) => {
-    if (e) e.preventDefault();
-
-    const upiId = '7558889458@upi';
-    const name = 'CONFIQ Secretariat';
-
-    // Copy UPI ID to clipboard first
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(upiId);
-    }
-    setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 3500);
-
-    const userAgent = navigator.userAgent || '';
-    const isMobileUA = /Android|iPhone|iPad|iPod/i.test(userAgent);
-    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-    // Only launch scheme URL on real mobile devices to prevent Chrome DevTools/Desktop network errors
-    if (!isMobileUA || !isTouchDevice) return;
-
-    // Fixed UPI params: Added am=200 & cu=INR & tn=CONFIQ2026
-    const upiParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=200&cu=INR&tn=CONFIQ2026`;
-    const targetUrl = `upi://pay?${upiParams}`;
-
-    try {
-      window.location.href = targetUrl;
-    } catch (err) {
-      console.log('UPI payment launch error:', err);
-    }
-  };
   const [formData, setFormData] = useState({
     fullName: '',
     age: '',
@@ -95,15 +63,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const [submitted, setSubmitted] = useState(false);
   const [delegatePass, setDelegatePass] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
-  const [hasClickedRazorpay, setHasClickedRazorpay] = useState(false);
-
-  const handleOpenRazorpay = (e) => {
-    if (e) e.preventDefault();
-    setHasClickedRazorpay(true);
-    setPaymentError('');
-    window.open('https://rzp.io/rzp/afiIk3Q', '_blank');
-  };
 
   const copyPhoneToWhatsapp = () => {
     setFormData((prev) => ({ ...prev, whatsapp: prev.phone }));
@@ -138,14 +97,16 @@ export default function RegistrationPage({ onOpenAdmin }) {
     e.preventDefault();
 
     setPaymentError('');
+    const trimmedUtr = utrNumber.trim();
 
-    if (!paymentScreenshot && !hasClickedRazorpay) {
-      setPaymentError('Please pay ₹200 via Razorpay online or upload your payment screenshot before submitting registration.');
+    if (!paymentScreenshot && !trimmedUtr) {
+      setPaymentError('Please upload your payment screenshot or enter your UTR/Reference number after scanning the QR code.');
       return;
     }
 
     setIsSubmitting(true);
-    const trimmedUtr = utrNumber.trim();
+    const finalPaymentStatus = 'PENDING_VERIFICATION';
+    const finalUtr = trimmedUtr || 'N/A';
 
     const passId = 'CF-2026-' + Math.floor(1000 + Math.random() * 9000);
     const newDelegate = {
@@ -161,9 +122,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
       campus: formData.status === 'Student' ? formData.campus : 'N/A',
       position: formData.status === 'Working' ? formData.position : 'N/A',
       studiedAlfiyyaAndFathulMueen: formData.studiedAlfiyyaAndFathulMueen,
-      utrNumber: trimmedUtr || 'N/A',
+      utrNumber: finalUtr,
       paymentScreenshot: paymentScreenshot,
-      paymentStatus: 'PENDING_VERIFICATION',
+      paymentStatus: finalPaymentStatus,
       registeredAt: new Date().toLocaleDateString()
     };
 
@@ -186,9 +147,9 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
       const fullPayload = {
         ...basePayload,
-        utr_number: trimmedUtr || null,
+        utr_number: finalUtr !== 'N/A' ? finalUtr : null,
         payment_screenshot: paymentScreenshot,
-        payment_status: 'PENDING_VERIFICATION',
+        payment_status: finalPaymentStatus,
         amount: 200
       };
 
@@ -236,7 +197,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setUtrNumber('');
     setPaymentScreenshot(null);
     setScreenshotFileName('');
-    setHasClickedRazorpay(false);
     setPaymentError('');
     setFormData({
       fullName: '',
@@ -632,140 +592,153 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     )}
                   </div>
 
-                  {/* Primary Razorpay Action Card */}
-                  <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-left">
-                      <div className="flex items-center justify-center sm:justify-start gap-2">
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full uppercase tracking-wider">
-                          Instant Checkout
-                        </span>
-                        <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-                          <ShieldCheck className="w-3.5 h-3.5" /> Razorpay Secured
-                        </span>
-                      </div>
-                      <h5 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                        Pay ₹200 Online (UPI, Cards, NetBanking, Paytm)
-                      </h5>
-                      <p className="text-xs text-gray-600">
-                        Fast & secure payment popup modal without leaving this page
-                      </p>
-                    </div>
-
-                    <a
-                      href="https://rzp.io/rzp/afiIk3Q"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => {
-                        setHasClickedRazorpay(true);
-                        setPaymentError('');
-                      }}
-                      className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#17472B] to-[#20603B] hover:from-[#0E4023] hover:to-[#17472B] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span>{hasClickedRazorpay ? '✓ Razorpay Opened (Click to Pay)' : 'Pay ₹200 via Razorpay'}</span>
-                      <ExternalLink className="w-4 h-4 text-amber-300" />
-                    </a>
-                  </div>
-
-                  {/* UPI Payment Copy Box & Screenshot Upload (No QR Code) */}
-                  <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-200 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-emerald-100 text-[#17472B] rounded-lg">
-                          <CreditCard className="w-4 h-4" />
+                  {/* PhonePe QR Code & Direct UPI Payment Card */}
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl border-2 border-emerald-600/30 shadow-md space-y-5">
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-emerald-100 pb-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-[#17472B] text-white rounded-xl shadow-sm shrink-0">
+                          <CreditCard className="w-5 h-5" />
                         </div>
-                        <h5 className="font-extrabold text-sm sm:text-base text-[#17472B]">
-                          Pay via UPI ID & Upload Receipt
-                        </h5>
-                      </div>
-                    </div>
-
-                    {/* UPI ID Copy Link Box */}
-                    <div className="bg-emerald-50/80 p-3 sm:p-3.5 rounded-xl border border-emerald-200 flex items-center justify-between gap-3 shadow-xs">
-                      <div className="min-w-0">
-                        <span className="font-mono font-extrabold text-sm sm:text-base text-[#17472B] select-all block truncate">
-                          7558889458@upi
-                        </span>
+                        <div>
+                          <h4 className="font-black text-base sm:text-lg text-[#17472B]">
+                            Registration Fee: ₹200
+                          </h4>
+                          <p className="text-xs text-gray-600 font-medium">
+                            Scan PhonePe / GPay QR Code or transfer via UPI ID below
+                          </p>
+                        </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={handleCopyUpi}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
-                        title=""
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>{copiedUpi ? 'Copied!' : 'Copy'}</span>
-                      </button>
+                      <span className="px-3 py-1 bg-emerald-100 text-[#17472B] text-xs font-black rounded-full uppercase tracking-wider self-start sm:self-auto border border-emerald-300">
+                        Direct UPI Transfer
+                      </span>
                     </div>
 
-                    {/* Screenshot Upload Field */}
-                    <div className="pt-2 border-t border-gray-100">
-                      <label className="block text-xs font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
-                        Upload Payment Screenshot (Required if paying via UPI)
-                      </label>
-                      <p className="text-[11px] font-semibold text-gray-500 mb-2">
-                        Optional if paying via Razorpay online. Required only if using direct UPI transfer.
-                      </p>
+                    {/* QR Code & UPI Copy Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                      
+                      {/* PhonePe QR Code Visual Box */}
+                      <div className="bg-emerald-50/50 p-4 rounded-2xl border-2 border-emerald-200 shadow-sm text-center flex flex-col items-center justify-center">
+                        <div className="text-xs font-extrabold text-[#17472B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          Scan QR Code to pay ₹200
+                        </div>
 
-                      {!paymentScreenshot ? (
-                        <div className={`relative border-2 border-dashed rounded-xl p-4 sm:p-5 text-center cursor-pointer transition-all ${paymentError
-                          ? 'border-red-500 bg-red-50/50 hover:bg-red-50'
-                          : 'border-emerald-600/40 bg-emerald-50/40 hover:bg-emerald-50/80 hover:border-emerald-600'
-                          }`}>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleScreenshotChange}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        <div className="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-3 border-[#17472B] p-2 bg-white shadow-md flex items-center justify-center">
+                          <img
+                            src={phonepeQrImg}
+                            alt="CONFIQ PhonePe Payment QR Code"
+                            className="w-full h-full object-contain rounded-xl"
                           />
-                          <div className="flex flex-col items-center justify-center space-y-1.5">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#17472B] flex items-center justify-center">
-                              <Upload className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <span className="text-xs sm:text-sm font-extrabold text-[#17472B] hover:underline">
-                                Click to upload payment screenshot
-                              </span>
-                              <p className="text-[10px] sm:text-xs font-semibold text-gray-500 mt-0.5">
-                                Supports JPG, PNG, WEBP receipts (Optional for Razorpay)
-                              </p>
-                            </div>
-                          </div>
                         </div>
-                      ) : (
-                        <div className="bg-white p-3 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-3 shadow-sm overflow-hidden">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
-                              <img
-                                src={paymentScreenshot}
-                                alt="Payment Screenshot Preview"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
-                                <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                                <span className="truncate">Screenshot Attached</span>
-                              </div>
-                              <div className="text-[11px] font-mono text-gray-600 truncate mt-0.5">
-                                {screenshotFileName || 'receipt.png'}
-                              </div>
-                            </div>
-                          </div>
 
+                        <div className="mt-3 flex items-center justify-center gap-2">
                           <button
                             type="button"
-                            onClick={handleRemoveScreenshot}
-                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold flex items-center gap-1 shrink-0 cursor-pointer"
-                            title="Remove screenshot"
+                            onClick={handleDownloadQr}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white text-xs font-extrabold rounded-xl shadow-xs transition-all cursor-pointer active:scale-95"
                           >
-                            <Trash2 className="w-4 h-4" />
-                            <span className="hidden sm:inline">Remove</span>
+                            <Download className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Download QR Code</span>
                           </button>
                         </div>
-                      )}
+                      </div>
+
+                      {/* UPI ID & UTR / Screenshot Inputs */}
+                      <div className="space-y-4">
+                        
+                        {/* UPI ID Box */}
+                        <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-2xs space-y-1.5">
+                          <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
+                            Official UPI ID / VPA
+                          </label>
+                          <div className="bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-300 flex items-center justify-between gap-2">
+                            <span className="font-mono font-black text-sm sm:text-base text-[#17472B] select-all">
+                              7558889458@upi
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleCopyUpi}
+                              className="px-3 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white rounded-lg text-xs font-extrabold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 active:scale-95 shrink-0"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>{copiedUpi ? 'Copied!' : 'Copy'}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* UTR Number Input */}
+                        <div>
+                          <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
+                            UPI Reference / UTR Number (12-digit)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 423819283019 (Found in UPI receipt)"
+                            value={utrNumber}
+                            onChange={(e) => setUtrNumber(e.target.value)}
+                            className="w-full px-3.5 py-2 rounded-xl border border-gray-300 focus:border-[#17472B] text-xs font-mono font-bold outline-none bg-white"
+                          />
+                        </div>
+
+                        {/* Screenshot Upload Field */}
+                        <div>
+                          <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider mb-1">
+                            Upload Payment Screenshot *
+                          </label>
+
+                          {!paymentScreenshot ? (
+                            <div className="relative border-2 border-dashed border-emerald-600/40 bg-emerald-50/40 hover:bg-emerald-50/80 hover:border-emerald-600 rounded-xl p-3 text-center cursor-pointer transition-all">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleScreenshotChange}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                              />
+                              <div className="flex items-center justify-center gap-2">
+                                <Upload className="w-4 h-4 text-[#17472B]" />
+                                <span className="text-xs font-extrabold text-[#17472B]">
+                                  Click to attach receipt image
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-white p-2 rounded-xl border-2 border-emerald-500 flex items-center justify-between gap-3 shadow-sm">
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden border border-emerald-300 shrink-0 bg-gray-100">
+                                  <img
+                                    src={paymentScreenshot}
+                                    alt="Payment Screenshot Preview"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs font-extrabold text-emerald-800 flex items-center gap-1">
+                                    <FileCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    <span className="truncate">Screenshot Attached</span>
+                                  </div>
+                                  <div className="text-[10px] font-mono text-gray-600 truncate">
+                                    {screenshotFileName || 'receipt.png'}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={handleRemoveScreenshot}
+                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold shrink-0 cursor-pointer"
+                                title="Remove screenshot"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
                     </div>
+
                   </div>
                 </div>
 
@@ -796,92 +769,156 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
             </div>
           ) : (
-            /* Success & Printable Delegate Pass */
+            /* Success & Printable Delegate Pass Badge */
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#CCE5B4] text-center">
 
-              <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                <ShieldCheck className="w-8 h-8 text-amber-600" />
+              {/* Print CSS Rules */}
+              <style>{`
+                @media print {
+                  body * {
+                    visibility: hidden !important;
+                  }
+                  #printable-pass-container, #printable-pass-container * {
+                    visibility: visible !important;
+                  }
+                  #printable-pass-container {
+                    position: absolute !important;
+                    left: 0 !important;
+                    top: 0 !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: transparent !important;
+                  }
+                  #printable-pass {
+                    box-shadow: none !important;
+                    border: 4px solid #17472B !important;
+                    margin: 0 auto !important;
+                    page-break-inside: avoid !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                  }
+                }
+              `}</style>
+
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 ${
+                delegatePass.paymentStatus === 'PAID'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'
+              }`}>
+                {delegatePass.paymentStatus === 'PAID' ? (
+                  <CheckCircle className="w-8 h-8 text-emerald-600" />
+                ) : (
+                  <ShieldCheck className="w-8 h-8 text-amber-600" />
+                )}
               </div>
+
               <h2 className="font-sans text-2xl sm:text-3xl font-black text-[#17472B]">
                 Registration Received!
               </h2>
-              <div className="inline-block my-2 px-3 py-1 bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-xs font-black uppercase tracking-wider">
-                🟡 PAYMENT UNDER VERIFICATION
+
+              <div className={`inline-flex items-center gap-1.5 my-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                delegatePass.paymentStatus === 'PAID'
+                  ? 'bg-emerald-100 border border-emerald-300 text-emerald-900'
+                  : 'bg-amber-100 border border-amber-300 text-amber-900'
+              }`}>
+                {delegatePass.paymentStatus === 'PAID'
+                  ? '🟢 PAYMENT CONFIRMED & PASS ACTIVATED'
+                  : '🟡 PAYMENT UNDER VERIFICATION'}
               </div>
+
               <p className="text-xs sm:text-sm font-semibold text-[#387B52] mt-1 mb-6 max-w-md mx-auto">
-                Your payment details have been submitted. Your delegate pass will be fully activated upon Secretariat verification against bank records.
+                {delegatePass.paymentStatus === 'PAID'
+                  ? 'Your online payment was verified instantly. Your official CONFIQ 2026 Delegate Pass Badge is ready below.'
+                  : 'Your payment details have been submitted. Your delegate pass badge will be fully activated upon Secretariat verification.'}
               </p>
 
-              {/* Printable Pass Card */}
-              <div id="printable-pass" className="bg-[#17472B] text-white rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden border-4 border-[#354823] text-left max-w-xl mx-auto">
+              {/* Printable Pass Badge Card Container */}
+              <div id="printable-pass-container" className="my-4">
+                <div id="printable-pass" className="bg-gradient-to-b from-[#17472B] via-[#1c5534] to-[#0f341f] text-white rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden border-4 border-[#354823] text-left max-w-md sm:max-w-xl mx-auto">
 
-                <div className="flex items-center justify-between border-b border-[#354823] pb-4 mb-5">
-                  <div className="flex items-center space-x-2 select-none">
-                    <img src={confiqLogo} alt="CON FIQ Logo" className="h-6 sm:h-8 object-contain brightness-0 invert" />
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-black bg-[#354823] text-white uppercase tracking-wider">
-                      1ST EDITION
-                    </span>
-                  </div>
-
-                  <div className="font-mono text-xs sm:text-sm text-[#C5DF9F] font-bold bg-[#354823] px-3 py-1 rounded-lg">
-                    {delegatePass.id}
-                  </div>
-                </div>
-
-                <div className="space-y-4 my-3">
-                  <div>
-                    <span className="text-[10px] font-extrabold text-gray-300 uppercase tracking-widest block mb-0.5">Delegate Name</span>
-                    <span className="font-sans text-2xl sm:text-3xl font-black text-white">{delegatePass.fullName} ({delegatePass.age} yrs)</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-xs bg-[#20603B]/60 p-4 rounded-xl border border-[#354823]">
-                    <div>
-                      <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider">Study Range</span>
-                      <span className="font-bold text-[#C5DF9F] text-base">{delegatePass.studyRange}</span>
+                  {/* Lanyard Hole Visual Indicator */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-14 h-3 bg-[#0d2a19] rounded-full border border-emerald-500/40 shadow-inner flex items-center justify-center">
+                      <div className="w-8 h-1 bg-[#17472B] rounded-full"></div>
                     </div>
+                  </div>
+
+                  {/* Header Badge Row */}
+                  <div className="flex items-center justify-between border-b border-[#354823] pb-4 mb-5">
+                    <div className="flex items-center space-x-2 select-none">
+                      <img src={confiqLogo} alt="CON FIQ Logo" className="h-7 sm:h-9 object-contain brightness-0 invert" />
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-[#354823] text-amber-300 uppercase tracking-widest">
+                        DELEGATE PASS
+                      </span>
+                    </div>
+
+                    <div className="font-mono text-xs sm:text-sm text-[#C5DF9F] font-black bg-[#0d2a19] px-3 py-1.5 rounded-xl border border-emerald-800">
+                      {delegatePass.id}
+                    </div>
+                  </div>
+
+                  {/* Main Delegate Info */}
+                  <div className="space-y-4 my-3">
                     <div>
-                      <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider">Status / Birudam</span>
-                      <span className="font-bold text-white text-xs truncate block">
-                        {delegatePass.status} {delegatePass.birudam !== 'N/A' ? `• ${delegatePass.birudam}` : ''}
+                      <span className="text-[10px] font-extrabold text-amber-200 uppercase tracking-widest block mb-0.5">Delegate Name</span>
+                      <span className="font-sans text-2xl sm:text-3xl font-black text-white leading-tight block">
+                        {delegatePass.fullName} <span className="text-sm font-normal text-emerald-200">({delegatePass.age} yrs)</span>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs bg-[#0d2a19]/80 p-4 rounded-2xl border border-emerald-800/80 shadow-inner">
+                      <div>
+                        <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider font-extrabold">Study Range</span>
+                        <span className="font-black text-[#C5DF9F] text-base block">{delegatePass.studyRange}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider font-extrabold">Status / Birudam</span>
+                        <span className="font-bold text-white text-xs truncate block">
+                          {delegatePass.status} {delegatePass.birudam !== 'N/A' ? `• ${delegatePass.birudam}` : ''}
+                        </span>
+                      </div>
+                    </div>
+
+                    {delegatePass.utrNumber && delegatePass.utrNumber !== 'N/A' && (
+                      <div className="text-xs bg-[#091f13] p-3 rounded-xl border border-emerald-700/60 flex items-center justify-between font-mono">
+                        <span className="text-gray-300 text-[11px]">Payment Reference / UTR:</span>
+                        <span className="font-bold text-[#C5DF9F]">{delegatePass.utrNumber}</span>
+                      </div>
+                    )}
+
+                    <div>
+                      <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider font-extrabold">Institution / Campus</span>
+                      <span className="text-sm font-semibold text-gray-100 block">
+                        {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
                       </span>
                     </div>
                   </div>
 
-                  {delegatePass.utrNumber && delegatePass.utrNumber !== 'N/A' && (
-                    <div className="text-xs bg-[#123620] p-2.5 rounded-lg border border-emerald-700/60 flex items-center justify-between font-mono">
-                      <span className="text-gray-300 text-[11px]">UTR Ref:</span>
-                      <span className="font-bold text-[#C5DF9F]">{delegatePass.utrNumber}</span>
-                    </div>
-                  )}
-
-                  <div>
-                    <span className="text-[10px] text-gray-300 block mb-0.5 uppercase tracking-wider">Institution / Designation</span>
-                    <span className="text-sm font-semibold text-gray-200 block">
-                      {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
-                    </span>
+                  {/* Badge Footer */}
+                  <div className="mt-6 pt-4 border-t border-[#354823] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-gray-200 font-semibold">
+                    <span className="flex items-center gap-1">📍 AHLUSSUFFA Dars, Parapram, Pinarayi</span>
+                    <span className="flex items-center gap-1 text-amber-300 font-bold">📅 Sept 11–12, 2026</span>
                   </div>
-                </div>
 
-                <div className="mt-6 pt-4 border-t border-[#354823] flex items-center justify-between text-xs text-gray-300 font-semibold">
-                  <span>📍 Parapram, Pinarayi, Kannur</span>
-                  <span>📅 11–12 Sept 2026</span>
                 </div>
-
               </div>
 
               {/* Action Buttons */}
               <div className="mt-8 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
                 <button
+                  type="button"
                   onClick={handlePrint}
-                  className="flex-1 bg-[#17472B] hover:bg-[#20603B] text-white py-3.5 rounded-xl font-bold text-sm shadow flex items-center justify-center gap-2 transition-all"
+                  className="flex-1 bg-[#17472B] hover:bg-[#20603B] text-white py-3.5 rounded-xl font-extrabold text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <Printer className="w-4 h-4" />
-                  <span>Print / Save Pass</span>
+                  <Printer className="w-4.5 h-4.5 text-amber-300" />
+                  <span>Print / Save Delegate Badge</span>
                 </button>
 
                 <button
+                  type="button"
                   onClick={resetForm}
-                  className="px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold text-sm transition-all"
+                  className="px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-extrabold text-sm transition-all cursor-pointer"
                 >
                   Register Another Delegate
                 </button>
