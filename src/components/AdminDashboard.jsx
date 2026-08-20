@@ -27,9 +27,32 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
 
+  // Local storage helpers to guarantee status persistence across page refreshes
+  const getLocalStatusOverrides = () => {
+    try {
+      const stored = localStorage.getItem('confiqh_delegate_status_overrides');
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  const setLocalStatusOverride = (id, status) => {
+    try {
+      const overrides = getLocalStatusOverrides();
+      overrides[id] = status;
+      localStorage.setItem('confiqh_delegate_status_overrides', JSON.stringify(overrides));
+    } catch (e) {
+      console.error('Error saving local status override:', e);
+    }
+  };
+
   const handleApprovePayment = async (targetId) => {
     if (!targetId) return;
     if (!window.confirm(`Approve payment and mark delegate ${targetId} as PAID?`)) return;
+
+    // Immediately persist approval to localStorage
+    setLocalStatusOverride(targetId, 'PAID');
 
     setDelegates((prev) =>
       prev.map((d) => (d.id === targetId ? { ...d, paymentStatus: 'PAID' } : d))
@@ -62,6 +85,9 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
     if (!targetId) return;
     const reason = window.prompt('Enter rejection reason (optional):', 'Invalid UTR or payment not received');
     if (reason === null) return;
+
+    // Immediately persist rejection to localStorage
+    setLocalStatusOverride(targetId, 'REJECTED');
 
     setDelegates((prev) =>
       prev.map((d) => (d.id === targetId ? { ...d, paymentStatus: 'REJECTED' } : d))
@@ -123,24 +149,29 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
         setDbConnected(false);
       } else if (data) {
         setDbConnected(true);
-        const mapped = data.map(d => ({
-          id: d.pass_id || d.id,
-          fullName: d.full_name,
-          age: d.age,
-          address: d.address,
-          phone: d.phone,
-          whatsapp: d.whatsapp,
-          studyRange: d.study_range,
-          birudam: d.birudam,
-          status: d.status,
-          campus: d.campus,
-          position: d.position,
-          studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
-          utrNumber: d.utr_number || d.utrNumber || 'N/A',
-          paymentScreenshot: d.payment_screenshot || d.paymentScreenshot || null,
-          paymentStatus: d.payment_status || d.paymentStatus || 'PENDING_VERIFICATION',
-          registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
-        }));
+        const overrides = getLocalStatusOverrides();
+        const mapped = data.map(d => {
+          const id = d.pass_id || d.id;
+          const localStatus = overrides[id];
+          return {
+            id: id,
+            fullName: d.full_name,
+            age: d.age,
+            address: d.address,
+            phone: d.phone,
+            whatsapp: d.whatsapp,
+            studyRange: d.study_range,
+            birudam: d.birudam,
+            status: d.status,
+            campus: d.campus,
+            position: d.position,
+            studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
+            utrNumber: d.utr_number || d.utrNumber || 'N/A',
+            paymentScreenshot: d.payment_screenshot || d.paymentScreenshot || null,
+            paymentStatus: localStatus || d.payment_status || d.paymentStatus || 'PENDING_VERIFICATION',
+            registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
+          };
+        });
         setDelegates(mapped);
       }
     } catch (err) {
@@ -729,6 +760,8 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                     <tr className="bg-gray-50 border-b border-gray-200 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
                       <th className="py-3.5 px-4">Pass ID</th>
                       <th className="py-3.5 px-4">Name & Age</th>
+                      <th className="py-3.5 px-4">Campus / Institution</th>
+                      <th className="py-3.5 px-4">Address</th>
                       <th className="py-3.5 px-4">Phone & WhatsApp</th>
                       <th className="py-3.5 px-4">Study Range</th>
                       <th className="py-3.5 px-4">UTR & Receipt (₹200)</th>
@@ -744,7 +777,17 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="font-bold text-gray-900">{d.fullName} ({d.age} yrs)</div>
-                          <div className="text-[11px] text-gray-500 truncate max-w-[150px]">{d.address}</div>
+                          <span className="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-semibold mt-0.5">
+                            {d.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-[#17472B]">
+                            {d.status === 'Student' ? (d.campus || 'N/A') : (d.position || 'N/A')}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-gray-700 max-w-[180px]">
+                          <div className="text-xs leading-snug break-words">{d.address || 'N/A'}</div>
                         </td>
                         <td className="py-3.5 px-4 text-gray-600">
                           <div>Ph: {d.phone}</div>
@@ -798,9 +841,6 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                               🟡 PENDING REVIEW
                             </span>
                           )}
-                          <div className="text-[10px] text-gray-500 mt-1">
-                            {d.status === 'Student' ? d.campus : d.position}
-                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">

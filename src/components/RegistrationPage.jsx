@@ -96,9 +96,12 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const [delegatePass, setDelegatePass] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRazorpayModal, setShowRazorpayModal] = useState(false);
+  const [hasClickedRazorpay, setHasClickedRazorpay] = useState(false);
 
   const handleOpenRazorpay = (e) => {
     if (e) e.preventDefault();
+    setHasClickedRazorpay(true);
+    setPaymentError('');
     setShowRazorpayModal(true);
   };
 
@@ -134,8 +137,14 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setIsSubmitting(true);
     setPaymentError('');
+
+    if (!paymentScreenshot && !hasClickedRazorpay) {
+      setPaymentError('Please pay ₹200 via Razorpay online or upload your payment screenshot before submitting registration.');
+      return;
+    }
+
+    setIsSubmitting(true);
     const trimmedUtr = utrNumber.trim();
 
     const passId = 'CF-2026-' + Math.floor(1000 + Math.random() * 9000);
@@ -227,6 +236,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setUtrNumber('');
     setPaymentScreenshot(null);
     setScreenshotFileName('');
+    setHasClickedRazorpay(false);
     setPaymentError('');
     setFormData({
       fullName: '',
@@ -641,16 +651,15 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       </p>
                     </div>
 
-                    <a
-                      href="https://rzp.io/rzp/afiIk3Q"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={handleOpenRazorpay}
                       className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#17472B] to-[#20603B] hover:from-[#0E4023] hover:to-[#17472B] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
                     >
                       <CreditCard className="w-4 h-4" />
-                      <span>Pay ₹200 via Razorpay</span>
+                      <span>{hasClickedRazorpay ? '✓ Pay / Checkout via Razorpay' : 'Pay ₹200 via Razorpay'}</span>
                       <ExternalLink className="w-4 h-4 text-amber-300" />
-                    </a>
+                    </button>
                   </div>
 
                   {/* UPI Payment Copy Box & Screenshot Upload (No QR Code) */}
