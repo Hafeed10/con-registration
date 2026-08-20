@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import {
-  Users, Calendar, FileText, Settings, Plus, Search, Download,
+  Users, Calendar, FileText, Settings, Plus, Search, Download, Printer, ExternalLink,
   Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X, Edit3, Image as ImageIcon, Sparkles, Tag, Upload, BookOpen, Layers
 } from 'lucide-react';
 
@@ -26,6 +26,8 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
+  // Modal to preview & print individual delegate badge
+  const [printBadgeModal, setPrintBadgeModal] = useState(null);
 
   // Local storage helpers to guarantee status persistence across page refreshes
   const getLocalStatusOverrides = () => {
@@ -744,13 +746,24 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                 </select>
               </div>
 
-              <button
-                onClick={handleExportCSV}
-                className="bg-[#17472B] hover:bg-[#20603B] text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition-all"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export Database CSV</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.print()}
+                  className="bg-emerald-800 hover:bg-emerald-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition-all cursor-pointer"
+                  title="Print complete delegate register"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Full Details</span>
+                </button>
+
+                <button
+                  onClick={handleExportCSV}
+                  className="bg-[#17472B] hover:bg-[#20603B] text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Export Database CSV</span>
+                </button>
+              </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -790,8 +803,27 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                           <div className="text-xs leading-snug break-words">{d.address || 'N/A'}</div>
                         </td>
                         <td className="py-3.5 px-4 text-gray-600">
-                          <div>Ph: {d.phone}</div>
-                          <div className="text-[11px] text-emerald-700 font-bold">WA: {d.whatsapp}</div>
+                          <div>
+                            <a
+                              href={`tel:${d.phone}`}
+                              className="hover:underline font-semibold text-gray-800"
+                              title="Call Phone"
+                            >
+                              Ph: {d.phone}
+                            </a>
+                          </div>
+                          <div className="mt-0.5">
+                            <a
+                              href={`https://wa.me/91${(d.whatsapp || d.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Assalamu Alaikum ${d.fullName}, regarding your CONFIQ 2026 Delegate Pass (${d.id}):`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-200 text-[11px] font-extrabold transition-all"
+                              title="Open WhatsApp Chat"
+                            >
+                              <span>WA: {d.whatsapp}</span>
+                              <ExternalLink className="w-3 h-3 text-emerald-600 shrink-0" />
+                            </a>
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 font-bold text-[#17472B]">
                           <div>{d.studyRange}</div>
@@ -817,7 +849,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                               />
                               <button
                                 onClick={() => setViewReceiptModal(d)}
-                                className="text-[11px] text-[#17472B] hover:underline font-extrabold flex items-center gap-1"
+                                className="text-[11px] text-[#17472B] hover:underline font-extrabold flex items-center gap-1 cursor-pointer"
                               >
                                 <FileText className="w-3.5 h-3.5 text-emerald-700" />
                                 <span>View Receipt</span>
@@ -844,10 +876,19 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setPrintBadgeModal(d)}
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer"
+                              title="Print Delegate Pass Badge"
+                            >
+                              <Printer className="w-3 h-3 text-[#17472B]" />
+                              <span>Badge</span>
+                            </button>
+
                             {(d.paymentStatus === 'PENDING_VERIFICATION' || d.paymentStatus === 'REJECTED') && (
                               <button
                                 onClick={() => handleApprovePayment(d.id)}
-                                className="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-extrabold transition-all"
+                                className="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-extrabold transition-all cursor-pointer"
                                 title="Approve payment & mark Paid"
                               >
                                 Approve
@@ -857,7 +898,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                             {d.paymentStatus !== 'REJECTED' && (
                               <button
                                 onClick={() => handleRejectPayment(d.id)}
-                                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-extrabold transition-all"
+                                className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-extrabold transition-all cursor-pointer"
                                 title="Reject payment"
                               >
                                 Reject
@@ -866,7 +907,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
                             <button
                               onClick={() => handleDeleteDelegate(d.id)}
-                              className="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100"
+                              className="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100 cursor-pointer"
                               title="Delete Delegate"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1498,6 +1539,123 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* Printable Delegate Pass Badge Modal */}
+      {printBadgeModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          
+          {/* Print CSS Rules - Print STRICTLY the badge card */}
+          <style>{`
+            @media print {
+              body * {
+                visibility: hidden !important;
+              }
+              #admin-printable-pass, #admin-printable-pass * {
+                visibility: visible !important;
+              }
+              #admin-printable-pass {
+                position: fixed !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 420px !important;
+                max-width: 90% !important;
+                margin: 0 !important;
+                padding: 24px !important;
+                background: #F8FBF6 !important;
+                box-shadow: none !important;
+                border: 4px solid #17472B !important;
+                border-radius: 24px !important;
+                page-break-inside: avoid !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+            }
+          `}</style>
+
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative">
+            <button
+              onClick={() => setPrintBadgeModal(null)}
+              className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-black text-[#17472B]">
+                Delegate Pass Badge Preview
+              </h3>
+
+              {/* Printable Pass Card */}
+              <div id="admin-printable-pass" className="bg-[#F8FBF6] border-4 border-[#17472B] rounded-3xl p-6 shadow-md text-left space-y-4 relative">
+                
+                <div className="flex items-center justify-between border-b border-emerald-200 pb-3">
+                  <div>
+                    <h4 className="font-serif font-black text-xl text-[#17472B]">CONFIQ 2026</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Annual Kerala Fiqh Summit</p>
+                  </div>
+                  <span className="px-3 py-1 bg-[#17472B] text-white text-xs font-mono font-bold rounded-full">
+                    {printBadgeModal.id}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">Delegate Name</div>
+                  <div className="text-lg font-extrabold text-gray-900">{printBadgeModal.fullName}</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-gray-500 font-bold block">Status & Age:</span>
+                    <span className="font-extrabold text-[#17472B]">{printBadgeModal.status} ({printBadgeModal.age} yrs)</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-bold block">Study Range:</span>
+                    <span className="font-extrabold text-[#17472B]">{printBadgeModal.studyRange}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-bold block">Campus / Post:</span>
+                    <span className="font-bold text-gray-800">{printBadgeModal.status === 'Student' ? (printBadgeModal.campus || 'N/A') : (printBadgeModal.position || 'N/A')}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-bold block">Birudam:</span>
+                    <span className="font-bold text-gray-800">{printBadgeModal.birudam || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-bold block">Phone:</span>
+                    <span className="font-mono font-bold text-gray-800">{printBadgeModal.phone}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-bold block">Payment Status:</span>
+                    <span className="font-extrabold text-emerald-700">{printBadgeModal.paymentStatus}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-emerald-100 text-[10px] text-gray-500 flex justify-between">
+                  <span>Ahlussuffa Dars, Parapram, Pinarayi</span>
+                  <span>Sept 11–12, 2026</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setPrintBadgeModal(null)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="px-5 py-2 bg-[#17472B] hover:bg-[#20603B] text-white font-extrabold text-xs rounded-xl shadow flex items-center gap-1.5"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Badge</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
