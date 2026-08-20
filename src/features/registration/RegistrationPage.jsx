@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { supabase } from '../lib/supabase';
-import confiqLogo from '../assets/CONFIQ.png';
-import vectorSmartObject from '../assets/Vector Smart Object.png';
-import group8Img from '../assets/Group 8.png';
-import phonepeQrImg from '../assets/image.jpeg';
+import { supabase } from '../../lib/supabase';
+import confiqLogo from '../../assets/CONFIQ.png';
+import vectorSmartObject from '../../assets/Vector Smart Object.png';
+import group8Img from '../../assets/Group 8.png';
+import phonepeQrImg from '../../assets/image.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,

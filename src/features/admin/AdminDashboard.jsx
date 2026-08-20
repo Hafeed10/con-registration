@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import {
   Users, Calendar, FileText, Settings, Plus, Search, Download, Printer, ExternalLink,
   Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X, Edit3, Image as ImageIcon, Sparkles, Tag, Upload, BookOpen, Layers

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { supabase } from '../lib/supabase';
-import phonepeQrImg from '../assets/image.jpeg';
+import { supabase } from '../../lib/supabase';
+import phonepeQrImg from '../../assets/image.jpeg';
 import {
   X, CheckCircle, Printer, QrCode, User, Mail, Phone, MapPin,
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
@@ -659,8 +659,8 @@ export default function RegistrationModal({ isOpen, onClose }) {
               </div>
 
             </form>
-
-         ) : (
+          </div>
+        ) : (
                   /* Success & Printable Delegate Pass Badge */
                   <div className="py-2 text-center">
 
@@ -811,8 +811,6 @@ export default function RegistrationModal({ isOpen, onClose }) {
                         Close
                       </button>
                     </div>
-
-                  </div>>
 
                   </div>
         )}

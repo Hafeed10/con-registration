@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import RegistrationPage from './components/RegistrationPage';
-import AdminDashboard from './components/AdminDashboard';
+import { RegistrationPage } from './features/registration';
+import { AdminDashboard } from './features/admin';
 
 export default function App() {
   // Admin view activated ONLY via URL route (#admin or /admin or ?admin)
