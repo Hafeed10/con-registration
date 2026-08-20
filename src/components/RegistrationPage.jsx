@@ -102,7 +102,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     if (e) e.preventDefault();
     setHasClickedRazorpay(true);
     setPaymentError('');
-    setShowRazorpayModal(true);
+    window.open('https://rzp.io/rzp/afiIk3Q', '_blank');
   };
 
   const copyPhoneToWhatsapp = () => {
@@ -651,15 +651,20 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={handleOpenRazorpay}
+                    <a
+                      href="https://rzp.io/rzp/afiIk3Q"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        setHasClickedRazorpay(true);
+                        setPaymentError('');
+                      }}
                       className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#17472B] to-[#20603B] hover:from-[#0E4023] hover:to-[#17472B] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-center cursor-pointer"
                     >
                       <CreditCard className="w-4 h-4" />
-                      <span>{hasClickedRazorpay ? '✓ Pay / Checkout via Razorpay' : 'Pay ₹200 via Razorpay'}</span>
+                      <span>{hasClickedRazorpay ? '✓ Razorpay Opened (Click to Pay)' : 'Pay ₹200 via Razorpay'}</span>
                       <ExternalLink className="w-4 h-4 text-amber-300" />
-                    </button>
+                    </a>
                   </div>
 
                   {/* UPI Payment Copy Box & Screenshot Upload (No QR Code) */}
