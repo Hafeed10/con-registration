@@ -433,7 +433,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
 
                   <div>
                     <label className="block text-xs font-bold uppercase text-[#17472B] tracking-wider mb-1.5">
-                      Birudam (Degree - If any)
+                      Sanad (Degree - If any)
                     </label>
                     <div className="relative">
                       <Award className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
