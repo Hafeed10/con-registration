@@ -33,6 +33,26 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   const [printBadgeModal, setPrintBadgeModal] = useState(null);
   // In-app Delete Confirmation Modal (fixes mobile window.confirm blocking)
   const [deleteConfirmDelegate, setDeleteConfirmDelegate] = useState(null);
+  // Modal to edit delegate registration details
+  const [editingDelegate, setEditingDelegate] = useState(null);
+  const [editDelegateForm, setEditDelegateForm] = useState({
+    fullName: '',
+    age: '',
+    phone: '',
+    whatsapp: '',
+    address: '',
+    status: 'Student',
+    campus: '',
+    position: '',
+    studyRange: 'Muthawwal',
+    sanad: '',
+    studiedAlfiyyaAndFathulMueen: true,
+    utrNumber: '',
+    paymentStatus: 'PENDING_VERIFICATION',
+    rejectionReason: ''
+  });
+  const [editDelegateSaving, setEditDelegateSaving] = useState(false);
+  const [editDelegateError, setEditDelegateError] = useState('');
 
   // Local storage helpers to guarantee status persistence across page refreshes
   const getLocalStatusOverrides = () => {
@@ -163,6 +183,140 @@ Regarding your summit delegate registration:
     } catch (err) {
       console.error('Supabase reject payment exception:', err.message);
     }
+  };
+
+  const handleOpenEditDelegate = (d) => {
+    setEditingDelegate(d);
+    setEditDelegateForm({
+      fullName: d.fullName || '',
+      age: d.age || '',
+      phone: d.phone || '',
+      whatsapp: d.whatsapp || d.phone || '',
+      address: d.address || '',
+      status: d.status || 'Student',
+      campus: d.campus || '',
+      position: d.position || '',
+      studyRange: d.studyRange || 'Muthawwal',
+      sanad: d.sanad !== 'N/A' ? (d.sanad || d.birudam || '') : '',
+      studiedAlfiyyaAndFathulMueen: !!d.studiedAlfiyyaAndFathulMueen,
+      utrNumber: d.utrNumber !== 'N/A' ? (d.utrNumber || '') : '',
+      paymentStatus: d.paymentStatus || 'PENDING_VERIFICATION',
+      rejectionReason: d.rejectionReason || '',
+      paymentScreenshot: d.paymentScreenshot || null
+    });
+    setEditDelegateError('');
+  };
+
+  const handleEditScreenshotChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setEditDelegateError('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
+      return;
+    }
+    setEditDelegateError('');
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditDelegateForm((prev) => ({
+        ...prev,
+        paymentScreenshot: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveEditScreenshot = () => {
+    setEditDelegateForm((prev) => ({
+      ...prev,
+      paymentScreenshot: null
+    }));
+  };
+
+  const handleSaveDelegateChanges = async (e) => {
+    e.preventDefault();
+    if (!editingDelegate) return;
+    setEditDelegateSaving(true);
+    setEditDelegateError('');
+
+    const targetId = editingDelegate.id;
+    const rawStatus = (editDelegateForm.paymentStatus || 'PENDING_VERIFICATION').toUpperCase();
+    let normalizedStatus = 'PENDING_VERIFICATION';
+    if (rawStatus.includes('PAID')) normalizedStatus = 'PAID';
+    else if (rawStatus.includes('REJECT')) normalizedStatus = 'REJECTED';
+
+    const updatedDelegate = {
+      ...editingDelegate,
+      fullName: editDelegateForm.fullName.trim(),
+      age: parseInt(editDelegateForm.age) || editingDelegate.age,
+      phone: editDelegateForm.phone.trim(),
+      whatsapp: editDelegateForm.whatsapp.trim(),
+      address: editDelegateForm.address.trim(),
+      status: editDelegateForm.status,
+      campus: editDelegateForm.status === 'Student' ? editDelegateForm.campus.trim() : 'N/A',
+      position: editDelegateForm.status === 'Working' ? editDelegateForm.position.trim() : 'N/A',
+      studyRange: editDelegateForm.studyRange,
+      sanad: editDelegateForm.sanad.trim() || 'N/A',
+      birudam: editDelegateForm.sanad.trim() || 'N/A',
+      studiedAlfiyyaAndFathulMueen: editDelegateForm.studiedAlfiyyaAndFathulMueen,
+      utrNumber: editDelegateForm.utrNumber.trim() || 'N/A',
+      paymentScreenshot: editDelegateForm.paymentScreenshot || null,
+      paymentStatus: normalizedStatus,
+      rejectionReason: normalizedStatus === 'REJECTED' ? editDelegateForm.rejectionReason : null,
+      verifiedAt: normalizedStatus === 'PAID' ? (editingDelegate.verifiedAt || new Date().toISOString()) : null
+    };
+
+    // 1. Immediately update local storage and react state
+    setLocalStatusOverride(targetId, normalizedStatus);
+    setDelegates((prev) =>
+      prev.map((d) => (d.id === targetId ? updatedDelegate : d))
+    );
+
+    // 2. Persist to Supabase Database
+    try {
+      const payload = {
+        full_name: updatedDelegate.fullName,
+        age: updatedDelegate.age,
+        phone: updatedDelegate.phone,
+        whatsapp: updatedDelegate.whatsapp,
+        address: updatedDelegate.address,
+        status: updatedDelegate.status,
+        campus: updatedDelegate.campus,
+        position: updatedDelegate.position,
+        study_range: updatedDelegate.studyRange,
+        birudam: updatedDelegate.birudam,
+        studied_alfiyya: updatedDelegate.studiedAlfiyyaAndFathulMueen,
+        utr_number: updatedDelegate.utrNumber !== 'N/A' ? updatedDelegate.utrNumber : null,
+        payment_screenshot: updatedDelegate.paymentScreenshot,
+        payment_status: updatedDelegate.paymentStatus,
+        rejection_reason: updatedDelegate.rejectionReason,
+        verified_at: updatedDelegate.verifiedAt
+      };
+
+      let res = await supabase
+        .from('delegates')
+        .update(payload)
+        .eq('pass_id', targetId)
+        .select();
+
+      if (res.error || !res.data || res.data.length === 0) {
+        res = await supabase
+          .from('delegates')
+          .update(payload)
+          .eq('id', targetId)
+          .select();
+      }
+
+      if (res.error) {
+        console.error('Supabase delegate update error:', res.error);
+        setEditDelegateError('Saved locally, but Supabase update error: ' + res.error.message);
+      } else {
+        setEditingDelegate(null);
+      }
+    } catch (err) {
+      console.error('Save delegate exception:', err);
+      setEditingDelegate(null);
+    }
+    setEditDelegateSaving(false);
   };
 
   // Real delegates state - Source: Supabase Database ONLY
@@ -1025,17 +1179,32 @@ Regarding your summit delegate registration:
 
                   {/* Card Actions Footer */}
                   <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/80 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPrintBadgeModal(d);
-                      }}
-                      className="px-3.5 py-2 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-800 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer border border-gray-200 shadow-xs touch-manipulation"
-                    >
-                      <Printer className="w-3.5 h-3.5 text-[#17472B] pointer-events-none" />
-                      <span>Badge</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPrintBadgeModal(d);
+                        }}
+                        className="px-3 py-1.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-800 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1 cursor-pointer border border-gray-200 shadow-xs touch-manipulation"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-[#17472B] pointer-events-none" />
+                        <span>Badge</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditDelegate(d);
+                        }}
+                        className="px-3 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] border border-gray-200 hover:border-emerald-300 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-xs touch-manipulation"
+                        title="Edit Delegate Details"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-emerald-700 pointer-events-none" />
+                        <span>Edit</span>
+                      </button>
+                    </div>
 
                     <div className="flex items-center gap-2">
                       {(d.paymentStatus === 'PENDING_VERIFICATION' || d.paymentStatus === 'REJECTED') && (
@@ -1250,6 +1419,15 @@ Regarding your summit delegate registration:
                             >
                               <Printer className="w-3.5 h-3.5 text-[#17472B]" />
                               <span>Badge</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleOpenEditDelegate(d)}
+                              className="px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-[#17472B] hover:text-emerald-900 border border-gray-200 hover:border-emerald-300 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                              title="Edit Delegate Details"
+                            >
+                              <Edit3 className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>Edit</span>
                             </button>
 
                             {(d.paymentStatus === 'PENDING_VERIFICATION' || d.paymentStatus === 'REJECTED') && (
@@ -2085,6 +2263,326 @@ Regarding your summit delegate registration:
                 <span>Delete</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Delegate Modal */}
+      {editingDelegate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-7 shadow-2xl relative border border-emerald-100 my-8 max-h-[92vh] flex flex-col">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#17472B] flex items-center justify-center shadow-xs">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-gray-900">
+                    Edit Delegate Info
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="font-mono text-xs font-bold text-[#17472B] bg-[#17472B]/10 px-2 py-0.5 rounded-md">
+                      {editingDelegate.id}
+                    </span>
+                    <span className="text-[11px] text-gray-500 font-medium">
+                      Registered: {editingDelegate.registeredAt}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setEditingDelegate(null)}
+                className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Form Fields Body */}
+            <form onSubmit={handleSaveDelegateChanges} className="overflow-y-auto py-4 space-y-4 flex-grow pr-1">
+              
+              {editDelegateError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-xl">
+                  {editDelegateError}
+                </div>
+              )}
+
+              {/* Row 1: Name & Age */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editDelegateForm.fullName}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, fullName: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Age *</label>
+                  <input
+                    type="number"
+                    required
+                    min="10"
+                    max="100"
+                    value={editDelegateForm.age}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, age: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Phone & WhatsApp */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={editDelegateForm.phone}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, phone: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">WhatsApp Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={editDelegateForm.whatsapp}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, whatsapp: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Row 3: Status & Campus / Position */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Status</label>
+                  <select
+                    value={editDelegateForm.status}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, status: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 bg-white cursor-pointer"
+                  >
+                    <option value="Student">Student</option>
+                    <option value="Working">Working</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    {editDelegateForm.status === 'Student' ? 'Campus / Institution Name' : 'Position / Designation'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editDelegateForm.status === 'Student' ? editDelegateForm.campus : editDelegateForm.position}
+                    onChange={(e) => {
+                      if (editDelegateForm.status === 'Student') {
+                        setEditDelegateForm({ ...editDelegateForm, campus: e.target.value });
+                      } else {
+                        setEditDelegateForm({ ...editDelegateForm, position: e.target.value });
+                      }
+                    }}
+                    placeholder={editDelegateForm.status === 'Student' ? 'e.g. Markaz Karanthur' : 'e.g. Mudarris / Usthad'}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Row 4: Study Range & Sanad */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Study Range</label>
+                  <select
+                    value={editDelegateForm.studyRange}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, studyRange: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 bg-white cursor-pointer"
+                  >
+                    <option value="Mukhtasar">Mukhtasar</option>
+                    <option value="Muthawwal">Muthawwal</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Sanad (Degree / Birudam)</label>
+                  <input
+                    type="text"
+                    value={editDelegateForm.sanad}
+                    onChange={(e) => setEditDelegateForm({ ...editDelegateForm, sanad: e.target.value })}
+                    placeholder="e.g. Wafy, Saadi, Siraji, Dars, or N/A"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Row 5: Address */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Address / Mahal / Place</label>
+                <textarea
+                  rows="2"
+                  value={editDelegateForm.address}
+                  onChange={(e) => setEditDelegateForm({ ...editDelegateForm, address: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 bg-white resize-none"
+                />
+              </div>
+
+              {/* Row 6: Payment Status & UTR Number */}
+              <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-2xl space-y-3">
+                <div className="text-xs font-black text-gray-800 uppercase tracking-wide">
+                  Payment & Verification
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">Payment Status</label>
+                    <select
+                      value={editDelegateForm.paymentStatus}
+                      onChange={(e) => setEditDelegateForm({ ...editDelegateForm, paymentStatus: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-extrabold outline-none bg-white cursor-pointer"
+                    >
+                      <option value="PENDING_VERIFICATION">🟡 Pending Verification</option>
+                      <option value="PAID">🟢 Paid (Verified ₹200)</option>
+                      <option value="REJECTED">🔴 Rejected</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">UTR / Ref Number</label>
+                    <input
+                      type="text"
+                      value={editDelegateForm.utrNumber}
+                      onChange={(e) => setEditDelegateForm({ ...editDelegateForm, utrNumber: e.target.value })}
+                      placeholder="12-digit UTR Number"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold outline-none focus:border-emerald-600 bg-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                {editDelegateForm.paymentStatus === 'REJECTED' && (
+                  <div>
+                    <label className="block text-xs font-bold text-rose-700 mb-1">Rejection Reason</label>
+                    <input
+                      type="text"
+                      value={editDelegateForm.rejectionReason}
+                      onChange={(e) => setEditDelegateForm({ ...editDelegateForm, rejectionReason: e.target.value })}
+                      placeholder="e.g. Invalid UTR number or payment not received"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-rose-300 text-xs font-semibold outline-none focus:border-rose-500 bg-rose-50/50"
+                    />
+                  </div>
+                )}
+
+                {/* Payment Screenshot Upload / Preview / Replace */}
+                <div className="pt-2 border-t border-gray-200">
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
+                    <span>Payment Receipt Screenshot</span>
+                    {editDelegateForm.paymentScreenshot ? (
+                      <span className="text-[10px] text-emerald-700 font-extrabold bg-emerald-100 px-2 py-0.5 rounded">
+                        Screenshot Attached
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-gray-400 font-medium italic">
+                        No image attached
+                      </span>
+                    )}
+                  </label>
+
+                  {editDelegateForm.paymentScreenshot ? (
+                    <div className="flex items-center gap-3 p-2.5 bg-white border border-gray-200 rounded-xl shadow-xs">
+                      <img
+                        src={editDelegateForm.paymentScreenshot}
+                        alt="Payment Receipt"
+                        className="w-14 h-14 object-cover rounded-lg border border-gray-200 cursor-pointer shadow-xs hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(editDelegateForm.paymentScreenshot, '_blank')}
+                        title="Click to view full screenshot"
+                      />
+                      <div className="flex-grow space-y-1">
+                        <div className="text-xs font-bold text-gray-800">Attached Receipt Image</div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => window.open(editDelegateForm.paymentScreenshot, '_blank')}
+                            className="text-[11px] text-emerald-700 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>View Full</span>
+                          </button>
+                          <span className="text-gray-300">•</span>
+                          <label className="text-[11px] text-emerald-800 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                            <Upload className="w-3 h-3" />
+                            <span>Replace</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleEditScreenshotChange}
+                              className="hidden"
+                            />
+                          </label>
+                          <span className="text-gray-300">•</span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveEditScreenshot}
+                            className="text-[11px] text-rose-600 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-emerald-50 text-[#17472B] border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-xl text-xs font-bold cursor-pointer transition-all shadow-xs">
+                        <Upload className="w-4 h-4 text-emerald-700" />
+                        <span>Upload / Attach Payment Screenshot Image</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleEditScreenshotChange}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Checkbox: Alfiyya & Fathul Mueen */}
+              <label className="flex items-center gap-2.5 cursor-pointer select-none p-1">
+                <input
+                  type="checkbox"
+                  checked={editDelegateForm.studiedAlfiyyaAndFathulMueen}
+                  onChange={(e) => setEditDelegateForm({ ...editDelegateForm, studiedAlfiyyaAndFathulMueen: e.target.checked })}
+                  className="w-4 h-4 text-[#17472B] rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                />
+                <span className="text-xs font-bold text-gray-700">
+                  Studied Alfiyya & Fathul Mueen
+                </span>
+              </label>
+
+              {/* Actions Footer */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setEditingDelegate(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editDelegateSaving}
+                  className="px-6 py-2.5 rounded-xl text-xs font-black text-white bg-[#17472B] hover:bg-[#20603B] shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{editDelegateSaving ? 'Saving Changes...' : 'Save Delegate Changes'}</span>
+                </button>
+              </div>
+
+            </form>
+
           </div>
         </div>
       )}
