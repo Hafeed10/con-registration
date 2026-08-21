@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
   Users, Calendar, FileText, Settings, Plus, Search, Download, Printer, ExternalLink,
-  Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X, Edit3, Image as ImageIcon, Sparkles, Tag, Upload, BookOpen, Layers
+  Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X, Edit3, Image as ImageIcon, Sparkles, Tag, Upload, BookOpen, Layers,
+  Phone, Building2, Check
 } from 'lucide-react';
 
 export default function AdminDashboard({ onReturnToPublic, sessionsData = [], setSessionsData, tracksData = [], setTracksData }) {
@@ -47,6 +48,32 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
     } catch (e) {
       console.error('Error saving local status override:', e);
     }
+  };
+
+  // Helper to generate pre-filled WhatsApp message with working cross-platform icons & emojis
+  const getWhatsAppUrl = (d) => {
+    const cleanNumber = (d.whatsapp || d.phone || '').replace(/\D/g, '');
+    const statusFormatted = (d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)') 
+      ? '🟢 *PAID (₹200)*' 
+      : (d.paymentStatus === 'REJECTED') 
+      ? '🔴 *REJECTED*' 
+      : '🟡 *PENDING VERIFICATION*';
+    
+    const message = 
+`*CONFIQ 2026* | Annual Fiqh Summit
+━━━━━━━━━━━━━━━━━━━━
+Assalamu Alaikum *${d.fullName}*,
+
+Regarding your summit delegate registration:
+
+🎟 *Pass ID:* ${d.id}
+💳 *Payment Status:* ${statusFormatted}
+📍 *Venue:* Ahlussuffa Dars, Parapram, Pinarayi
+📅 *Date:* September 11–12, 2026
+━━━━━━━━━━━━━━━━━━━━
+*Ahlussuffa • CONFIQ 2026*`;
+
+    return `https://api.whatsapp.com/send?phone=91${cleanNumber}&text=${encodeURIComponent(message)}`;
   };
 
   const handleApprovePayment = async (targetId) => {
@@ -619,24 +646,24 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
       {/* Admin Header */}
       <header className="bg-[#17472B] text-white sticky top-0 z-40 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
 
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2.5 select-none">
-                <span className="font-sans text-xl font-black text-white tracking-tight uppercase">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2.5 select-none shrink-0">
+                <span className="font-sans text-base sm:text-xl font-black text-white tracking-tight uppercase">
                   <span className="text-[#A1CF7F]">CON</span> FIQH
                 </span>
-                <span className="inline-block px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black bg-[#354823] text-white uppercase tracking-wider shadow-xs">
+                <span className="hidden xs:inline-block px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl text-[9px] sm:text-[11px] font-black bg-[#354823] text-white uppercase tracking-wider shadow-xs">
                   1ST EDITION
                 </span>
               </div>
-              <span className="text-xs font-bold text-[#A1CF7F] border-l border-emerald-700 pl-3">
+              <span className="hidden sm:inline text-xs font-bold text-[#A1CF7F] border-l border-emerald-700 pl-3">
                 Secretariat Admin
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               <button
                 onClick={fetchSupabaseDelegates}
                 disabled={loading}
@@ -649,15 +676,15 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
               <button
                 onClick={onReturnToPublic}
-                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
+                className="bg-white/10 hover:bg-white/20 text-white px-2.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2"
               >
                 <Eye className="w-4 h-4" />
-                <span>View Website</span>
+                <span className="hidden sm:inline">View Website</span>
               </button>
 
               <button
                 onClick={handleLogout}
-                className="bg-red-600/80 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                className="bg-red-600/80 hover:bg-red-700 text-white px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
                 title="Logout Secretariat Portal"
               >
                 <LogOut className="w-4 h-4" />
@@ -669,41 +696,41 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex-grow w-full">
 
         {/* Nav Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4 mb-8">
+        <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 sm:pb-4 mb-4 sm:mb-8">
           <button
             onClick={() => setActiveTab('delegates')}
-            className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'delegates'
+            className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2 ${activeTab === 'delegates'
               ? 'bg-[#17472B] text-white shadow-md'
               : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
           >
-            <Users className="w-4 h-4" />
-            <span>Delegates Database ({delegates.length})</span>
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Delegates ({delegates.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('sessions')}
-            className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'sessions'
+            className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2 ${activeTab === 'sessions'
               ? 'bg-[#17472B] text-white shadow-md'
               : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
           >
-            <Calendar className="w-4 h-4" />
-            <span>Scheduled Sessions CMS ({sessionsData.length})</span>
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Sessions ({sessionsData.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('tracks')}
-            className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'tracks'
+            className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2 ${activeTab === 'tracks'
               ? 'bg-[#17472B] text-white shadow-md'
               : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
           >
-            <Layers className="w-4 h-4" />
-            <span>Academic Tracks CMS ({tracksData.length})</span>
+            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Tracks ({tracksData.length})</span>
           </button>
         </div>
 
@@ -711,23 +738,25 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
         {activeTab === 'delegates' && (
           <div className="space-y-6">
 
-            <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 max-w-xs">
-                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-                  <input
-                    type="text"
-                    placeholder="Search by name, phone, pass ID, UTR..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-300 text-xs font-medium outline-none"
-                  />
-                </div>
+            <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+              {/* Search Bar - Full width on mobile */}
+              <div className="relative w-full">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                <input
+                  type="text"
+                  placeholder="Search by name, phone, pass ID, UTR..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-medium outline-none"
+                />
+              </div>
 
+              {/* Filters row */}
+              <div className="flex flex-wrap gap-2">
                 <select
                   value={filterPaymentStatus}
                   onChange={(e) => setFilterPaymentStatus(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
+                  className="flex-1 min-w-[140px] px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
                 >
                   <option value="All">All Payment Statuses</option>
                   <option value="PENDING_VERIFICATION">🟡 Pending Verification</option>
@@ -738,7 +767,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                 <select
                   value={filterStudyRange}
                   onChange={(e) => setFilterStudyRange(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
+                  className="flex-1 min-w-[120px] px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
                 >
                   <option value="All">All Study Ranges</option>
                   <option value="Mukhtasar">Mukhtasar</option>
@@ -746,27 +775,207 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                 </select>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => window.print()}
-                  className="bg-emerald-800 hover:bg-emerald-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition-all cursor-pointer"
+                  className="flex-1 sm:flex-none bg-emerald-800 hover:bg-emerald-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                   title="Print complete delegate register"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Print Full Details</span>
+                  <span>Print</span>
                 </button>
 
                 <button
                   onClick={handleExportCSV}
-                  className="bg-[#17472B] hover:bg-[#20603B] text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2 transition-all cursor-pointer"
+                  className="flex-1 sm:flex-none bg-[#17472B] hover:bg-[#20603B] text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Export Database CSV</span>
+                  <span>Export CSV</span>
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            {/* ===== MOBILE CARD VIEW (visible only below lg) ===== */}
+            <div className="lg:hidden space-y-4">
+              {filteredDelegates.map((d) => (
+                <div 
+                  key={d.id} 
+                  className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200/90 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
+                >
+                  {/* Card Top Header */}
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-gray-50/80 via-white to-gray-50/80 border-b border-gray-100">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono font-bold text-[#17472B] text-xs bg-[#17472B]/10 px-2.5 py-1 rounded-lg border border-[#17472B]/15 shrink-0">
+                        {d.id}
+                      </span>
+                      <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md text-[11px] font-semibold shrink-0">
+                        {d.status}
+                      </span>
+                    </div>
+
+                    {/* Modern Pill Status */}
+                    {(d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)') ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/90 text-[11px] font-extrabold uppercase tracking-wide shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>PAID ₹200</span>
+                      </span>
+                    ) : d.paymentStatus === 'REJECTED' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/90 text-[11px] font-extrabold uppercase tracking-wide shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <span>REJECTED</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[11px] font-extrabold uppercase tracking-wide shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span>PENDING</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="p-4 space-y-3.5 flex-grow">
+                    {/* Delegate Name & Institution */}
+                    <div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <h4 className="text-base font-black text-gray-900 leading-snug">
+                          {d.fullName}
+                        </h4>
+                        <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md shrink-0">
+                          {d.age} yrs
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#17472B] mt-1">
+                        <Building2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">{d.status === 'Student' ? (d.campus || 'N/A') : (d.position || 'N/A')}</span>
+                      </div>
+                    </div>
+
+                    {/* Info 2-Column Grid (Study Range & Address) */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 flex flex-col justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Study Range</span>
+                        <div className="mt-1">
+                          <div className="text-xs font-bold text-[#17472B]">{d.studyRange || 'N/A'}</div>
+                          <div className="text-[10px] text-gray-500 font-medium truncate">{d.birudam || '—'}</div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 flex flex-col justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Address</span>
+                        <div className="mt-1 text-[11px] text-gray-700 leading-snug font-medium line-clamp-2" title={d.address}>
+                          {d.address || 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact buttons row */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <a
+                        href={`tel:${d.phone}`}
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-800 border border-gray-200 transition-colors"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-gray-600 shrink-0" />
+                        <span className="truncate">{d.phone}</span>
+                      </a>
+                      <a
+                        href={getWhatsAppUrl(d)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-extrabold transition-colors"
+                        title="Send Delegate Info via WhatsApp"
+                      >
+                        <span>WhatsApp</span>
+                        <ExternalLink className="w-3 h-3 text-emerald-600 shrink-0" />
+                      </a>
+                    </div>
+
+                    {/* UTR & Payment Receipt Preview Bar */}
+                    <div className="flex items-center justify-between gap-2 p-2.5 bg-gray-50/90 rounded-xl border border-gray-100">
+                      <div className="min-w-0">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">UTR Number</span>
+                        {d.utrNumber && d.utrNumber !== 'N/A' ? (
+                          <span className="font-mono text-xs font-bold text-gray-800 truncate block">
+                            {d.utrNumber}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-amber-700 italic font-medium">No UTR entered</span>
+                        )}
+                      </div>
+
+                      {d.paymentScreenshot ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <img
+                            src={d.paymentScreenshot}
+                            alt={`Receipt for ${d.fullName}`}
+                            className="w-8 h-8 rounded-lg border border-emerald-400 object-cover cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setViewReceiptModal(d)}
+                            title="Click to zoom receipt"
+                          />
+                          <button
+                            onClick={() => setViewReceiptModal(d)}
+                            className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-[#17472B] border border-emerald-300 rounded-lg text-xs font-extrabold flex items-center gap-1 transition-colors cursor-pointer shadow-xs"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>Receipt</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-gray-400 italic shrink-0">No receipt image</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Actions Footer */}
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/80 border-t border-gray-100">
+                    <button
+                      onClick={() => setPrintBadgeModal(d)}
+                      className="px-3.5 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer border border-gray-200 shadow-xs"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-[#17472B]" />
+                      <span>Badge</span>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {(d.paymentStatus === 'PENDING_VERIFICATION' || d.paymentStatus === 'REJECTED') && (
+                        <button
+                          onClick={() => handleApprovePayment(d.id)}
+                          className="px-3.5 py-2 bg-[#17472B] hover:bg-[#20603B] text-white rounded-xl text-xs font-extrabold shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Approve</span>
+                        </button>
+                      )}
+
+                      {d.paymentStatus !== 'REJECTED' && (
+                        <button
+                          onClick={() => handleRejectPayment(d.id)}
+                          className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-extrabold transition-all cursor-pointer"
+                        >
+                          Reject
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleDeleteDelegate(d.id)}
+                        className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer border border-transparent hover:border-rose-100"
+                        title="Delete Delegate"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {filteredDelegates.length === 0 && (
+                <div className="bg-white rounded-2xl border border-gray-200 py-10 text-center text-gray-500 font-semibold text-sm">
+                  No delegates registered yet.
+                </div>
+              )}
+            </div>
+
+            {/* ===== DESKTOP TABLE VIEW (visible only on lg+) ===== */}
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -814,11 +1023,11 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                           </div>
                           <div className="mt-0.5">
                             <a
-                              href={`https://wa.me/91${(d.whatsapp || d.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Assalamu Alaikum ${d.fullName}, regarding your CONFIQ 2026 Delegate Pass (${d.id}):`)}`}
+                              href={getWhatsAppUrl(d)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-200 text-[11px] font-extrabold transition-all"
-                              title="Open WhatsApp Chat"
+                              title="Send Delegate Info via WhatsApp"
                             >
                               <span>WA: {d.whatsapp}</span>
                               <ExternalLink className="w-3 h-3 text-emerald-600 shrink-0" />
@@ -918,7 +1127,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
                     ))}
                     {filteredDelegates.length === 0 && (
                       <tr>
-                        <td colSpan="8" className="py-8 text-center text-gray-500 font-semibold">
+                        <td colSpan="9" className="py-8 text-center text-gray-500 font-semibold">
                           No delegates registered yet. Real registrations submitted on the website sync here automatically via Supabase!
                         </td>
                       </tr>
@@ -1179,47 +1388,47 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
       {/* Payment Receipt Screenshot Modal for Secretariat Verification */}
       {viewReceiptModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-gray-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative border border-gray-200 max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setViewReceiptModal(null)}
-              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-lg transition-colors"
+              className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-lg transition-colors z-10"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
-              <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl">
+            <div className="flex items-center gap-2.5 mb-4 border-b border-gray-100 pb-3 pr-8">
+              <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl shrink-0">
                 <CheckCircle className="w-5 h-5" />
               </div>
-              <div>
-                <h3 className="font-extrabold text-lg text-gray-900">
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-base sm:text-lg text-gray-900 leading-tight">
                   Payment Receipt Verification
                 </h3>
-                <p className="text-xs text-gray-500 font-medium">
-                  Delegate: <strong>{viewReceiptModal.fullName}</strong> ({viewReceiptModal.id}) • Fee: <strong>₹200</strong>
+                <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate mt-0.5">
+                  {viewReceiptModal.fullName} ({viewReceiptModal.id}) • Fee: <strong>₹200</strong>
                 </p>
               </div>
             </div>
 
-            <div className="bg-gray-50 p-3 rounded-2xl border border-gray-200 text-center">
+            <div className="bg-gray-50 p-2.5 sm:p-3 rounded-2xl border border-gray-200 text-center">
               {viewReceiptModal.paymentScreenshot ? (
                 <img 
                   src={viewReceiptModal.paymentScreenshot} 
                   alt={`Payment Screenshot for ${viewReceiptModal.fullName}`}
-                  className="max-h-[60vh] w-auto mx-auto rounded-xl object-contain shadow-md"
+                  className="max-h-[55vh] w-auto mx-auto rounded-xl object-contain shadow-md"
                 />
               ) : (
-                <div className="py-12 text-gray-400 text-sm font-semibold">
+                <div className="py-10 text-gray-400 text-xs sm:text-sm font-semibold">
                   No payment screenshot uploaded for this delegate.
                 </div>
               )}
             </div>
 
-            <div className="mt-5 flex justify-end">
+            <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setViewReceiptModal(null)}
-                className="bg-[#17472B] hover:bg-[#20603B] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow"
+                className="bg-[#17472B] hover:bg-[#20603B] text-white px-5 py-2 rounded-xl text-xs font-bold shadow"
               >
                 Close Receipt
               </button>
@@ -1576,71 +1785,85 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
             }
           `}</style>
 
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative">
+          <div className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl relative max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setPrintBadgeModal(null)}
-              className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+              className="absolute top-3.5 right-3.5 p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors z-10"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="text-center space-y-4">
-              <h3 className="text-lg font-black text-[#17472B]">
+              <h3 className="text-base sm:text-lg font-black text-[#17472B]">
                 Delegate Pass Badge Preview
               </h3>
 
               {/* Printable Pass Card */}
-              <div id="admin-printable-pass" className="bg-[#F8FBF6] border-4 border-[#17472B] rounded-3xl p-6 shadow-md text-left space-y-4 relative">
+              <div id="admin-printable-pass" className="bg-[#F8FBF6] border-4 border-[#17472B] rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-md text-left space-y-3 sm:space-y-4 relative">
                 
-                <div className="flex items-center justify-between border-b border-emerald-200 pb-3">
-                  <div>
-                    <h4 className="font-serif font-black text-xl text-[#17472B]">CONFIQ 2026</h4>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Annual Kerala Fiqh Summit</p>
+                <div className="flex items-center justify-between border-b border-emerald-200/80 pb-2.5 sm:pb-3 gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-serif font-black text-lg sm:text-xl text-[#17472B] tracking-tight">CONFIQ 2026</h4>
+                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-800 truncate">Annual Kerala Fiqh Summit</p>
                   </div>
-                  <span className="px-3 py-1 bg-[#17472B] text-white text-xs font-mono font-bold rounded-full">
+                  <span className="px-2.5 sm:px-3 py-1 bg-[#17472B] text-white text-[10px] sm:text-xs font-mono font-bold rounded-full shrink-0">
                     {printBadgeModal.id}
                   </span>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">Delegate Name</div>
-                  <div className="text-lg font-extrabold text-gray-900">{printBadgeModal.fullName}</div>
+                <div className="space-y-0.5">
+                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Delegate Name</div>
+                  <div className="text-base sm:text-lg font-black text-gray-900 leading-snug break-words">{printBadgeModal.fullName}</div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <span className="text-gray-500 font-bold block">Status & Age:</span>
-                    <span className="font-extrabold text-[#17472B]">{printBadgeModal.status} ({printBadgeModal.age} yrs)</span>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs">
+                  <div className="overflow-hidden">
+                    <span className="text-gray-500 font-bold block text-[10px]">Status & Age:</span>
+                    <span className="font-extrabold text-[#17472B] text-[11px] sm:text-xs truncate block">{printBadgeModal.status} ({printBadgeModal.age} yrs)</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-bold block">Study Range:</span>
-                    <span className="font-extrabold text-[#17472B]">{printBadgeModal.studyRange}</span>
+                  <div className="overflow-hidden">
+                    <span className="text-gray-500 font-bold block text-[10px]">Study Range:</span>
+                    <span className="font-extrabold text-[#17472B] text-[11px] sm:text-xs truncate block">{printBadgeModal.studyRange || 'N/A'}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-bold block">Campus / Post:</span>
-                    <span className="font-bold text-gray-800">{printBadgeModal.status === 'Student' ? (printBadgeModal.campus || 'N/A') : (printBadgeModal.position || 'N/A')}</span>
+                  <div className="overflow-hidden">
+                    <span className="text-gray-500 font-bold block text-[10px]">Campus / Post:</span>
+                    <span className="font-bold text-gray-800 text-[11px] sm:text-xs truncate block" title={printBadgeModal.status === 'Student' ? (printBadgeModal.campus || 'N/A') : (printBadgeModal.position || 'N/A')}>
+                      {printBadgeModal.status === 'Student' ? (printBadgeModal.campus || 'N/A') : (printBadgeModal.position || 'N/A')}
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-bold block">Birudam:</span>
-                    <span className="font-bold text-gray-800">{printBadgeModal.birudam || 'N/A'}</span>
+                  <div className="overflow-hidden">
+                    <span className="text-gray-500 font-bold block text-[10px]">Birudam:</span>
+                    <span className="font-bold text-gray-800 text-[11px] sm:text-xs truncate block">{printBadgeModal.birudam || 'N/A'}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-bold block">Phone:</span>
-                    <span className="font-mono font-bold text-gray-800">{printBadgeModal.phone}</span>
+                  <div className="overflow-hidden">
+                    <span className="text-gray-500 font-bold block text-[10px]">Phone:</span>
+                    <span className="font-mono font-bold text-gray-800 text-[11px] sm:text-xs truncate block">{printBadgeModal.phone}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-bold block">Payment Status:</span>
-                    <span className="font-extrabold text-emerald-700">{printBadgeModal.paymentStatus}</span>
+                  <div className="overflow-hidden">
+                    <span className="text-gray-500 font-bold block text-[10px]">Payment Status:</span>
+                    <span className={`font-extrabold text-[11px] sm:text-xs truncate block ${
+                      printBadgeModal.paymentStatus === 'PAID' || printBadgeModal.paymentStatus === 'Paid (₹200)'
+                        ? 'text-emerald-700'
+                        : printBadgeModal.paymentStatus === 'REJECTED'
+                        ? 'text-rose-700'
+                        : 'text-amber-700'
+                    }`}>
+                      {printBadgeModal.paymentStatus === 'PAID' || printBadgeModal.paymentStatus === 'Paid (₹200)'
+                        ? 'PAID ₹200 ✓'
+                        : printBadgeModal.paymentStatus === 'REJECTED'
+                        ? 'REJECTED'
+                        : 'PENDING'}
+                    </span>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-emerald-100 text-[10px] text-gray-500 flex justify-between">
-                  <span>Ahlussuffa Dars, Parapram, Pinarayi</span>
-                  <span>Sept 11–12, 2026</span>
+                <div className="pt-2 border-t border-emerald-100 text-[9px] sm:text-[10px] text-gray-500 flex justify-between gap-1">
+                  <span className="truncate">Ahlussuffa Dars, Parapram</span>
+                  <span className="shrink-0">Sept 11–12, 2026</span>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2.5 pt-1">
                 <button
                   onClick={() => setPrintBadgeModal(null)}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
