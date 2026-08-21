@@ -24,6 +24,8 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   const [filterPaymentStatus, setFilterPaymentStatus] = useState('All');
   const [loading, setLoading] = useState(false);
   const [dbConnected, setDbConnected] = useState(true);
+  const [lastSyncedTime, setLastSyncedTime] = useState(null);
+  const [isLiveActive, setIsLiveActive] = useState(true);
 
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
@@ -167,8 +169,8 @@ Regarding your summit delegate registration:
     onReturnToPublic();
   };
 
-  const fetchSupabaseDelegates = async () => {
-    setLoading(true);
+  const fetchSupabaseDelegates = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const { data, error } = await supabase
         .from('delegates')
@@ -180,6 +182,8 @@ Regarding your summit delegate registration:
         setDbConnected(false);
       } else if (data) {
         setDbConnected(true);
+        setLastSyncedTime(new Date());
+        setIsLiveActive(true);
         const overrides = getLocalStatusOverrides();
         const mapped = data.map(d => {
           const id = d.pass_id || d.id;
@@ -210,28 +214,38 @@ Regarding your summit delegate registration:
       console.error('Supabase connection exception:', err.message);
       setDbConnected(false);
     }
-    setLoading(false);
+    if (!isSilent) setLoading(false);
   };
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchSupabaseDelegates();
+      fetchSupabaseDelegates(false);
 
       // Real-time Postgres database subscription for instant table updates
       const channel = supabase
-        .channel('public:delegates')
+        .channel('public:delegates_realtime')
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'delegates' },
           (payload) => {
             console.log('Real-time database payload received:', payload);
-            fetchSupabaseDelegates();
+            fetchSupabaseDelegates(true);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            setIsLiveActive(true);
+          }
+        });
+
+      // Live tracking polling fallback (every 4 seconds) to guarantee instant response time
+      const pollInterval = setInterval(() => {
+        fetchSupabaseDelegates(true);
+      }, 4000);
 
       return () => {
         supabase.removeChannel(channel);
+        clearInterval(pollInterval);
       };
     }
   }, [isAuthenticated]);
@@ -683,10 +697,24 @@ Regarding your summit delegate registration:
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-3">
+              {/* Live Tracking Status Badge */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 text-emerald-300 text-[11px] font-bold border border-emerald-500/20 select-none">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                <span className="hidden sm:inline">Live Tracking</span>
+                {lastSyncedTime && (
+                  <span className="text-[10px] text-gray-300 font-mono hidden md:inline ml-1">
+                    {lastSyncedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+                )}
+              </div>
+
               <button
-                onClick={fetchSupabaseDelegates}
+                onClick={() => fetchSupabaseDelegates(false)}
                 disabled={loading}
-                className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                className="bg-white/10 hover:bg-white/20 text-white p-2 sm:px-3 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Refresh Supabase Data"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -695,7 +723,7 @@ Regarding your summit delegate registration:
 
               <button
                 onClick={onReturnToPublic}
-                className="bg-white/10 hover:bg-white/20 text-white px-2.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2"
+                className="bg-white/10 hover:bg-white/20 text-white px-2.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer"
               >
                 <Eye className="w-4 h-4" />
                 <span className="hidden sm:inline">View Website</span>
@@ -703,7 +731,7 @@ Regarding your summit delegate registration:
 
               <button
                 onClick={handleLogout}
-                className="bg-red-600/80 hover:bg-red-700 text-white px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                className="bg-red-600/80 hover:bg-red-700 text-white px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Logout Secretariat Portal"
               >
                 <LogOut className="w-4 h-4" />
@@ -758,60 +786,63 @@ Regarding your summit delegate registration:
           <div className="space-y-6">
 
             <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-              {/* Search Bar - Full width on mobile */}
-              <div className="relative w-full">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                <input
-                  type="text"
-                  placeholder="Search by name, phone, pass ID, UTR..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-medium outline-none"
-                />
-              </div>
+              {/* Search and Filters Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
+                {/* Search Bar */}
+                <div className="relative sm:col-span-12 md:col-span-5 lg:col-span-5">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, phone, pass ID, UTR..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-medium outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all bg-white"
+                  />
+                </div>
 
-              {/* Filters row */}
-              <div className="flex flex-wrap gap-2">
-                <select
-                  value={filterPaymentStatus}
-                  onChange={(e) => setFilterPaymentStatus(e.target.value)}
-                  className="flex-1 min-w-[140px] px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
-                >
-                  <option value="All">All Payment Statuses</option>
-                  <option value="PENDING_VERIFICATION">🟡 Pending Verification</option>
-                  <option value="PAID">🟢 Paid (Verified)</option>
-                  <option value="REJECTED">🔴 Rejected</option>
-                </select>
+                {/* Filters */}
+                <div className="sm:col-span-7 md:col-span-4 lg:col-span-4 flex gap-2">
+                  <select
+                    value={filterPaymentStatus}
+                    onChange={(e) => setFilterPaymentStatus(e.target.value)}
+                    className="flex-1 min-w-[140px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
+                  >
+                    <option value="All">All Payment Statuses</option>
+                    <option value="PENDING_VERIFICATION">🟡 Pending Verification</option>
+                    <option value="PAID">🟢 Paid (Verified)</option>
+                    <option value="REJECTED">🔴 Rejected</option>
+                  </select>
 
-                <select
-                  value={filterStudyRange}
-                  onChange={(e) => setFilterStudyRange(e.target.value)}
-                  className="flex-1 min-w-[120px] px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none"
-                >
-                  <option value="All">All Study Ranges</option>
-                  <option value="Mukhtasar">Mukhtasar</option>
-                  <option value="Muthawwal">Muthawwal</option>
-                </select>
-              </div>
+                  <select
+                    value={filterStudyRange}
+                    onChange={(e) => setFilterStudyRange(e.target.value)}
+                    className="flex-1 min-w-[120px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
+                  >
+                    <option value="All">All Study Ranges</option>
+                    <option value="Mukhtasar">Mukhtasar</option>
+                    <option value="Muthawwal">Muthawwal</option>
+                  </select>
+                </div>
 
-              {/* Action buttons */}
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => window.print()}
-                  className="flex-1 sm:flex-none bg-emerald-800 hover:bg-emerald-900 text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
-                  title="Print complete delegate register"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Print</span>
-                </button>
+                {/* Action buttons */}
+                <div className="sm:col-span-5 md:col-span-3 lg:col-span-3 flex justify-end gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="flex-1 sm:flex-none bg-emerald-800 hover:bg-emerald-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    title="Print complete delegate register"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>Print</span>
+                  </button>
 
-                <button
-                  onClick={handleExportCSV}
-                  className="flex-1 sm:flex-none bg-[#17472B] hover:bg-[#20603B] text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Export CSV</span>
-                </button>
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex-1 sm:flex-none bg-[#17472B] hover:bg-[#20603B] text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Export CSV</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1015,20 +1046,20 @@ Regarding your summit delegate registration:
 
             {/* ===== DESKTOP TABLE VIEW (visible only on lg+) ===== */}
             <div className="hidden lg:block bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1250px] text-left border-collapse">
                   <thead>
                     <tr className="bg-gradient-to-r from-gray-50 via-gray-50/80 to-gray-50 border-b border-gray-200 text-[11px] font-extrabold uppercase tracking-wider text-gray-500">
-                      <th className="py-4 px-3 text-center w-12">#</th>
-                      <th className="py-4 px-4">Pass ID</th>
-                      <th className="py-4 px-4">Delegate Name</th>
-                      <th className="py-4 px-4">Campus / Institution</th>
-                      <th className="py-4 px-4">Address</th>
-                      <th className="py-4 px-4">Phone & WhatsApp</th>
-                      <th className="py-4 px-4">Study & Sanad (Degree)</th>
-                      <th className="py-4 px-4">UTR & Receipt (₹200)</th>
-                      <th className="py-4 px-4">Payment Status</th>
-                      <th className="py-4 px-4 text-right">Actions</th>
+                      <th className="py-4 px-3 text-center w-12 whitespace-nowrap">#</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Pass ID</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Delegate Name</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Campus / Institution</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Address</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Phone & WhatsApp</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Study & Sanad (Degree)</th>
+                      <th className="py-4 px-4 whitespace-nowrap">UTR & Receipt (₹200)</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Payment Status</th>
+                      <th className="py-4 px-4 text-right whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-xs font-medium">
