@@ -456,11 +456,12 @@ export default function QRScannerModal({
                 {!isPaid && (
                   <button
                     type="button"
-                    onClick={() => onApprovePayment && onApprovePayment(matchedDelegate.id)}
+                    onClick={() => onApprovePayment && onApprovePayment(matchedDelegate)}
                     className="p-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow"
+                    title="Inspect Receipt & Verify Payment"
                   >
                     <CreditCard className="w-3.5 h-3.5" />
-                    <span>Approve Payment</span>
+                    <span>Verify & Approve</span>
                   </button>
                 )}
 

@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import {
   Users, Calendar, FileText, Settings, Plus, Search, Download, Printer, ExternalLink,
   Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X, Edit3, Image as ImageIcon, Sparkles, Tag, Upload, BookOpen, Layers,
-  Phone, Building2, Check, QrCode, CheckCircle2, Clock, UserCheck, Undo2
+  Phone, Building2, Check, QrCode, CheckCircle2, Clock, UserCheck, Undo2, Copy, CreditCard, AlertCircle
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import QRScannerModal from './QRScannerModal';
@@ -36,6 +36,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
 
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
+  const [copiedUtr, setCopiedUtr] = useState(false);
   // Modal to preview & print individual delegate badge
   const [printBadgeModal, setPrintBadgeModal] = useState(null);
   // In-app Delete Confirmation Modal (fixes mobile window.confirm blocking)
@@ -102,6 +103,9 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
     }
   };
 
+  // Helper to test if a string is a valid UUID
+  const isUUID = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
+
   const handleToggleArrival = async (targetId, newStatus) => {
     if (!targetId) return;
     const nowIso = new Date().toISOString();
@@ -117,30 +121,44 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
     );
 
     try {
+      // 1. Try updating with full arrival fields + verified_by fallback
       let res = await supabase
         .from('delegates')
         .update({
           arrived: newStatus,
           attendance_status: newStatus ? 'ARRIVED' : 'ABSENT',
-          arrived_at: newStatus ? nowIso : null
+          arrived_at: newStatus ? nowIso : null,
+          verified_by: newStatus ? `ARRIVED:${nowIso}` : 'NOT_ARRIVED'
         })
         .eq('pass_id', targetId)
         .select();
 
-      if (res.error || !res.data || res.data.length === 0) {
+      // 2. If standard columns don't exist yet, update verified_by which always exists in the DB
+      if (res.error) {
         res = await supabase
           .from('delegates')
           .update({
-            arrived: newStatus,
-            attendance_status: newStatus ? 'ARRIVED' : 'ABSENT',
-            arrived_at: newStatus ? nowIso : null
+            verified_by: newStatus ? `ARRIVED:${nowIso}` : 'NOT_ARRIVED'
+          })
+          .eq('pass_id', targetId)
+          .select();
+      }
+
+      // 3. If targetId is a UUID, fallback to id column
+      if ((res.error || !res.data || res.data.length === 0) && isUUID(targetId)) {
+        res = await supabase
+          .from('delegates')
+          .update({
+            verified_by: newStatus ? `ARRIVED:${nowIso}` : 'NOT_ARRIVED'
           })
           .eq('id', targetId)
           .select();
       }
 
       if (res.error) {
-        console.warn('Supabase arrival update error (falling back gracefully to local storage):', res.error.message);
+        console.warn('Supabase arrival update error:', res.error.message);
+      } else {
+        console.log('Successfully synced arrival status across all devices to Supabase Cloud DB:', res.data);
       }
     } catch (err) {
       console.error('Supabase arrival update exception:', err);
@@ -179,6 +197,7 @@ Regarding your summit delegate registration:
 
     // Immediately persist approval to localStorage
     setLocalStatusOverride(targetId, 'PAID');
+    setViewReceiptModal(null);
 
     setDelegates((prev) =>
       prev.map((d) => (d.id === targetId ? { ...d, paymentStatus: 'PAID' } : d))
@@ -194,7 +213,7 @@ Regarding your summit delegate registration:
         .eq('pass_id', targetId)
         .select();
 
-      if (res.error || !res.data || res.data.length === 0) {
+      if ((res.error || !res.data || res.data.length === 0) && isUUID(targetId)) {
         res = await supabase
           .from('delegates')
           .update({
@@ -237,7 +256,7 @@ Regarding your summit delegate registration:
         .eq('pass_id', targetId)
         .select();
 
-      if (res.error || !res.data || res.data.length === 0) {
+      if ((res.error || !res.data || res.data.length === 0) && isUUID(targetId)) {
         res = await supabase
           .from('delegates')
           .update({
@@ -371,7 +390,7 @@ Regarding your summit delegate registration:
         .eq('pass_id', targetId)
         .select();
 
-      if (res.error || !res.data || res.data.length === 0) {
+      if ((res.error || !res.data || res.data.length === 0) && isUUID(targetId)) {
         res = await supabase
           .from('delegates')
           .update(payload)
@@ -437,10 +456,20 @@ Regarding your summit delegate registration:
           if (rawStatus.includes('PAID')) normalizedStatus = 'PAID';
           else if (rawStatus.includes('REJECT')) normalizedStatus = 'REJECTED';
 
+          const isCloudArrived = d.arrived === true ||
+            d.attendance_status === 'ARRIVED' ||
+            (typeof d.verified_by === 'string' && d.verified_by.startsWith('ARRIVED')) ||
+            (typeof d.verified_by === 'string' && d.verified_by === 'ARRIVED');
+
+          let cloudArrivedAt = d.arrived_at || null;
+          if (!cloudArrivedAt && typeof d.verified_by === 'string' && d.verified_by.startsWith('ARRIVED:')) {
+            cloudArrivedAt = d.verified_by.replace('ARRIVED:', '');
+          }
+
           const isArrived = arrivalOverrides[id] !== undefined
             ? arrivalOverrides[id]
-            : (d.arrived === true || d.attendance_status === 'ARRIVED' || !!d.arrived_at);
-          const arrivedAt = arrivalOverrides[`${id}_at`] || d.arrived_at || null;
+            : isCloudArrived;
+          const arrivedAt = arrivalOverrides[`${id}_at`] || cloudArrivedAt || null;
 
           return {
             id: id,
@@ -1441,9 +1470,10 @@ Regarding your summit delegate registration:
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleApprovePayment(d.id);
+                            setViewReceiptModal(d);
                           }}
                           className="px-3.5 py-2 bg-[#17472B] hover:bg-[#20603B] active:bg-[#0D382C] text-white rounded-xl text-xs font-extrabold shadow-sm transition-all flex items-center gap-1 cursor-pointer touch-manipulation"
+                          title="Verify Receipt & Approve Payment"
                         >
                           <Check className="w-3.5 h-3.5 pointer-events-none" />
                           <span>Approve</span>
@@ -1696,9 +1726,9 @@ Regarding your summit delegate registration:
 
                             {(d.paymentStatus === 'PENDING_VERIFICATION' || d.paymentStatus === 'REJECTED') && (
                               <button
-                                onClick={() => handleApprovePayment(d.id)}
+                                onClick={() => setViewReceiptModal(d)}
                                 className="px-2.5 py-1.5 bg-[#17472B] hover:bg-[#20603B] text-white rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
-                                title="Approve Payment & Mark Paid"
+                                title="Inspect Payment Receipt & Approve"
                               >
                                 <Check className="w-3 h-3" />
                                 <span>Approve</span>
@@ -2512,6 +2542,207 @@ Regarding your summit delegate registration:
         </div>
       )}
 
+      {/* Payment Verification & Receipt Inspection Modal */}
+      {viewReceiptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-2xl relative border border-gray-200 max-h-[94vh] flex flex-col overflow-hidden">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-[#17472B] flex items-center justify-center shadow-xs">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-gray-900 leading-tight">
+                    Verify Payment & Approve
+                  </h3>
+                  <p className="text-xs text-gray-500 font-medium">
+                    Secretariat Review • Inspect payment proof before granting official pass
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setViewReceiptModal(null)}
+                className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="overflow-y-auto py-4 space-y-4 flex-grow pr-1">
+              
+              {/* Delegate Summary Card */}
+              <div className="bg-gradient-to-r from-emerald-950 via-[#17472B] to-emerald-900 text-white p-4 rounded-2xl shadow-sm">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <span className="font-mono text-xs font-black text-amber-300 bg-black/30 px-2.5 py-0.5 rounded-lg border border-amber-300/30 inline-block mb-1">
+                      {viewReceiptModal.id}
+                    </span>
+                    <h4 className="text-base font-black text-white">{viewReceiptModal.fullName}</h4>
+                    <p className="text-xs text-emerald-200 font-medium">
+                      {viewReceiptModal.phone} • {viewReceiptModal.status === 'Student' ? (viewReceiptModal.campus || 'Student') : (viewReceiptModal.position || 'Working')}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider block">Registration Fee</span>
+                    <span className="text-lg font-black text-amber-300">₹200.00</span>
+                    <div className="mt-0.5">
+                      {(viewReceiptModal.paymentStatus === 'PAID' || viewReceiptModal.paymentStatus === 'Paid (₹200)') ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-extrabold uppercase">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>PAID</span>
+                        </span>
+                      ) : viewReceiptModal.paymentStatus === 'REJECTED' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/30 text-[10px] font-extrabold uppercase">
+                          <span>REJECTED</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-extrabold uppercase">
+                          <span>PENDING VERIFICATION</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* UTR / Transaction Reference Box */}
+              <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-200/90 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">
+                    UTR / Transaction Ref Number
+                  </span>
+                  {viewReceiptModal.utrNumber && viewReceiptModal.utrNumber !== 'N/A' ? (
+                    <span className="font-mono text-sm font-black text-gray-900 select-all block truncate">
+                      {viewReceiptModal.utrNumber}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-amber-700 font-semibold italic block">
+                      No UTR Number entered by delegate
+                    </span>
+                  )}
+                </div>
+
+                {viewReceiptModal.utrNumber && viewReceiptModal.utrNumber !== 'N/A' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(viewReceiptModal.utrNumber);
+                      setCopiedUtr(true);
+                      setTimeout(() => setCopiedUtr(false), 2000);
+                    }}
+                    className="px-3 py-1.5 bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 rounded-xl text-xs font-bold transition-colors shrink-0 flex items-center gap-1 cursor-pointer shadow-xs"
+                    title="Copy UTR Number"
+                  >
+                    {copiedUtr ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-gray-500" />
+                        <span>Copy UTR</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Payment Proof Screenshot Display */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-emerald-700" />
+                    <span>Payment Receipt Screenshot</span>
+                  </label>
+
+                  {viewReceiptModal.paymentScreenshot && (
+                    <a
+                      href={viewReceiptModal.paymentScreenshot}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold hover:underline flex items-center gap-1"
+                    >
+                      <span>Open Original Image</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
+
+                {viewReceiptModal.paymentScreenshot ? (
+                  <div className="bg-gray-900 rounded-2xl overflow-hidden border-2 border-emerald-600/30 flex items-center justify-center p-2 min-h-[220px] max-h-[360px] relative group">
+                    <img
+                      src={viewReceiptModal.paymentScreenshot}
+                      alt={`Payment Receipt for ${viewReceiptModal.fullName}`}
+                      className="max-h-[340px] w-auto max-w-full object-contain rounded-xl shadow-lg"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-4 text-center space-y-2">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+                      <AlertCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h5 className="font-extrabold text-xs text-amber-900">No Screenshot Uploaded</h5>
+                      <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                        The delegate registered without uploading a payment screenshot. Please verify the <strong>₹200</strong> receipt directly in your UPI / Bank App using UTR: <strong className="font-mono">{viewReceiptModal.utrNumber || 'N/A'}</strong> before approving.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* Modal Actions Footer */}
+            <div className="flex items-center justify-between gap-2.5 pt-4 border-t border-gray-100 shrink-0 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setViewReceiptModal(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+
+              <div className="flex items-center gap-2">
+                {viewReceiptModal.paymentStatus !== 'REJECTED' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const id = viewReceiptModal.id;
+                      setViewReceiptModal(null);
+                      handleRejectPayment(id);
+                    }}
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+                  >
+                    Reject Payment
+                  </button>
+                )}
+
+                {viewReceiptModal.paymentStatus !== 'PAID' && (
+                  <button
+                    type="button"
+                    onClick={() => handleApprovePayment(viewReceiptModal.id)}
+                    className="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-[#17472B] hover:bg-[#20603B] shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Check className="w-4 h-4 text-amber-300" />
+                    <span>Verify & Approve (₹200)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {/* In-App Delete Confirmation Modal (Never blocked by mobile browsers) */}
       {deleteConfirmDelegate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fadeIn">
@@ -2906,7 +3137,15 @@ Regarding your summit delegate registration:
         }}
         delegates={delegates}
         onToggleArrival={handleToggleArrival}
-        onApprovePayment={handleApprovePayment}
+        onApprovePayment={(d) => {
+          const delegateObj = typeof d === 'object' ? d : delegates.find((x) => x.id === d);
+          if (delegateObj) {
+            setScannerModalOpen(false);
+            setViewReceiptModal(delegateObj);
+          } else {
+            handleApprovePayment(d);
+          }
+        }}
         onPrintBadge={(d) => {
           setScannerModalOpen(false);
           setPrintBadgeModal(d);
