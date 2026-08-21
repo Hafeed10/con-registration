@@ -47,7 +47,7 @@ export default function AcademicTracks({ onOpenRegister, tracksData }) {
   return (
     <section id="tracks" className="py-20 bg-brand-bg relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
@@ -69,7 +69,7 @@ export default function AcademicTracks({ onOpenRegister, tracksData }) {
             const Icon = getTrackIcon(idx);
             const topicsList = Array.isArray(track.topics) ? track.topics : (track.topics ? track.topics.split(',') : []);
             return (
-              <div 
+              <div
                 key={track.id}
                 className="bg-white rounded-2xl p-8 border border-brand-light shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
               >
@@ -105,7 +105,7 @@ export default function AcademicTracks({ onOpenRegister, tracksData }) {
                     ))}
                   </div>
 
-                  <button 
+                  <button
                     onClick={onOpenRegister}
                     className="w-full py-2.5 px-4 rounded-xl border-2 border-brand-dark text-brand-dark hover:bg-brand-dark hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >

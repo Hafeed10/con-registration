@@ -34,10 +34,10 @@ export default function CountdownSection({ onOpenRegister }) {
   return (
     <section id="countdown" className="py-20 bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Title Row matching PDF */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
-          
+
           {/* Left Title: Let's witness the first Edition */}
           <div className="lg:col-span-7">
             <h2 className="font-sans text-5xl sm:text-7xl font-normal text-[#123C2C] leading-[1.05]">
@@ -62,7 +62,7 @@ export default function CountdownSection({ onOpenRegister }) {
 
         {/* Dynamic Countdown Display */}
         <div className="bg-[#EEF3EA] rounded-3xl p-8 sm:p-10 border border-[#D5E0D2]">
-          
+
           <div className="flex items-center gap-2 mb-6 text-[#123C2C] font-bold text-sm">
             <Clock className="w-5 h-5" />
             <span>Countdown to Summit Inauguration • 11 September 2026</span>
