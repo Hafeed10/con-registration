@@ -163,7 +163,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
             phone: d.phone,
             whatsapp: d.whatsapp,
             studyRange: d.study_range,
-            birudam: d.birudam,
+            sanad: d.sanad,
             status: d.status,
             campus: d.campus,
             position: d.position,
