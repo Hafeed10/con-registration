@@ -42,8 +42,9 @@
   background: #0D382C;
 }
 
-/* Hide Side Scrollbar Utility for Modals & Containers */
+/* Hide Side/Bottom Scrollbars Utility */
 .no-scrollbar::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar,
 .overflow-y-auto::-webkit-scrollbar,
 .overflow-auto::-webkit-scrollbar {
   display: none !important;
@@ -53,6 +54,7 @@
 }
 
 .no-scrollbar,
+.overflow-x-auto,
 .overflow-y-auto,
 .overflow-auto {
   -ms-overflow-style: none !important;
