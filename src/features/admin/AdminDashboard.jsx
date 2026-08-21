@@ -593,6 +593,10 @@ Regarding your summit delegate registration:
   const arrivedCount = delegates.filter(d => d.arrived === true).length;
   const notArrivedCount = delegates.filter(d => d.arrived !== true).length;
 
+  const totalPaidRevenue = paidCount * 200;
+  const totalPendingRevenue = pendingCount * 200;
+  const totalPotentialRevenue = delegates.length * 200;
+
   // Scheduled Sessions CMS Admin State
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
@@ -1127,57 +1131,116 @@ Regarding your summit delegate registration:
         {activeTab === 'delegates' && (
           <div className="space-y-6">
 
-            {/* Quick Metrics & Arrival Overview Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block">Total Registered</span>
-                  <span className="text-2xl font-black text-gray-900 leading-tight">{delegates.length}</span>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5" />
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-2xl border border-emerald-200/80 shadow-xs flex items-center justify-between bg-gradient-to-br from-white to-emerald-50/40">
-                <div>
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 block">Paid Verified (₹200)</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-emerald-800 leading-tight">{paidCount}</span>
-                    <span className="text-xs font-bold text-emerald-600">
-                      ({((paidCount / (delegates.length || 1)) * 100).toFixed(0)}%)
-                    </span>
+            {/* Quick Metrics & Total Payment Revenue Overview Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+              
+              {/* Card 1: Total Registered */}
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block truncate">
+                    Total Registered
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                  <CheckCircle className="w-5 h-5" />
+                <div className="mt-2">
+                  <span className="text-xl sm:text-2xl font-black text-gray-900 leading-tight block">
+                    {delegates.length}
+                  </span>
+                  <span className="text-[10px] font-semibold text-gray-500 mt-0.5 block truncate">
+                    Est. Value: ₹{totalPotentialRevenue.toLocaleString('en-IN')}
+                  </span>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded-2xl border border-teal-200 shadow-xs flex items-center justify-between bg-gradient-to-br from-white to-teal-50/50">
-                <div>
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-teal-800 block">Venue Arrival / Checked-In</span>
+              {/* Card 2: Total Payment Collected (Verified) */}
+              <div className="bg-gradient-to-br from-emerald-900 via-[#17472B] to-emerald-950 text-white p-3.5 sm:p-4 rounded-2xl border border-emerald-700/60 shadow-md flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-emerald-300 block truncate">
+                    Total Payment Collected
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-800/80 text-amber-300 border border-amber-400/30 flex items-center justify-center shrink-0">
+                    <CreditCard className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl sm:text-2xl font-black text-amber-300 leading-tight">
+                      ₹{totalPaidRevenue.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-200 mt-0.5 block truncate">
+                    {paidCount} Verified Paid (₹200/ea)
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3: Pending Payments (Under Review) */}
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-amber-200/90 shadow-xs flex flex-col justify-between bg-gradient-to-br from-white to-amber-50/40">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-amber-800 block truncate">
+                    Pending Payment
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <span className="text-xl sm:text-2xl font-black text-amber-800 leading-tight block">
+                    ₹{totalPendingRevenue.toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-700 mt-0.5 block truncate">
+                    {pendingCount} Delegates To Verify
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 4: Venue Arrival / Checked-In */}
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-teal-200 shadow-xs flex flex-col justify-between bg-gradient-to-br from-white to-teal-50/50">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-teal-800 block truncate">
+                    Venue Arrival
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-teal-900 leading-tight">{arrivedCount}</span>
+                    <span className="text-xl sm:text-2xl font-black text-teal-900 leading-tight">
+                      {arrivedCount}
+                    </span>
                     <span className="text-xs font-bold text-teal-700">
-                      / {delegates.length} ({((arrivedCount / (delegates.length || 1)) * 100).toFixed(0)}%)
+                      / {delegates.length}
                     </span>
                   </div>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <UserCheck className="w-5 h-5" />
+                  <span className="text-[10px] font-bold text-teal-700 mt-0.5 block truncate">
+                    {((arrivedCount / (delegates.length || 1)) * 100).toFixed(0)}% Checked In at Venue
+                  </span>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded-2xl border border-amber-200/80 shadow-xs flex items-center justify-between bg-gradient-to-br from-white to-amber-50/40">
-                <div>
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 block">Pending Review</span>
-                  <span className="text-2xl font-black text-amber-800 leading-tight">{pendingCount}</span>
+              {/* Card 5: Payment Rate */}
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-emerald-200/80 shadow-xs flex flex-col justify-between col-span-2 sm:col-span-1 md:col-span-1 bg-gradient-to-br from-white to-emerald-50/30">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 block truncate">
+                    Paid Status Rate
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-4 h-4" />
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5" />
+                <div className="mt-2">
+                  <span className="text-xl sm:text-2xl font-black text-emerald-800 leading-tight block">
+                    {((paidCount / (delegates.length || 1)) * 100).toFixed(0)}%
+                  </span>
+                  <span className="text-[10px] font-semibold text-gray-500 mt-0.5 block truncate">
+                    {paidCount} Paid • {rejectedCount} Rejected
+                  </span>
                 </div>
               </div>
+
             </div>
 
             <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
