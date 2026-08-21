@@ -524,7 +524,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     <span className="font-extrabold text-[#17472B] block text-sm mb-1">
                       Eligibility Requirement *
                     </span>
-                    Registration is intended for delegates studying <strong>Alfiyya ibn Malik</strong> and <strong>Fathul Mueen (Baabul Ibaadaath)</strong>.
+                    Registration is intended for delegates studied <strong>Alfiyya ibn Malik</strong> and <strong>Fathul Mueen</strong>.
                   </div>
                 </div>
 
