@@ -112,7 +112,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       phone: formData.phone,
       whatsapp: formData.whatsapp || formData.phone,
       studyRange: formData.studyRange,
-      birudam: formData.birudam || 'N/A',
+      birudam: formData.sanad || 'N/A',
       status: formData.status,
       campus: formData.status === 'Student' ? formData.campus : 'N/A',
       position: formData.status === 'Working' ? formData.position : 'N/A',
@@ -440,8 +440,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <input
                         type="text"
                         placeholder="e.g. Saqafi, Ahsani, B.A, M.A"
-                        value={formData.birudam}
-                        onChange={(e) => setFormData({ ...formData, birudam: e.target.value })}
+                        value={formData.sanad}
+                        onChange={(e) => setFormData({ ...formData, sanad: e.target.value })}
                         className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-[#17472B] focus:ring-2 focus:ring-[#17472B]/20 text-sm font-medium outline-none transition-all"
                       />
                     </div>
