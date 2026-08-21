@@ -99,11 +99,6 @@ export default function RegistrationPage({ onOpenAdmin }) {
     setPaymentError('');
     const trimmedUtr = utrNumber.trim();
 
-    if (!paymentScreenshot && !trimmedUtr) {
-      setPaymentError('Please upload your payment screenshot or enter your UTR/Reference number after scanning the QR code.');
-      return;
-    }
-
     setIsSubmitting(true);
     const finalPaymentStatus = 'PENDING_VERIFICATION';
     const finalUtr = trimmedUtr || 'N/A';
@@ -627,7 +622,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       {/* Screenshot Upload Field */}
                       <div className="bg-white p-4 rounded-2xl shadow-2xs space-y-1.5">
                         <label className="block text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
-                          Upload Payment Screenshot *
+                          Upload Payment Screenshot (Optional)
                         </label>
 
                         {!paymentScreenshot ? (
@@ -701,7 +696,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
                     {isSubmitting ? (
                       <span>Processing Registration...</span>
                     ) : (
-                      <span>Submit Payment & Register</span>
+                      <span>Submit Registration</span>
                     )}
                   </button>
                 </div>

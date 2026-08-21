@@ -98,11 +98,6 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setPaymentError('');
     const trimmedUtr = utrNumber.trim();
 
-    if (!paymentScreenshot && !trimmedUtr) {
-      setPaymentError('Please upload your payment screenshot or enter your UTR/Reference number after scanning the QR code.');
-      return;
-    }
-
     setIsSubmitting(true);
     const finalPaymentStatus = 'PENDING_VERIFICATION';
     const finalUtr = trimmedUtr || 'N/A';
@@ -581,7 +576,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                       {/* Screenshot Upload Field */}
                       <div className="bg-white p-3 rounded-2xl shadow-2xs space-y-1">
                         <label className="block text-[10px] sm:text-[11px] font-extrabold uppercase text-[#17472B] tracking-wider">
-                          Upload Screenshot *
+                          Upload Screenshot (Optional)
                         </label>
 
                         {!paymentScreenshot ? (
@@ -653,7 +648,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
                   {isSubmitting ? (
                     <span>Processing Registration...</span>
                   ) : (
-                    <span>Submit Payment & Register</span>
+                    <span>Submit Registration</span>
                   )}
                 </button>
               </div>
