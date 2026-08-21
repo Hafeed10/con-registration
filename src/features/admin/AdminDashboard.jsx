@@ -29,6 +29,8 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
   // Modal to preview & print individual delegate badge
   const [printBadgeModal, setPrintBadgeModal] = useState(null);
+  // In-app Delete Confirmation Modal (fixes mobile window.confirm blocking)
+  const [deleteConfirmDelegate, setDeleteConfirmDelegate] = useState(null);
 
   // Local storage helpers to guarantee status persistence across page refreshes
   const getLocalStatusOverrides = () => {
@@ -190,7 +192,8 @@ Regarding your summit delegate registration:
             phone: d.phone,
             whatsapp: d.whatsapp,
             studyRange: d.study_range,
-            sanad: d.sanad,
+            sanad: d.sanad || d.birudam || 'N/A',
+            birudam: d.sanad || d.birudam || 'N/A',
             status: d.status,
             campus: d.campus,
             position: d.position,
@@ -500,11 +503,11 @@ Regarding your summit delegate registration:
   const handleExportCSV = () => {
     const headers = [
       "Pass ID", "Full Name", "Age", "Address", "Phone No", "WhatsApp No",
-      "Study Range", "Birudam", "Status", "Campus / Position", "Alfiyya & Fathul Mueen Studied", "Registration Date"
+      "Study Range", "Sanad (Degree)", "Status", "Campus / Position", "Alfiyya & Fathul Mueen Studied", "Registration Date"
     ];
     const rows = delegates.map(d => [
       d.id, `"${d.fullName}"`, d.age, `"${d.address}"`, d.phone, d.whatsapp,
-      d.studyRange, `"${d.birudam}"`, d.status, `"${d.status === 'Student' ? d.campus : d.position}"`,
+      d.studyRange, `"${d.sanad || d.birudam || 'N/A'}"`, d.status, `"${d.status === 'Student' ? d.campus : d.position}"`,
       d.studiedAlfiyyaAndFathulMueen ? "Yes" : "No", d.registeredAt
     ]);
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -517,51 +520,58 @@ Regarding your summit delegate registration:
     document.body.removeChild(link);
   };
 
-  const handleDeleteDelegate = async (targetId) => {
-    if (!targetId) return;
+  const handleDeleteDelegate = (delegate) => {
+    if (!delegate) return;
+    setDeleteConfirmDelegate(delegate);
+  };
 
-    if (window.confirm(`Are you sure you want to delete delegate ${targetId}?`)) {
-      // 1. Immediately remove from React state (Instant UI delete)
-      setDelegates((prevDelegates) => prevDelegates.filter((d) => d.id !== targetId && d.pass_id !== targetId));
+  const executeDeleteDelegate = async () => {
+    if (!deleteConfirmDelegate) return;
+    const targetId = deleteConfirmDelegate.id;
 
-      // 2. Clean from local storage status overrides
-      try {
-        const overrides = getLocalStatusOverrides();
-        delete overrides[targetId];
-        localStorage.setItem('confiqh_delegate_status_overrides', JSON.stringify(overrides));
-      } catch (e) {
-        console.error('Error cleaning local storage override:', e);
-      }
+    // 1. Immediately remove from React state (Instant UI delete)
+    setDelegates((prevDelegates) => prevDelegates.filter((d) => d.id !== targetId && d.pass_id !== targetId));
 
-      // 3. Delete from Supabase database cleanly
-      try {
-        let error = null;
+    // 2. Clean from local storage status overrides
+    try {
+      const overrides = getLocalStatusOverrides();
+      delete overrides[targetId];
+      localStorage.setItem('confiqh_delegate_status_overrides', JSON.stringify(overrides));
+    } catch (e) {
+      console.error('Error cleaning local storage override:', e);
+    }
 
-        // Try deleting by pass_id first
-        const res1 = await supabase
+    // 3. Close the modal immediately
+    setDeleteConfirmDelegate(null);
+
+    // 4. Delete from Supabase database cleanly
+    try {
+      let error = null;
+
+      // Try deleting by pass_id first
+      const res1 = await supabase
+        .from('delegates')
+        .delete()
+        .eq('pass_id', targetId);
+
+      error = res1.error;
+
+      // If pass_id delete failed or didn't match, try deleting by numeric/uuid id
+      if (error || (res1.count !== null && res1.count === 0)) {
+        const res2 = await supabase
           .from('delegates')
           .delete()
-          .eq('pass_id', targetId);
-
-        error = res1.error;
-
-        // If pass_id delete failed or didn't match, try deleting by numeric/uuid id
-        if (error || (res1.count !== null && res1.count === 0)) {
-          const res2 = await supabase
-            .from('delegates')
-            .delete()
-            .eq('id', targetId);
-          error = res2.error;
-        }
-
-        if (error) {
-          console.error('Supabase DB delete error:', error.message);
-        } else {
-          console.log(`Successfully deleted ${targetId} from Supabase DB and UI.`);
-        }
-      } catch (err) {
-        console.error('Supabase delete exception:', err.message);
+          .eq('id', targetId);
+        error = res2.error;
       }
+
+      if (error) {
+        console.error('Supabase DB delete error:', error.message);
+      } else {
+        console.log(`Successfully deleted ${targetId} from Supabase DB and UI.`);
+      }
+    } catch (err) {
+      console.error('Supabase delete exception:', err.message);
     }
   };
 
@@ -860,13 +870,15 @@ Regarding your summit delegate registration:
                       </div>
                     </div>
 
-                    {/* Info 2-Column Grid (Study Range & Address) */}
+                    {/* Info 2-Column Grid (Study Range & Sanad / Address) */}
                     <div className="grid grid-cols-2 gap-2.5">
                       <div className="bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 flex flex-col justify-between">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Study Range</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Study & Sanad</span>
                         <div className="mt-1">
                           <div className="text-xs font-bold text-[#17472B]">{d.studyRange || 'N/A'}</div>
-                          <div className="text-[10px] text-gray-500 font-medium truncate">{d.birudam || '—'}</div>
+                          <div className="text-[10px] font-semibold text-emerald-800 truncate mt-0.5">
+                            {(d.sanad || d.birudam) && (d.sanad !== 'N/A' && d.birudam !== 'N/A') ? `Sanad: ${d.sanad || d.birudam}` : 'No Sanad'}
+                          </div>
                         </div>
                       </div>
 
@@ -982,7 +994,7 @@ Regarding your summit delegate registration:
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleDeleteDelegate(d.id);
+                          handleDeleteDelegate(d);
                         }}
                         className="p-2 sm:p-2.5 text-gray-400 hover:text-rose-600 active:text-rose-700 hover:bg-rose-50 active:bg-rose-100 rounded-xl transition-all cursor-pointer touch-manipulation border border-transparent hover:border-rose-100 shrink-0"
                         title="Delete Delegate"
@@ -1013,7 +1025,7 @@ Regarding your summit delegate registration:
                       <th className="py-4 px-4">Campus / Institution</th>
                       <th className="py-4 px-4">Address</th>
                       <th className="py-4 px-4">Phone & WhatsApp</th>
-                      <th className="py-4 px-4">Study Range</th>
+                      <th className="py-4 px-4">Study & Sanad (Degree)</th>
                       <th className="py-4 px-4">UTR & Receipt (₹200)</th>
                       <th className="py-4 px-4">Payment Status</th>
                       <th className="py-4 px-4 text-right">Actions</th>
@@ -1088,13 +1100,15 @@ Regarding your summit delegate registration:
                           </div>
                         </td>
 
-                        {/* Study Range */}
+                        {/* Study Range & Sanad */}
                         <td className="py-4 px-4">
                           <div className="font-bold text-xs text-[#17472B]">{d.studyRange || 'N/A'}</div>
-                          {d.birudam && (
-                            <div className="text-[10px] text-gray-500 font-medium truncate max-w-[120px]" title={d.birudam}>
-                              {d.birudam}
+                          {(d.sanad || d.birudam) && (d.sanad !== 'N/A' && d.birudam !== 'N/A') ? (
+                            <div className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 inline-block mt-0.5 max-w-[130px] truncate" title={`Sanad: ${d.sanad || d.birudam}`}>
+                              Sanad: {d.sanad || d.birudam}
                             </div>
+                          ) : (
+                            <div className="text-[10px] text-gray-400 font-normal mt-0.5">No Sanad</div>
                           )}
                         </td>
 
@@ -1184,11 +1198,15 @@ Regarding your summit delegate registration:
                             )}
 
                             <button
-                              onClick={() => handleDeleteDelegate(d.id)}
-                              className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteDelegate(d);
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg transition-colors cursor-pointer touch-manipulation"
                               title="Delete Delegate"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4 pointer-events-none" />
                             </button>
                           </div>
                         </td>
@@ -1901,8 +1919,8 @@ Regarding your summit delegate registration:
                     </span>
                   </div>
                   <div className="overflow-hidden">
-                    <span className="text-gray-500 font-bold block text-[10px]">Birudam:</span>
-                    <span className="font-bold text-gray-800 text-[11px] sm:text-xs truncate block">{printBadgeModal.birudam || 'N/A'}</span>
+                    <span className="text-gray-500 font-bold block text-[10px]">Sanad (Degree):</span>
+                    <span className="font-bold text-gray-800 text-[11px] sm:text-xs truncate block">{printBadgeModal.sanad || printBadgeModal.birudam || 'N/A'}</span>
                   </div>
                   <div className="overflow-hidden">
                     <span className="text-gray-500 font-bold block text-[10px]">Phone:</span>
@@ -1947,6 +1965,49 @@ Regarding your summit delegate registration:
                   <span>Print Badge</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Delete Confirmation Modal (Never blocked by mobile browsers) */}
+      {deleteConfirmDelegate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative border border-gray-200 text-center space-y-4">
+            <button
+              onClick={() => setDeleteConfirmDelegate(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-xs">
+              <Trash2 className="w-7 h-7" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-black text-gray-900">Delete Delegate?</h3>
+              <p className="text-xs text-gray-500 font-medium mt-1.5 leading-relaxed">
+                Are you sure you want to permanently delete <strong className="text-gray-900">{deleteConfirmDelegate.fullName}</strong> (<span className="font-mono text-emerald-800 font-bold">{deleteConfirmDelegate.id}</span>)?
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmDelegate(null)}
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteDelegate}
+                className="flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-black rounded-xl shadow-md transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete</span>
+              </button>
             </div>
           </div>
         </div>
