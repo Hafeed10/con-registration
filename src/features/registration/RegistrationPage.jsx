@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../../lib/supabase';
 import confiqLogo from '../../assets/CONFIQ.png';
@@ -8,7 +8,7 @@ import phonepeQrImg from '../../assets/image.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown, Download, ExternalLink
+  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown, Download, ExternalLink, Search, X
 } from 'lucide-react';
 
 export default function RegistrationPage({ onOpenAdmin }) {
@@ -63,6 +63,115 @@ export default function RegistrationPage({ onOpenAdmin }) {
   const [submitted, setSubmitted] = useState(false);
   const [delegatePass, setDelegatePass] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Delegate Pass Lookup Modal state (for checking status / downloading badge)
+  const [showLookupModal, setShowLookupModal] = useState(false);
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState('');
+
+  // Live real-time listener: When delegate status is approved by admin, mobile updates instantly!
+  useEffect(() => {
+    if (!delegatePass || delegatePass.paymentStatus === 'PAID') return;
+
+    const checkStatus = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('delegates')
+          .select('payment_status')
+          .or(`pass_id.eq.${delegatePass.id},id.eq.${delegatePass.id}`)
+          .single();
+
+        if (data && (data.payment_status === 'PAID' || data.payment_status === 'Paid (₹200)')) {
+          setDelegatePass((prev) => ({ ...prev, paymentStatus: 'PAID' }));
+          try {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+          } catch (e) {}
+        }
+      } catch (err) {
+        // silent polling catch
+      }
+    };
+
+    const interval = setInterval(checkStatus, 3000);
+
+    const channel = supabase
+      .channel(`delegate_status_${delegatePass.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'delegates' },
+        (payload) => {
+          if (
+            payload.new &&
+            (payload.new.pass_id === delegatePass.id || payload.new.id === delegatePass.id) &&
+            (payload.new.payment_status === 'PAID' || payload.new.payment_status === 'Paid (₹200)')
+          ) {
+            setDelegatePass((prev) => ({ ...prev, paymentStatus: 'PAID' }));
+            try {
+              confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } catch (e) {}
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [delegatePass?.id, delegatePass?.paymentStatus]);
+
+  const handleLookupPass = async (e) => {
+    e.preventDefault();
+    const query = lookupQuery.trim();
+    if (!query) return;
+    setLookupLoading(true);
+    setLookupError('');
+
+    try {
+      const { data, error } = await supabase
+        .from('delegates')
+        .select('*')
+        .or(`phone.eq.${query},whatsapp.eq.${query},pass_id.eq.${query},id.eq.${query}`)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        setLookupError('Error checking records: ' + error.message);
+      } else if (!data || data.length === 0) {
+        setLookupError(`No registration found for "${query}". Please check the phone number or Pass ID.`);
+      } else {
+        const d = data[0];
+        const pass = {
+          id: d.pass_id || d.id,
+          fullName: d.full_name,
+          age: d.age,
+          address: d.address,
+          phone: d.phone,
+          whatsapp: d.whatsapp,
+          studyRange: d.study_range,
+          sanad: d.sanad || d.birudam || 'N/A',
+          birudam: d.sanad || d.birudam || 'N/A',
+          status: d.status,
+          campus: d.campus,
+          position: d.position,
+          studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
+          utrNumber: d.utr_number || 'N/A',
+          paymentScreenshot: d.payment_screenshot || null,
+          paymentStatus: d.payment_status || 'PENDING_VERIFICATION',
+          registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
+        };
+        setDelegatePass(pass);
+        setSubmitted(true);
+        setShowLookupModal(false);
+        setLookupQuery('');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (err) {
+      setLookupError('Failed to search pass: ' + err.message);
+    }
+    setLookupLoading(false);
+  };
 
   const copyPhoneToWhatsapp = () => {
     setFormData((prev) => ({ ...prev, whatsapp: prev.phone }));
@@ -224,21 +333,25 @@ export default function RegistrationPage({ onOpenAdmin }) {
             </span>
           </div>
 
-          {/* Right side info (Desktop & Tablet) */}
-          <div className="hidden sm:flex items-center space-x-4 md:space-x-6 text-xs text-[#17472B] font-bold whitespace-nowrap shrink-0">
-            <div className="flex items-center space-x-1.5">
+          {/* Right side info & Actions */}
+          <div className="flex items-center space-x-2 sm:space-x-4 text-xs text-[#17472B] font-bold whitespace-nowrap shrink-0">
+            <div className="hidden md:flex items-center space-x-1.5">
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#387B52] shrink-0" />
               <span>11 , 12 Sept 2026</span>
             </div>
-            <div className="flex items-center space-x-1.5">
+            <div className="hidden lg:flex items-center space-x-1.5">
               <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#387B52] shrink-0" />
               <span>Parapram, Kannur</span>
             </div>
-          </div>
 
-          {/* Mobile Edition Badge */}
-          <div className="sm:hidden font-sans text-[9px] font-black bg-[#17472B] text-white px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap shrink-0">
-            1ST EDITION
+            <button
+              onClick={() => setShowLookupModal(true)}
+              className="bg-[#17472B] hover:bg-[#20603B] text-white px-2.5 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Check pass status or download badge"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Check Pass / Status</span>
+            </button>
           </div>
 
         </div>
@@ -892,6 +1005,69 @@ export default function RegistrationPage({ onOpenAdmin }) {
           </p>
         </div>
       </footer>
+
+      {/* Lookup Pass Modal */}
+      {showLookupModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3.5 sm:p-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-7 max-w-md w-full shadow-2xl border border-emerald-100 relative animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => {
+                setShowLookupModal(false);
+                setLookupError('');
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#17472B] flex items-center justify-center mx-auto mb-3 shadow-xs">
+                <Search className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-black text-[#17472B]">Check Pass Status</h3>
+              <p className="text-xs text-gray-500 font-medium mt-1">
+                Enter your registered WhatsApp / Phone Number or Pass ID (e.g. CF-2026-XXXX) to view your live badge status.
+              </p>
+            </div>
+
+            <form onSubmit={handleLookupPass} className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Phone Number or Pass ID..."
+                  value={lookupQuery}
+                  onChange={(e) => setLookupQuery(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm font-semibold outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all bg-gray-50/50"
+                  autoFocus
+                  required
+                />
+              </div>
+
+              {lookupError && (
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold p-3 rounded-xl flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <span>{lookupError}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={lookupLoading}
+                className="w-full bg-[#17472B] hover:bg-[#20603B] text-white py-3 rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+              >
+                {lookupLoading ? (
+                  <span>Searching Database...</span>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4" />
+                    <span>Retrieve Delegate Badge</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

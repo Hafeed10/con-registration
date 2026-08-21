@@ -92,22 +92,30 @@ Regarding your summit delegate registration:
     );
 
     try {
-      const res1 = await supabase
+      let res = await supabase
         .from('delegates')
         .update({
           payment_status: 'PAID',
           verified_at: new Date().toISOString()
         })
-        .eq('pass_id', targetId);
+        .eq('pass_id', targetId)
+        .select();
 
-      if (res1.error) {
-        await supabase
+      if (res.error || !res.data || res.data.length === 0) {
+        res = await supabase
           .from('delegates')
           .update({
             payment_status: 'PAID',
             verified_at: new Date().toISOString()
           })
-          .eq('id', targetId);
+          .eq('id', targetId)
+          .select();
+      }
+
+      if (res.error) {
+        console.error('Supabase approve payment DB error:', res.error);
+      } else {
+        console.log('Payment approved successfully in Supabase DB:', res.data);
       }
     } catch (err) {
       console.error('Supabase approve payment exception:', err.message);
@@ -127,22 +135,30 @@ Regarding your summit delegate registration:
     );
 
     try {
-      const res1 = await supabase
+      let res = await supabase
         .from('delegates')
         .update({
           payment_status: 'REJECTED',
           rejection_reason: reason
         })
-        .eq('pass_id', targetId);
+        .eq('pass_id', targetId)
+        .select();
 
-      if (res1.error) {
-        await supabase
+      if (res.error || !res.data || res.data.length === 0) {
+        res = await supabase
           .from('delegates')
           .update({
             payment_status: 'REJECTED',
             rejection_reason: reason
           })
-          .eq('id', targetId);
+          .eq('id', targetId)
+          .select();
+      }
+
+      if (res.error) {
+        console.error('Supabase reject payment DB error:', res.error);
+      } else {
+        console.log('Payment rejected in Supabase DB:', res.data);
       }
     } catch (err) {
       console.error('Supabase reject payment exception:', err.message);
