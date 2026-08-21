@@ -204,23 +204,30 @@ Regarding your summit delegate registration:
         const mapped = data.map(d => {
           const id = d.pass_id || d.id;
           const localStatus = overrides[id];
+          const rawStatus = (localStatus || d.payment_status || d.paymentStatus || 'PENDING_VERIFICATION').toUpperCase();
+          let normalizedStatus = 'PENDING_VERIFICATION';
+          if (rawStatus.includes('PAID')) normalizedStatus = 'PAID';
+          else if (rawStatus.includes('REJECT')) normalizedStatus = 'REJECTED';
+
           return {
             id: id,
-            fullName: d.full_name,
-            age: d.age,
-            address: d.address,
-            phone: d.phone,
-            whatsapp: d.whatsapp,
-            studyRange: d.study_range,
+            fullName: d.full_name || 'Anonymous',
+            age: d.age || 'N/A',
+            address: d.address || 'N/A',
+            phone: d.phone || 'N/A',
+            whatsapp: d.whatsapp || d.phone || 'N/A',
+            studyRange: d.study_range || 'Muthawwal',
             sanad: d.sanad || d.birudam || 'N/A',
             birudam: d.sanad || d.birudam || 'N/A',
-            status: d.status,
-            campus: d.campus,
-            position: d.position,
+            status: d.status || 'Student',
+            campus: d.campus || 'N/A',
+            position: d.position || 'N/A',
             studiedAlfiyyaAndFathulMueen: d.studied_alfiyya,
             utrNumber: d.utr_number || d.utrNumber || 'N/A',
             paymentScreenshot: d.payment_screenshot || d.paymentScreenshot || null,
-            paymentStatus: localStatus || d.payment_status || d.paymentStatus || 'PENDING_VERIFICATION',
+            paymentStatus: normalizedStatus,
+            rejectionReason: d.rejection_reason || null,
+            verifiedAt: d.verified_at || null,
             registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
           };
         });
@@ -267,17 +274,39 @@ Regarding your summit delegate registration:
   }, [isAuthenticated]);
 
   const filteredDelegates = delegates.filter(d => {
-    const matchesSearch = d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.phone.includes(searchTerm) ||
-      d.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (d.utrNumber && d.utrNumber.toLowerCase().includes(searchTerm.toLowerCase()));
+    const term = (searchTerm || '').trim().toLowerCase();
+    const fullName = (d.fullName || '').toLowerCase();
+    const phone = (d.phone || '').toLowerCase();
+    const whatsapp = (d.whatsapp || '').toLowerCase();
+    const id = (d.id || '').toLowerCase();
+    const utr = (d.utrNumber || '').toLowerCase();
+    const campus = (d.campus || '').toLowerCase();
+
+    const matchesSearch = !term ||
+      fullName.includes(term) ||
+      phone.includes(term) ||
+      whatsapp.includes(term) ||
+      id.includes(term) ||
+      utr.includes(term) ||
+      campus.includes(term);
+
     const matchesRange = filterStudyRange === 'All' || d.studyRange === filterStudyRange;
-    const matchesStatus = filterPaymentStatus === 'All' || 
-      (filterPaymentStatus === 'PENDING_VERIFICATION' && d.paymentStatus === 'PENDING_VERIFICATION') ||
-      (filterPaymentStatus === 'PAID' && (d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)')) ||
-      (filterPaymentStatus === 'REJECTED' && d.paymentStatus === 'REJECTED');
+
+    let matchesStatus = true;
+    if (filterPaymentStatus === 'PAID') {
+      matchesStatus = d.paymentStatus === 'PAID';
+    } else if (filterPaymentStatus === 'REJECTED') {
+      matchesStatus = d.paymentStatus === 'REJECTED';
+    } else if (filterPaymentStatus === 'PENDING_VERIFICATION') {
+      matchesStatus = d.paymentStatus === 'PENDING_VERIFICATION' || !d.paymentStatus;
+    }
+
     return matchesSearch && matchesRange && matchesStatus;
   });
+
+  const pendingCount = delegates.filter(d => (d.paymentStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION').length;
+  const paidCount = delegates.filter(d => d.paymentStatus === 'PAID').length;
+  const rejectedCount = delegates.filter(d => d.paymentStatus === 'REJECTED').length;
 
   // Scheduled Sessions CMS Admin State
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
@@ -823,10 +852,10 @@ Regarding your summit delegate registration:
                     onChange={(e) => setFilterPaymentStatus(e.target.value)}
                     className="flex-1 min-w-[140px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
                   >
-                    <option value="All">All Payment Statuses</option>
-                    <option value="PENDING_VERIFICATION">🟡 Pending Verification</option>
-                    <option value="PAID">🟢 Paid (Verified)</option>
-                    <option value="REJECTED">🔴 Rejected</option>
+                    <option value="All">All Statuses ({delegates.length})</option>
+                    <option value="PENDING_VERIFICATION">🟡 Pending ({pendingCount})</option>
+                    <option value="PAID">🟢 Paid ({paidCount})</option>
+                    <option value="REJECTED">🔴 Rejected ({rejectedCount})</option>
                   </select>
 
                   <select
