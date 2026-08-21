@@ -3,8 +3,10 @@ import { supabase } from '../../lib/supabase';
 import {
   Users, Calendar, FileText, Settings, Plus, Search, Download, Printer, ExternalLink,
   Trash2, Eye, LogOut, CheckCircle, RefreshCw, Lock, Key, ShieldAlert, ArrowRight, X, Edit3, Image as ImageIcon, Sparkles, Tag, Upload, BookOpen, Layers,
-  Phone, Building2, Check
+  Phone, Building2, Check, QrCode, CheckCircle2, Clock, UserCheck, Undo2
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import QRScannerModal from './QRScannerModal';
 
 export default function AdminDashboard({ onReturnToPublic, sessionsData = [], setSessionsData, tracksData = [], setTracksData }) {
   // Check if session is already authenticated
@@ -22,10 +24,15 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStudyRange, setFilterStudyRange] = useState('All');
   const [filterPaymentStatus, setFilterPaymentStatus] = useState('All');
+  const [filterArrivalStatus, setFilterArrivalStatus] = useState('All');
   const [loading, setLoading] = useState(false);
   const [dbConnected, setDbConnected] = useState(true);
   const [lastSyncedTime, setLastSyncedTime] = useState(null);
   const [isLiveActive, setIsLiveActive] = useState(true);
+
+  // QR Scanner & Check-in Modal
+  const [scannerModalOpen, setScannerModalOpen] = useState(false);
+  const [scannedPassIdTarget, setScannedPassIdTarget] = useState(null);
 
   // Modal to inspect delegate payment receipt screenshot
   const [viewReceiptModal, setViewReceiptModal] = useState(null);
@@ -71,6 +78,72 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
       localStorage.setItem('confiqh_delegate_status_overrides', JSON.stringify(overrides));
     } catch (e) {
       console.error('Error saving local status override:', e);
+    }
+  };
+
+  // Local storage helpers for Delegate Arrival / Attendance check-in
+  const getLocalArrivalOverrides = () => {
+    try {
+      const stored = localStorage.getItem('confiqh_delegate_arrival_overrides');
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  const setLocalArrivalOverride = (id, arrived, arrivedAt) => {
+    try {
+      const overrides = getLocalArrivalOverrides();
+      overrides[id] = arrived;
+      overrides[`${id}_at`] = arrived ? (arrivedAt || new Date().toISOString()) : null;
+      localStorage.setItem('confiqh_delegate_arrival_overrides', JSON.stringify(overrides));
+    } catch (e) {
+      console.error('Error saving local arrival override:', e);
+    }
+  };
+
+  const handleToggleArrival = async (targetId, newStatus) => {
+    if (!targetId) return;
+    const nowIso = new Date().toISOString();
+    setLocalArrivalOverride(targetId, newStatus, nowIso);
+
+    setDelegates((prev) =>
+      prev.map((d) => (d.id === targetId ? {
+        ...d,
+        arrived: newStatus,
+        attendanceStatus: newStatus ? 'ARRIVED' : 'ABSENT',
+        arrivedAt: newStatus ? nowIso : null
+      } : d))
+    );
+
+    try {
+      let res = await supabase
+        .from('delegates')
+        .update({
+          arrived: newStatus,
+          attendance_status: newStatus ? 'ARRIVED' : 'ABSENT',
+          arrived_at: newStatus ? nowIso : null
+        })
+        .eq('pass_id', targetId)
+        .select();
+
+      if (res.error || !res.data || res.data.length === 0) {
+        res = await supabase
+          .from('delegates')
+          .update({
+            arrived: newStatus,
+            attendance_status: newStatus ? 'ARRIVED' : 'ABSENT',
+            arrived_at: newStatus ? nowIso : null
+          })
+          .eq('id', targetId)
+          .select();
+      }
+
+      if (res.error) {
+        console.warn('Supabase arrival update error (falling back gracefully to local storage):', res.error.message);
+      }
+    } catch (err) {
+      console.error('Supabase arrival update exception:', err);
     }
   };
 
@@ -355,6 +428,7 @@ Regarding your summit delegate registration:
         setLastSyncedTime(new Date());
         setIsLiveActive(true);
         const overrides = getLocalStatusOverrides();
+        const arrivalOverrides = getLocalArrivalOverrides();
         const mapped = data.map(d => {
           const id = d.pass_id || d.id;
           const localStatus = overrides[id];
@@ -362,6 +436,11 @@ Regarding your summit delegate registration:
           let normalizedStatus = 'PENDING_VERIFICATION';
           if (rawStatus.includes('PAID')) normalizedStatus = 'PAID';
           else if (rawStatus.includes('REJECT')) normalizedStatus = 'REJECTED';
+
+          const isArrived = arrivalOverrides[id] !== undefined
+            ? arrivalOverrides[id]
+            : (d.arrived === true || d.attendance_status === 'ARRIVED' || !!d.arrived_at);
+          const arrivedAt = arrivalOverrides[`${id}_at`] || d.arrived_at || null;
 
           return {
             id: id,
@@ -382,7 +461,10 @@ Regarding your summit delegate registration:
             paymentStatus: normalizedStatus,
             rejectionReason: d.rejection_reason || null,
             verifiedAt: d.verified_at || null,
-            registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString()
+            registeredAt: d.created_at ? new Date(d.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
+            arrived: isArrived,
+            attendanceStatus: isArrived ? 'ARRIVED' : 'ABSENT',
+            arrivedAt: arrivedAt
           };
         });
         setDelegates(mapped);
@@ -393,6 +475,17 @@ Regarding your summit delegate registration:
     }
     if (!isSilent) setLoading(false);
   };
+
+  // URL scan parameter listener (e.g. ?scan=CF-2026-XXXX or #admin?scan=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const scanId = params.get('scan') || params.get('pass_id') || hashParams.get('scan') || hashParams.get('pass_id');
+    if (scanId) {
+      setScannedPassIdTarget(scanId.trim());
+      setScannerModalOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -455,12 +548,21 @@ Regarding your summit delegate registration:
       matchesStatus = d.paymentStatus === 'PENDING_VERIFICATION' || !d.paymentStatus;
     }
 
-    return matchesSearch && matchesRange && matchesStatus;
+    let matchesArrival = true;
+    if (filterArrivalStatus === 'ARRIVED') {
+      matchesArrival = d.arrived === true;
+    } else if (filterArrivalStatus === 'NOT_ARRIVED') {
+      matchesArrival = d.arrived !== true;
+    }
+
+    return matchesSearch && matchesRange && matchesStatus && matchesArrival;
   });
 
   const pendingCount = delegates.filter(d => (d.paymentStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION').length;
   const paidCount = delegates.filter(d => d.paymentStatus === 'PAID').length;
   const rejectedCount = delegates.filter(d => d.paymentStatus === 'REJECTED').length;
+  const arrivedCount = delegates.filter(d => d.arrived === true).length;
+  const notArrivedCount = delegates.filter(d => d.arrived !== true).length;
 
   // Scheduled Sessions CMS Admin State
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
@@ -911,6 +1013,18 @@ Regarding your summit delegate registration:
               </div>
 
               <button
+                onClick={() => {
+                  setScannedPassIdTarget(null);
+                  setScannerModalOpen(true);
+                }}
+                className="bg-amber-400 hover:bg-amber-300 text-[#17472B] font-extrabold px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                title="Scan Delegate QR Code Pass"
+              >
+                <QrCode className="w-4 h-4" />
+                <span className="hidden xs:inline">Scan Pass</span>
+              </button>
+
+              <button
                 onClick={() => fetchSupabaseDelegates(false)}
                 disabled={loading}
                 className="bg-white/10 hover:bg-white/20 text-white p-2 sm:px-3 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
@@ -984,11 +1098,64 @@ Regarding your summit delegate registration:
         {activeTab === 'delegates' && (
           <div className="space-y-6">
 
+            {/* Quick Metrics & Arrival Overview Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block">Total Registered</span>
+                  <span className="text-2xl font-black text-gray-900 leading-tight">{delegates.length}</span>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-emerald-200/80 shadow-xs flex items-center justify-between bg-gradient-to-br from-white to-emerald-50/40">
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 block">Paid Verified (₹200)</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-black text-emerald-800 leading-tight">{paidCount}</span>
+                    <span className="text-xs font-bold text-emerald-600">
+                      ({((paidCount / (delegates.length || 1)) * 100).toFixed(0)}%)
+                    </span>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <CheckCircle className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-teal-200 shadow-xs flex items-center justify-between bg-gradient-to-br from-white to-teal-50/50">
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-teal-800 block">Venue Arrival / Checked-In</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-black text-teal-900 leading-tight">{arrivedCount}</span>
+                    <span className="text-xs font-bold text-teal-700">
+                      / {delegates.length} ({((arrivedCount / (delegates.length || 1)) * 100).toFixed(0)}%)
+                    </span>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-amber-200/80 shadow-xs flex items-center justify-between bg-gradient-to-br from-white to-amber-50/40">
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 block">Pending Review</span>
+                  <span className="text-2xl font-black text-amber-800 leading-tight">{pendingCount}</span>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
               {/* Search and Filters Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
                 {/* Search Bar */}
-                <div className="relative sm:col-span-12 md:col-span-5 lg:col-span-5">
+                <div className="relative sm:col-span-12 md:col-span-4 lg:col-span-4">
                   <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
                   <input
                     type="text"
@@ -1000,24 +1167,34 @@ Regarding your summit delegate registration:
                 </div>
 
                 {/* Filters */}
-                <div className="sm:col-span-7 md:col-span-4 lg:col-span-4 flex gap-2">
+                <div className="sm:col-span-7 md:col-span-5 lg:col-span-5 flex flex-wrap sm:flex-nowrap gap-2">
                   <select
                     value={filterPaymentStatus}
                     onChange={(e) => setFilterPaymentStatus(e.target.value)}
-                    className="flex-1 min-w-[140px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
+                    className="flex-1 min-w-[130px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
                   >
-                    <option value="All">All Statuses ({delegates.length})</option>
-                    <option value="PENDING_VERIFICATION">🟡 Pending ({pendingCount})</option>
+                    <option value="All">All Payments ({delegates.length})</option>
                     <option value="PAID">🟢 Paid ({paidCount})</option>
+                    <option value="PENDING_VERIFICATION">🟡 Pending ({pendingCount})</option>
                     <option value="REJECTED">🔴 Rejected ({rejectedCount})</option>
+                  </select>
+
+                  <select
+                    value={filterArrivalStatus}
+                    onChange={(e) => setFilterArrivalStatus(e.target.value)}
+                    className="flex-1 min-w-[130px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
+                  >
+                    <option value="All">All Arrivals ({delegates.length})</option>
+                    <option value="ARRIVED">🟢 Arrived ({arrivedCount})</option>
+                    <option value="NOT_ARRIVED">⚪ Not Arrived ({notArrivedCount})</option>
                   </select>
 
                   <select
                     value={filterStudyRange}
                     onChange={(e) => setFilterStudyRange(e.target.value)}
-                    className="flex-1 min-w-[120px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
+                    className="flex-1 min-w-[110px] px-3 py-2 sm:py-2.5 rounded-xl border border-gray-300 text-xs font-semibold bg-white outline-none focus:border-emerald-600 cursor-pointer shadow-xs"
                   >
-                    <option value="All">All Study Ranges</option>
+                    <option value="All">All Ranges</option>
                     <option value="Mukhtasar">Mukhtasar</option>
                     <option value="Muthawwal">Muthawwal</option>
                   </select>
@@ -1026,20 +1203,32 @@ Regarding your summit delegate registration:
                 {/* Action buttons */}
                 <div className="sm:col-span-5 md:col-span-3 lg:col-span-3 flex justify-end gap-2">
                   <button
+                    onClick={() => {
+                      setScannedPassIdTarget(null);
+                      setScannerModalOpen(true);
+                    }}
+                    className="flex-1 sm:flex-none bg-[#17472B] hover:bg-[#20603B] text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    title="Scan Pass QR Code for Arrival Check-In"
+                  >
+                    <QrCode className="w-4 h-4 text-amber-300" />
+                    <span>Scan Pass</span>
+                  </button>
+
+                  <button
                     onClick={() => window.print()}
-                    className="flex-1 sm:flex-none bg-emerald-800 hover:bg-emerald-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-gray-300"
                     title="Print complete delegate register"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>Print</span>
+                    <span className="hidden sm:inline">Print</span>
                   </button>
 
                   <button
                     onClick={handleExportCSV}
-                    className="flex-1 sm:flex-none bg-[#17472B] hover:bg-[#20603B] text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="flex-1 sm:flex-none bg-emerald-800 hover:bg-emerald-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Export CSV</span>
+                    <span className="hidden sm:inline">Export</span>
                   </button>
                 </div>
               </div>
@@ -1053,7 +1242,7 @@ Regarding your summit delegate registration:
                   className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200/90 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
                 >
                   {/* Card Top Header */}
-                  <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-gray-50/80 via-white to-gray-50/80 border-b border-gray-100">
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-gray-50/80 via-white to-gray-50/80 border-b border-gray-100 flex-wrap">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-mono font-bold text-[#17472B] text-xs bg-[#17472B]/10 px-2.5 py-1 rounded-lg border border-[#17472B]/15 shrink-0">
                         {d.id}
@@ -1063,23 +1252,37 @@ Regarding your summit delegate registration:
                       </span>
                     </div>
 
-                    {/* Modern Pill Status */}
-                    {(d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)') ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/90 text-[11px] font-extrabold uppercase tracking-wide shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>PAID ₹200</span>
-                      </span>
-                    ) : d.paymentStatus === 'REJECTED' ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/90 text-[11px] font-extrabold uppercase tracking-wide shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                        <span>REJECTED</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[11px] font-extrabold uppercase tracking-wide shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                        <span>PENDING</span>
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Arrival Pill */}
+                      {d.arrived ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200 text-[10px] font-black uppercase">
+                          <CheckCircle2 className="w-3 h-3 text-teal-600" />
+                          <span>ARRIVED</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200 text-[10px] font-medium">
+                          <span>ABSENT</span>
+                        </span>
+                      )}
+
+                      {/* Modern Pill Status */}
+                      {(d.paymentStatus === 'PAID' || d.paymentStatus === 'Paid (₹200)') ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/90 text-[10px] font-extrabold uppercase tracking-wide">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span>PAID ₹200</span>
+                        </span>
+                      ) : d.paymentStatus === 'REJECTED' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/90 text-[10px] font-extrabold uppercase tracking-wide">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                          <span>REJECTED</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[10px] font-extrabold uppercase tracking-wide">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                          <span>PENDING</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Card Body */}
@@ -1178,8 +1381,34 @@ Regarding your summit delegate registration:
                   </div>
 
                   {/* Card Actions Footer */}
-                  <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/80 border-t border-gray-100">
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/80 border-t border-gray-100 flex-wrap">
                     <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleArrival(d.id, !d.arrived);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1 cursor-pointer shadow-xs ${
+                          d.arrived
+                            ? 'bg-teal-50 text-teal-800 border border-teal-300 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300'
+                            : 'bg-teal-700 hover:bg-teal-800 text-white'
+                        }`}
+                        title={d.arrived ? 'Undo Check-In' : 'Mark as Arrived at Venue'}
+                      >
+                        {d.arrived ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                            <span>Arrived ✓</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Check In</span>
+                          </>
+                        )}
+                      </button>
+
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1273,6 +1502,7 @@ Regarding your summit delegate registration:
                       <th className="py-4 px-4 whitespace-nowrap">Study & Sanad (Degree)</th>
                       <th className="py-4 px-4 whitespace-nowrap">UTR & Receipt (₹200)</th>
                       <th className="py-4 px-4 whitespace-nowrap">Payment Status</th>
+                      <th className="py-4 px-4 whitespace-nowrap">Arrival Status</th>
                       <th className="py-4 px-4 text-right whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
@@ -1407,6 +1637,40 @@ Regarding your summit delegate registration:
                               <span>PENDING</span>
                             </span>
                           )}
+                        </td>
+
+                        {/* Arrival Status & Quick Toggle */}
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {d.arrived ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 border border-teal-200 text-[10px] font-black uppercase">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                                <span>ARRIVED</span>
+                                {d.arrivedAt && (
+                                  <span className="text-[9px] text-teal-700 font-normal font-mono ml-0.5">
+                                    {new Date(d.arrivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200 text-[10px] font-semibold">
+                                <span>NOT ARRIVED</span>
+                              </span>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleToggleArrival(d.id, !d.arrived)}
+                              className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                d.arrived
+                                  ? 'text-gray-400 hover:text-rose-600 hover:bg-rose-50'
+                                  : 'text-teal-700 hover:text-white hover:bg-teal-700 bg-teal-50 border border-teal-200'
+                              }`}
+                              title={d.arrived ? 'Undo arrival check-in' : 'Mark as arrived at venue'}
+                            >
+                              {d.arrived ? <Undo2 className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
                         </td>
 
                         {/* Actions */}
@@ -2198,6 +2462,30 @@ Regarding your summit delegate registration:
                   </div>
                 </div>
 
+                {/* QR Code Identification & Check-In */}
+                <div className="bg-emerald-900/10 p-2.5 rounded-xl border border-emerald-800/20 flex items-center justify-between gap-2">
+                  <div className="space-y-0.5 select-none">
+                    <div className="flex items-center gap-1 text-[#17472B] font-extrabold text-[10px] uppercase tracking-wider">
+                      <QrCode className="w-3 h-3 text-emerald-700" />
+                      <span>Official Pass QR</span>
+                    </div>
+                    <p className="text-[9px] text-gray-600 leading-tight">
+                      Scan at venue reception for arrival check-in.
+                    </p>
+                    <div className="font-mono text-[9px] text-[#17472B] font-bold">
+                      ID: {printBadgeModal.id}
+                    </div>
+                  </div>
+                  <div className="bg-white p-1 rounded-lg shadow-sm shrink-0 border border-emerald-200">
+                    <QRCodeSVG
+                      value={`${window.location.origin}${window.location.pathname}?admin=true&scan=${encodeURIComponent(printBadgeModal.id)}`}
+                      size={54}
+                      level="M"
+                      includeMargin={false}
+                    />
+                  </div>
+                </div>
+
                 <div className="pt-2 border-t border-emerald-100 text-[9px] sm:text-[10px] text-gray-500 flex justify-between gap-1">
                   <span className="truncate">Ahlussuffa Dars, Parapram</span>
                   <span className="shrink-0">Sept 11–12, 2026</span>
@@ -2586,6 +2874,45 @@ Regarding your summit delegate registration:
           </div>
         </div>
       )}
+
+      {/* Floating QR Scanner Action Button for Quick Check-In */}
+      <button
+        type="button"
+        onClick={() => {
+          setScannedPassIdTarget(null);
+          setScannerModalOpen(true);
+        }}
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#17472B] to-[#1f5a38] hover:from-[#1f5a38] hover:to-[#267045] text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl flex items-center gap-2.5 border-2 border-emerald-400/40 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+        title="Open QR Scanner & Arrival Check-In"
+      >
+        <div className="relative">
+          <QrCode className="w-5 h-5 text-amber-300 group-hover:rotate-12 transition-transform" />
+          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-300"></span>
+          </span>
+        </div>
+        <span className="hidden sm:inline font-extrabold text-xs tracking-wide">
+          Scan Pass / Check In
+        </span>
+      </button>
+
+      {/* QR Scanner & Arrival Check-In Modal */}
+      <QRScannerModal
+        isOpen={scannerModalOpen}
+        onClose={() => {
+          setScannerModalOpen(false);
+          setScannedPassIdTarget(null);
+        }}
+        delegates={delegates}
+        onToggleArrival={handleToggleArrival}
+        onApprovePayment={handleApprovePayment}
+        onPrintBadge={(d) => {
+          setScannerModalOpen(false);
+          setPrintBadgeModal(d);
+        }}
+        initialPassId={scannedPassIdTarget}
+      />
 
     </div>
   );

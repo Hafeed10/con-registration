@@ -3,11 +3,12 @@ import { RegistrationPage } from './features/registration';
 import { AdminDashboard } from './features/admin';
 
 export default function App() {
-  // Admin view activated ONLY via URL route (#admin or /admin or ?admin)
+  // Admin view activated via URL route (#admin or /admin or ?admin or ?scan)
   const [isAdminView, setIsAdminView] = useState(() => {
     const hash = window.location.hash;
     const path = window.location.pathname;
-    return hash === '#admin' || path === '/admin' || window.location.search.includes('admin');
+    const search = window.location.search;
+    return hash.includes('admin') || path.includes('/admin') || search.includes('admin') || search.includes('scan');
   });
 
   const [sessionsData, setSessionsData] = useState([]);
@@ -18,7 +19,7 @@ export default function App() {
       const hash = window.location.hash;
       const path = window.location.pathname;
       const search = window.location.search;
-      setIsAdminView(hash === '#admin' || path === '/admin' || search.includes('admin'));
+      setIsAdminView(hash.includes('admin') || path.includes('/admin') || search.includes('admin') || search.includes('scan'));
     };
 
     window.addEventListener('hashchange', handleUrlChange);

@@ -7,6 +7,7 @@ import {
   BookOpen, Award, Briefcase, GraduationCap, Sparkles, Copy,
   Upload, AlertCircle, CreditCard, FileCheck, Image as ImageIcon, Trash2, Download, ExternalLink, ShieldCheck
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function RegistrationModal({ isOpen, onClose }) {
   const MAX_DELEGATES_LIMIT = 200;
@@ -777,6 +778,30 @@ export default function RegistrationModal({ isOpen, onClose }) {
                             <span className="text-xs sm:text-sm font-semibold text-gray-100 block">
                               {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
                             </span>
+                          </div>
+
+                          {/* QR Code Pass Identification & Check-In */}
+                          <div className="bg-[#091f13]/90 p-3 rounded-2xl border border-emerald-700/60 flex items-center justify-between gap-2 shadow-inner">
+                            <div className="space-y-1 select-none">
+                              <div className="flex items-center gap-1 text-amber-300 font-extrabold text-[10px] uppercase tracking-wider">
+                                <QrCode className="w-3 h-3" />
+                                <span>Official Pass QR</span>
+                              </div>
+                              <p className="text-[9px] text-gray-300 leading-tight">
+                                Scan for delegate verification & arrival check-in.
+                              </p>
+                              <div className="font-mono text-[9px] text-[#C5DF9F] font-bold">
+                                ID: {delegatePass.id}
+                              </div>
+                            </div>
+                            <div className="bg-white p-1.5 rounded-xl shadow-md shrink-0 border border-emerald-900 flex items-center justify-center">
+                              <QRCodeSVG
+                                value={`${window.location.origin}${window.location.pathname}?admin=true&scan=${encodeURIComponent(delegatePass.id)}`}
+                                size={68}
+                                level="M"
+                                includeMargin={false}
+                              />
+                            </div>
                           </div>
                         </div>
 

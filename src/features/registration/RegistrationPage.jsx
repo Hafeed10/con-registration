@@ -8,8 +8,9 @@ import phonepeQrImg from '../../assets/image.jpeg';
 import {
   CheckCircle, Printer, User, Phone, MapPin,
   Award, Briefcase, GraduationCap, Sparkles, Copy,
-  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown, Download, ExternalLink, Search, X
+  Upload, AlertCircle, CreditCard, FileCheck, Trash2, Calendar, MapPin as MapPinIcon, ShieldCheck, Lock, ChevronDown, Download, ExternalLink, Search, X, QrCode
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function RegistrationPage({ onOpenAdmin }) {
   const MAX_DELEGATES_LIMIT = 200;
@@ -942,6 +943,30 @@ export default function RegistrationPage({ onOpenAdmin }) {
                       <span className="text-sm font-semibold text-gray-100 block">
                         {delegatePass.status === 'Student' ? delegatePass.campus : delegatePass.position}
                       </span>
+                    </div>
+
+                    {/* QR Code Pass Identification & Check-In */}
+                    <div className="bg-[#091f13]/90 p-3.5 rounded-2xl border border-emerald-700/60 flex items-center justify-between gap-3 shadow-inner">
+                      <div className="space-y-1 select-none">
+                        <div className="flex items-center gap-1.5 text-amber-300 font-extrabold text-[11px] uppercase tracking-wider">
+                          <QrCode className="w-3.5 h-3.5" />
+                          <span>Official Pass QR</span>
+                        </div>
+                        <p className="text-[10px] text-gray-300 leading-tight">
+                          Scan at venue reception for delegate verification & arrival check-in.
+                        </p>
+                        <div className="font-mono text-[10px] text-[#C5DF9F] font-black">
+                          ID: {delegatePass.id}
+                        </div>
+                      </div>
+                      <div className="bg-white p-2 rounded-xl shadow-md shrink-0 border border-emerald-900 flex items-center justify-center">
+                        <QRCodeSVG
+                          value={`${window.location.origin}${window.location.pathname}?admin=true&scan=${encodeURIComponent(delegatePass.id)}`}
+                          size={76}
+                          level="M"
+                          includeMargin={false}
+                        />
+                      </div>
                     </div>
                   </div>
 
