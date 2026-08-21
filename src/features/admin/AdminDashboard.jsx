@@ -60,7 +60,7 @@ export default function AdminDashboard({ onReturnToPublic, sessionsData = [], se
       : '🟡 *PENDING VERIFICATION*';
     
     const message = 
-`*CONFIQ 2026* | Annual Fiqh Summit
+`*CONFIQ 2026* | Keralam Fiqh Summit
 ━━━━━━━━━━━━━━━━━━━━
 Assalamu Alaikum *${d.fullName}*,
 
