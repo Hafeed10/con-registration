@@ -49,6 +49,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     phone: '',
     whatsapp: '',
     studyRange: 'Muthawwal',
+    sanad: '',
     birudam: '',
     status: 'Student',
     campus: '',
@@ -143,6 +144,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
         setLookupError(`No registration found for "${query}". Please check the phone number or Pass ID.`);
       } else {
         const d = data[0];
+        const sanadVal = (d.sanad && d.sanad !== 'N/A') ? d.sanad : ((d.birudam && d.birudam !== 'N/A') ? d.birudam : 'N/A');
         const pass = {
           id: d.pass_id || d.id,
           fullName: d.full_name,
@@ -151,8 +153,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
           phone: d.phone,
           whatsapp: d.whatsapp,
           studyRange: d.study_range,
-          sanad: d.sanad || d.birudam || 'N/A',
-          birudam: d.sanad || d.birudam || 'N/A',
+          sanad: sanadVal,
+          birudam: sanadVal,
           status: d.status,
           campus: d.campus,
           position: d.position,
@@ -214,6 +216,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
     const finalUtr = trimmedUtr || 'N/A';
 
     const passId = 'CF-2026-' + Math.floor(1000 + Math.random() * 9000);
+    const cleanSanad = (formData.sanad || formData.birudam || '').trim() || 'N/A';
     const newDelegate = {
       id: passId,
       fullName: formData.fullName,
@@ -222,8 +225,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
       phone: formData.phone,
       whatsapp: formData.whatsapp || formData.phone,
       studyRange: formData.studyRange,
-      sanad: formData.sanad || formData.birudam || 'N/A',
-      birudam: formData.sanad || formData.birudam || 'N/A',
+      sanad: cleanSanad,
+      birudam: cleanSanad,
       status: formData.status,
       campus: formData.status === 'Student' ? formData.campus : 'N/A',
       position: formData.status === 'Working' ? formData.position : 'N/A',
@@ -244,7 +247,8 @@ export default function RegistrationPage({ onOpenAdmin }) {
         phone: formData.phone,
         whatsapp: formData.whatsapp || formData.phone,
         study_range: formData.studyRange,
-        birudam: formData.sanad || formData.birudam || 'N/A',
+        sanad: cleanSanad,
+        birudam: cleanSanad,
         status: formData.status,
         campus: formData.status === 'Student' ? formData.campus : 'N/A',
         position: formData.status === 'Working' ? formData.position : 'N/A',
@@ -311,6 +315,7 @@ export default function RegistrationPage({ onOpenAdmin }) {
       phone: '',
       whatsapp: '',
       studyRange: 'Muthawwal',
+      sanad: '',
       birudam: '',
       status: 'Student',
       campus: '',

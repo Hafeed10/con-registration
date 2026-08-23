@@ -417,7 +417,7 @@ export default function QRScannerModal({
                   <div className="bg-black/30 p-2.5 rounded-xl border border-emerald-800/40">
                     <span className="text-[10px] text-gray-300 uppercase font-bold block">Birudam / Sanad</span>
                     <span className="font-semibold text-white truncate block">
-                      {matchedDelegate.sanad || matchedDelegate.birudam || 'N/A'}
+                      {(matchedDelegate.sanad && matchedDelegate.sanad !== 'N/A') ? matchedDelegate.sanad : ((matchedDelegate.birudam && matchedDelegate.birudam !== 'N/A') ? matchedDelegate.birudam : 'N/A')}
                     </span>
                   </div>
 

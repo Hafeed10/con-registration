@@ -46,6 +46,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     phone: '',
     whatsapp: '',
     studyRange: 'Muthawwal',
+    sanad: '',
     birudam: '',
     status: 'Student',
     campus: '',
@@ -73,7 +74,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setPaymentError('Please select a valid payment screenshot image file (PNG, JPG, JPEG, WEBP).');
+      setPaymentError('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
       return;
     }
 
@@ -102,6 +103,7 @@ export default function RegistrationModal({ isOpen, onClose }) {
     setIsSubmitting(true);
     const finalPaymentStatus = 'PENDING_VERIFICATION';
     const finalUtr = trimmedUtr || 'N/A';
+    const cleanSanad = (formData.sanad || formData.birudam || '').trim() || 'N/A';
 
     const passId = 'CF-2026-' + Math.floor(1000 + Math.random() * 9000);
     const newDelegate = {
@@ -112,7 +114,8 @@ export default function RegistrationModal({ isOpen, onClose }) {
       phone: formData.phone,
       whatsapp: formData.whatsapp || formData.phone,
       studyRange: formData.studyRange,
-      birudam: formData.sanad || 'N/A',
+      sanad: cleanSanad,
+      birudam: cleanSanad,
       status: formData.status,
       campus: formData.status === 'Student' ? formData.campus : 'N/A',
       position: formData.status === 'Working' ? formData.position : 'N/A',
@@ -134,7 +137,8 @@ export default function RegistrationModal({ isOpen, onClose }) {
         phone: formData.phone,
         whatsapp: formData.whatsapp || formData.phone,
         study_range: formData.studyRange,
-        birudam: formData.sanad || 'N/A',
+        sanad: cleanSanad,
+        birudam: cleanSanad,
         status: formData.status,
         campus: formData.status === 'Student' ? formData.campus : 'N/A',
         position: formData.status === 'Working' ? formData.position : 'N/A',

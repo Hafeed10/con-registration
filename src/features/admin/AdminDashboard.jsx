@@ -278,6 +278,7 @@ Regarding your summit delegate registration:
   };
 
   const handleOpenEditDelegate = (d) => {
+    const rawSanad = (d.sanad && d.sanad !== 'N/A') ? d.sanad : ((d.birudam && d.birudam !== 'N/A') ? d.birudam : '');
     setEditingDelegate(d);
     setEditDelegateForm({
       fullName: d.fullName || '',
@@ -289,7 +290,7 @@ Regarding your summit delegate registration:
       campus: d.campus || '',
       position: d.position || '',
       studyRange: d.studyRange || 'Muthawwal',
-      sanad: d.sanad !== 'N/A' ? (d.sanad || d.birudam || '') : '',
+      sanad: rawSanad,
       studiedAlfiyyaAndFathulMueen: !!d.studiedAlfiyyaAndFathulMueen,
       utrNumber: d.utrNumber !== 'N/A' ? (d.utrNumber || '') : '',
       paymentStatus: d.paymentStatus || 'PENDING_VERIFICATION',
@@ -336,6 +337,8 @@ Regarding your summit delegate registration:
     if (rawStatus.includes('PAID')) normalizedStatus = 'PAID';
     else if (rawStatus.includes('REJECT')) normalizedStatus = 'REJECTED';
 
+    const cleanSanad = editDelegateForm.sanad.trim() || 'N/A';
+
     const updatedDelegate = {
       ...editingDelegate,
       fullName: editDelegateForm.fullName.trim(),
@@ -347,8 +350,8 @@ Regarding your summit delegate registration:
       campus: editDelegateForm.status === 'Student' ? editDelegateForm.campus.trim() : 'N/A',
       position: editDelegateForm.status === 'Working' ? editDelegateForm.position.trim() : 'N/A',
       studyRange: editDelegateForm.studyRange,
-      sanad: editDelegateForm.sanad.trim() || 'N/A',
-      birudam: editDelegateForm.sanad.trim() || 'N/A',
+      sanad: cleanSanad,
+      birudam: cleanSanad,
       studiedAlfiyyaAndFathulMueen: editDelegateForm.studiedAlfiyyaAndFathulMueen,
       utrNumber: editDelegateForm.utrNumber.trim() || 'N/A',
       paymentScreenshot: editDelegateForm.paymentScreenshot || null,
@@ -375,7 +378,8 @@ Regarding your summit delegate registration:
         campus: updatedDelegate.campus,
         position: updatedDelegate.position,
         study_range: updatedDelegate.studyRange,
-        birudam: updatedDelegate.birudam,
+        sanad: cleanSanad,
+        birudam: cleanSanad,
         studied_alfiyya: updatedDelegate.studiedAlfiyyaAndFathulMueen,
         utr_number: updatedDelegate.utrNumber !== 'N/A' ? updatedDelegate.utrNumber : null,
         payment_screenshot: updatedDelegate.paymentScreenshot,
@@ -471,6 +475,8 @@ Regarding your summit delegate registration:
             : isCloudArrived;
           const arrivedAt = arrivalOverrides[`${id}_at`] || cloudArrivedAt || null;
 
+          const rawSanad = (d.sanad && d.sanad !== 'N/A') ? d.sanad : ((d.birudam && d.birudam !== 'N/A') ? d.birudam : 'N/A');
+
           return {
             id: id,
             fullName: d.full_name || 'Anonymous',
@@ -479,8 +485,8 @@ Regarding your summit delegate registration:
             phone: d.phone || 'N/A',
             whatsapp: d.whatsapp || d.phone || 'N/A',
             studyRange: d.study_range || 'Muthawwal',
-            sanad: d.sanad || d.birudam || 'N/A',
-            birudam: d.sanad || d.birudam || 'N/A',
+            sanad: rawSanad,
+            birudam: rawSanad,
             status: d.status || 'Student',
             campus: d.campus || 'N/A',
             position: d.position || 'N/A',
@@ -557,6 +563,7 @@ Regarding your summit delegate registration:
     const id = (d.id || '').toLowerCase();
     const utr = (d.utrNumber || '').toLowerCase();
     const campus = (d.campus || '').toLowerCase();
+    const sanad = (d.sanad && d.sanad !== 'N/A' ? d.sanad : (d.birudam && d.birudam !== 'N/A' ? d.birudam : '')).toLowerCase();
 
     const matchesSearch = !term ||
       fullName.includes(term) ||
@@ -564,7 +571,8 @@ Regarding your summit delegate registration:
       whatsapp.includes(term) ||
       id.includes(term) ||
       utr.includes(term) ||
-      campus.includes(term);
+      campus.includes(term) ||
+      sanad.includes(term);
 
     const matchesRange = filterStudyRange === 'All' || d.studyRange === filterStudyRange;
 
@@ -1127,6 +1135,27 @@ Regarding your summit delegate registration:
           </button>
         </div>
 
+        {/* Database Not Configured Banner */}
+        {!dbConnected && (
+          <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-sm text-amber-900">Supabase Tables Not Detected</h4>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Your new Supabase database needs the tables and RLS policies created. Run the provided <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-[11px] font-bold">supabase_schema.sql</code> script in your Supabase SQL Editor.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => fetchSupabaseDelegates(false)}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-colors shadow-xs"
+            >
+              Retry Connection
+            </button>
+          </div>
+        )}
+
         {/* TAB 1: Delegates Table */}
         {activeTab === 'delegates' && (
           <div className="space-y-6">
@@ -1402,7 +1431,7 @@ Regarding your summit delegate registration:
                         <div className="mt-1">
                           <div className="text-xs font-bold text-[#17472B]">{d.studyRange || 'N/A'}</div>
                           <div className="text-[10px] font-semibold text-emerald-800 truncate mt-0.5">
-                            {(d.sanad || d.birudam) && (d.sanad !== 'N/A' && d.birudam !== 'N/A') ? `Sanad: ${d.sanad || d.birudam}` : 'No Sanad'}
+                            {((d.sanad && d.sanad !== 'N/A') || (d.birudam && d.birudam !== 'N/A')) ? `Sanad: ${(d.sanad && d.sanad !== 'N/A') ? d.sanad : d.birudam}` : 'No Sanad'}
                           </div>
                         </div>
                       </div>
@@ -1671,9 +1700,9 @@ Regarding your summit delegate registration:
                         {/* Study Range & Sanad */}
                         <td className="py-4 px-4">
                           <div className="font-bold text-xs text-[#17472B]">{d.studyRange || 'N/A'}</div>
-                          {(d.sanad || d.birudam) && (d.sanad !== 'N/A' && d.birudam !== 'N/A') ? (
-                            <div className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 inline-block mt-0.5 max-w-[130px] truncate" title={`Sanad: ${d.sanad || d.birudam}`}>
-                              Sanad: {d.sanad || d.birudam}
+                          {((d.sanad && d.sanad !== 'N/A') || (d.birudam && d.birudam !== 'N/A')) ? (
+                            <div className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 inline-block mt-0.5 max-w-[130px] truncate" title={`Sanad: ${(d.sanad && d.sanad !== 'N/A') ? d.sanad : d.birudam}`}>
+                              Sanad: {(d.sanad && d.sanad !== 'N/A') ? d.sanad : d.birudam}
                             </div>
                           ) : (
                             <div className="text-[10px] text-gray-400 font-normal mt-0.5">No Sanad</div>
