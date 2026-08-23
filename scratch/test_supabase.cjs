@@ -17,7 +17,7 @@ async function test() {
     console.log('Sessions table query result:');
     console.log('Error:', sessError);
     console.log('Data:', sessData);
-
+// ....
     const { data: trkData, error: trkError } = await supabase.from('tracks').select('*').limit(5);
     console.log('Tracks table query result:');
     console.log('Error:', trkError);
